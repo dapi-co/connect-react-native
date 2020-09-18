@@ -8,10 +8,10 @@
  */
 
 import {NativeModules} from 'react-native';
-import { DapiConnectNativeModule } from './privateTypes';
+import {DapiConnectNativeModule} from './privateTypes';
 
 const DapiConnectManager: DapiConnectNativeModule | undefined =
-  NativeModules.ImagePickerManager;
+  NativeModules.DapiConnectManager;
 
 // Produce an error if we don't have the native module
 if (!DapiConnectManager) {
