@@ -23,7 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		014A3B5C1C6CF33500B6D375 /* libRNImagePicker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNImagePicker.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		014A3B5C1C6CF33500B6D375 /* libRNDapiConnect.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNDapiConnect.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		014A3B681C6CF34500B6D375 /* DapiConnectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DapiConnectManager.h; sourceTree = "<group>"; };
 		014A3B691C6CF34500B6D375 /* DapiConnectManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DapiConnectManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -51,7 +51,7 @@
 		014A3B5D1C6CF33500B6D375 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				014A3B5C1C6CF33500B6D375 /* libRNImagePicker.a */,
+				014A3B5C1C6CF33500B6D375 /* libRNDapiConnect.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -59,9 +59,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		014A3B5B1C6CF33500B6D375 /* RNImagePicker */ = {
+		014A3B5B1C6CF33500B6D375 /* RNDapiConnect */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 014A3B651C6CF33500B6D375 /* Build configuration list for PBXNativeTarget "RNImagePicker" */;
+			buildConfigurationList = 014A3B651C6CF33500B6D375 /* Build configuration list for PBXNativeTarget "RNDapiConnect" */;
 			buildPhases = (
 				014A3B581C6CF33500B6D375 /* Sources */,
 				014A3B591C6CF33500B6D375 /* Frameworks */,
@@ -71,9 +71,9 @@
 			);
 			dependencies = (
 			);
-			name = RNImagePicker;
-			productName = RNImagePicker;
-			productReference = 014A3B5C1C6CF33500B6D375 /* libRNImagePicker.a */;
+			name = RNDapiConnect;
+			productName = RNDapiConnect;
+			productReference = 014A3B5C1C6CF33500B6D375 /* libRNDapiConnect.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -90,7 +90,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 014A3B571C6CF33500B6D375 /* Build configuration list for PBXProject "RNImagePicker" */;
+			buildConfigurationList = 014A3B571C6CF33500B6D375 /* Build configuration list for PBXProject "RNDapiConnect" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -102,7 +102,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				014A3B5B1C6CF33500B6D375 /* RNImagePicker */,
+				014A3B5B1C6CF33500B6D375 /* RNDapiConnect */,
 			);
 		};
 /* End PBXProject section */
@@ -222,7 +222,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		014A3B571C6CF33500B6D375 /* Build configuration list for PBXProject "RNImagePicker" */ = {
+		014A3B571C6CF33500B6D375 /* Build configuration list for PBXProject "RNDapiConnect" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				014A3B631C6CF33500B6D375 /* Debug */,
@@ -231,7 +231,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		014A3B651C6CF33500B6D375 /* Build configuration list for PBXNativeTarget "RNImagePicker" */ = {
+		014A3B651C6CF33500B6D375 /* Build configuration list for PBXNativeTarget "RNDapiConnect" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				014A3B661C6CF33500B6D375 /* Debug */,

@@ -97,8 +97,8 @@ Customization settings of dialog `android/app/res/values/themes.xml` (`android/a
 ### iOS
 
 1. In the XCode's "Project navigator", right click on your project's Libraries folder ➜ `Add Files to <...>`.
-1. Go to `node_modules` ➜ `dapiconnect-reactnative` ➜ `ios` ➜ select `RNImagePicker.xcodeproj`.
-1. Add `libRNImagePicker.a` to `Build Phases -> Link Binary With Libraries`.
+1. Go to `node_modules` ➜ `dapiconnect-reactnative` ➜ `ios` ➜ select `RNDapiConnect.xcodeproj`.
+1. Add `libRNDapiConnect.a` to `Build Phases -> Link Binary With Libraries`.
 1. Refer to [Post-install Steps](Install.md#post-install-steps).
 1. Compile and have fun.
 
