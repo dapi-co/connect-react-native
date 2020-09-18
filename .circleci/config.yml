@@ -9,7 +9,7 @@ aliases:
       - yarn-packages-{{ checksum "yarn.lock" }}
 
 defaults: &defaults
-  working_directory: ~/react-native-image-picker
+  working_directory: ~/dapiconnect-reactnative
   docker:
     - image: circleci/node:10
 

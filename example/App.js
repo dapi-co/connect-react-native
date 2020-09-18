@@ -25,7 +25,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import DapiConnect from 'react-native-image-picker';
+import DapiConnect from 'dapiconnect-reactnative';
 
 const App: () => React$Node = () => {
   return (

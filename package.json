@@ -1,5 +1,5 @@
 {
-  "name": "react-native-image-picker",
+  "name": "dapiconnect-reactnative",
   "version": "2.3.3",
   "description": "A React Native module that allows you to use native UI to select media from the device library or directly from the camera",
   "react-native": "src/index.ts",
@@ -33,7 +33,7 @@
       "email": "rusfearuth@gmail.com"
     }
   ],
-  "homepage": "https://github.com/react-community/react-native-image-picker#readme",
+  "homepage": "https://github.com/react-community/dapiconnect-reactnative#readme",
   "license": "MIT",
   "scripts": {
     "start": "react-native start",
@@ -47,7 +47,7 @@
   },
   "keywords": [
     "react-native",
-    "react-native-image-picker",
+    "dapiconnect-reactnative",
     "react",
     "native",
     "image",
@@ -85,7 +85,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/react-native-community/react-native-image-picker.git"
+    "url": "https://github.com/react-native-community/dapiconnect-reactnative.git"
   },
   "@react-native-community/bob": {
     "source": "src",

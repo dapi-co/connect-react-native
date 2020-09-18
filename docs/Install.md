@@ -1,16 +1,16 @@
 # Install
 
 ```
-yarn add react-native-image-picker
+yarn add dapiconnect-reactnative
 
 # RN >= 0.60
 cd ios && pod install
 
 # RN < 0.60
-react-native link react-native-image-picker
+react-native link dapiconnect-reactnative
 ```
 
-⚠️ If you need to support React Native < 0.40, you must install this package: `react-native-image-picker@0.24`.
+⚠️ If you need to support React Native < 0.40, you must install this package: `dapiconnect-reactnative@0.24`.
 
 ## Post-install Steps
 
@@ -97,7 +97,7 @@ Customization settings of dialog `android/app/res/values/themes.xml` (`android/a
 ### iOS
 
 1. In the XCode's "Project navigator", right click on your project's Libraries folder ➜ `Add Files to <...>`.
-1. Go to `node_modules` ➜ `react-native-image-picker` ➜ `ios` ➜ select `RNImagePicker.xcodeproj`.
+1. Go to `node_modules` ➜ `dapiconnect-reactnative` ➜ `ios` ➜ select `RNImagePicker.xcodeproj`.
 1. Add `libRNImagePicker.a` to `Build Phases -> Link Binary With Libraries`.
 1. Refer to [Post-install Steps](Install.md#post-install-steps).
 1. Compile and have fun.
@@ -107,8 +107,8 @@ Customization settings of dialog `android/app/res/values/themes.xml` (`android/a
 1. Add the following lines to `android/settings.gradle`:
 
    ```gradle
-   include ':react-native-image-picker'
-   project(':react-native-image-picker').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-image-picker/android')
+   include ':dapiconnect-reactnative'
+   project(':dapiconnect-reactnative').projectDir = new File(rootProject.projectDir, '../node_modules/dapiconnect-reactnative/android')
    ```
 
 2. Update the android build tools version to `2.2.+` in `android/build.gradle`:
@@ -135,7 +135,7 @@ Customization settings of dialog `android/app/res/values/themes.xml` (`android/a
 
    ```gradle
    dependencies {
-       implementation project(':react-native-image-picker')
+       implementation project(':dapiconnect-reactnative')
    }
    ```
 
