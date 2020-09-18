@@ -10,8 +10,8 @@
 
 import {NativeModules} from 'react-native';
 
-// Mock the ImagePickerManager native module to allow us to unit test the JavaScript code
-NativeModules.ImagePickerManager = {
+// Mock the DapiConnectManager native module to allow us to unit test the JavaScript code
+NativeModules.DapiConnectManager = {
   showImagePicker: jest.fn(),
   launchCamera: jest.fn(),
   launchImageLibrary: jest.fn(),
