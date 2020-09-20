@@ -1,7 +1,7 @@
 {
   "name": "dapiconnect-reactnative",
-  "version": "2.3.3",
-  "description": "A React Native module that allows you to use native UI to select media from the device library or directly from the camera",
+  "version": "1.0.0",
+  "description": "Financial APIs to connect users' bank accounts",
   "react-native": "src/index.ts",
   "types": "lib/typescript/index.d.ts",
   "main": "lib/commonjs/index.js",
@@ -14,26 +14,8 @@
     "/lib",
     "/*.podspec"
   ],
-  "author": "Marc Shilling (marcshilling)",
-  "contributors": [
-    {
-      "name": "Johan du Toit",
-      "email": "jdutoit.dev@gmail.com"
-    },
-    {
-      "name": "Matheus Santos",
-      "email": "vorj.dux@gmail.com"
-    },
-    {
-      "name": "Yoann Fuks",
-      "email": "yfuks@student.42.fr"
-    },
-    {
-      "name": "Alexander Ustinov",
-      "email": "rusfearuth@gmail.com"
-    }
-  ],
-  "homepage": "https://github.com/react-community/dapiconnect-reactnative#readme",
+  "author": "Mohammed M. Ennabah",
+  "homepage": "https://github.com/dapi-co/dapiconnect-reactnative",
   "license": "MIT",
   "scripts": {
     "start": "react-native start",
@@ -50,8 +32,9 @@
     "dapiconnect-reactnative",
     "react",
     "native",
-    "image",
-    "picker"
+    "dapi",
+    "fintech",
+    "banking"
   ],
   "dependencies": {},
   "devDependencies": {
@@ -85,7 +68,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/react-native-community/dapiconnect-reactnative.git"
+    "url": "https://github.com/dapi-co/dapiconnect-reactnative.git"
   },
   "@react-native-community/bob": {
     "source": "src",

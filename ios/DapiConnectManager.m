@@ -1,6 +1,7 @@
 #import "DapiConnectManager.h"
 #import <React/RCTConvert.h>
 #import <React/RCTUtils.h>
+#import <DapiConnect/DapiConnect.h>
 
 @interface DapiConnectManager ()
 
@@ -12,11 +13,10 @@ RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(show:(NSString *)text) {
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:text message:text preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *action = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil];
-        [alertController addAction:action];
-        UIViewController *root = RCTPresentedViewController();
-        [root presentViewController:alertController animated:YES completion:nil];
+        DPCConfigurations *configs = [[DPCConfigurations alloc] initWithAppKey:@"" baseUrl:[[NSURLComponents alloc] initWithString:@"http://localhost:4561"] countries:@[@"AE"] clientUserID:@"Ennabah"];
+        configs.environment = DPCAppEnvironmentSandbox;
+        DPCClient *client = [[DPCClient alloc] initWithConfigurations:configs];
+        [client.autoFlow present];
     });
 }
 

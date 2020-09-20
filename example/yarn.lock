@@ -2194,6 +2194,12 @@ cssstyle@^2.0.0:
   dependencies:
     cssom "~0.3.6"
 
+"dapiconnect-reactnative@file:..":
+  version "2.3.3"
+
+"dapiconnect-reactnative@file:../":
+  version "2.3.3"
+
 dashdash@^1.12.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
@@ -5432,12 +5438,6 @@ react-is@^16.12.0, react-is@^16.8.1, react-is@^16.8.4, react-is@^16.8.6:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
-
-"dapiconnect-reactnative@file:..":
-  version "2.3.3"
-
-"dapiconnect-reactnative@file:../":
-  version "2.3.3"
 
 react-native@0.63.2:
   version "0.63.2"
