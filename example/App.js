@@ -25,7 +25,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import DapiConnect from 'dapiconnect-reactnative';
+import DapiClient from 'dapiconnect-reactnative';
 
 const App: () => React$Node = () => {
   return (
@@ -44,7 +44,15 @@ const App: () => React$Node = () => {
           <Button
             title="Click Me"
             onPress={() => {
-              DapiConnect.show("Hello World")
+              const configs = {
+                appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
+                baseURL: 'http://localhost:4561',
+                countries: ['AE'],
+                clientUserID: 'MEnnabah',
+                environment: 'sandbox',
+              }
+              const client = new DapiClient(configs);
+              client.show('');
             }}
           />
           <View style={styles.body}>

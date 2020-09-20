@@ -7,8 +7,9 @@
  * @format
  */
 
-// import {ImagePickerResponse, ImagePickerOptions} from './types';
+import { DapiConfigurations } from './types';
 
 export interface DapiConnectNativeModule {
   show(text: string): void;
+  newClientWithConfigurations(configs: DapiConfigurations): void;
 }

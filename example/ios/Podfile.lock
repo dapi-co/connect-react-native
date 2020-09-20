@@ -3,8 +3,8 @@ PODS:
   - CocoaAsyncSocket (7.6.4)
   - CocoaLibEvent (1.0.0)
   - DapiConnect (0.2.6)
-  - dapiconnect-reactnative (2.3.3):
-    - DapiConnect
+  - dapiconnect-reactnative (1.0.0):
+    - DapiConnect (= 0.2.6)
     - React
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.63.2)
@@ -431,7 +431,7 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
   DapiConnect: b575013d7d22df8143243d3031dc271452a33398
-  dapiconnect-reactnative: a9f54e06e2e5edbd938a0f971bac6b41f08a0b64
+  dapiconnect-reactnative: 58b9c8c43d1fe3551f4064aa2988032df78ebb9f
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   FBLazyVector: 3ef4a7f62e7db01092f9d517d2ebc0d0677c4a37
   FBReactNativeSpec: dc7fa9088f0f2a998503a352b0554d69a4391c5a
