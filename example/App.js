@@ -27,6 +27,44 @@ import {
 
 import DapiClient from 'dapiconnect-reactnative';
 
+async function startConnect() {
+  const configs = {
+    appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
+    baseURL: 'http://localhost:4561',
+    countries: ['AE'],
+    clientUserID: 'MEnnabah',
+    environment: 'sandbox',
+  }
+  const client = new DapiClient(configs);
+
+
+  const lineAddress = {
+    line1: "1",
+    line2: "2",
+    line3: "3",
+  }
+  
+  const info = {
+    lineAddress: lineAddress,
+    accountNumber: "1234",
+    name: "Ennabah",
+    bankName: "ADCB",
+    swiftCode: "ADCBXXX",
+    iban: "ACB000001234",
+    phoneNumber: "0581243",
+    country: "United Arab Emirates",
+    branchAddress: "FUTI",
+    branchName: "ITUF",
+  }
+
+  try {
+      await client.connect.presentConnect((bankID) => { console.log(`BankID: ${bankID}`); return info});
+    // console.log(`Connection Result: ${connectionResult}`);
+  } catch (error) {
+    // console.log(`Connection Error: ${error}`);
+  }
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -42,17 +80,9 @@ const App: () => React$Node = () => {
             </View>
           )}
           <Button
-            title="Click Me"
+            title="Click Hehe"
             onPress={() => {
-              const configs = {
-                appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
-                baseURL: 'http://localhost:4561',
-                countries: ['AE'],
-                clientUserID: 'MEnnabah',
-                environment: 'sandbox',
-              }
-              const client = new DapiClient(configs);
-              client.show('');
+              startConnect();
             }}
           />
           <View style={styles.body}>

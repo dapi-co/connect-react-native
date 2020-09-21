@@ -7,9 +7,9 @@
  * @format
  */
 
-import { DapiConfigurations } from './types';
+import { DapiConfigurations, BeneficiaryInfoCallback, ConnectSuccessCallback, ConnectFailureCallback } from './types';
 
 export interface DapiConnectNativeModule {
-  show(text: string): void;
+  presentConnect(beneficiaryInfo: BeneficiaryInfoCallback): void;
   newClientWithConfigurations(configs: DapiConfigurations): void;
 }

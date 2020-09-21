@@ -39,3 +39,26 @@ export interface DapiQueryParameter {
   name: string;
   value: string;
 }
+
+export interface LineAddress {
+  line1: string;
+  line2: string;
+  line3: string;
+}
+
+export interface BeneficiaryInfo {
+  lineAddress: LineAddress;
+  accountNumber: string;
+  name: string;
+  bankName: string;
+  swiftCode: string;
+  iban: string;
+  phoneNumber: string;
+  country: string;
+  branchAddress: string;
+  branchName: string;
+}
+
+export type BeneficiaryInfoCallback = (bankID: string) => BeneficiaryInfo;
+export type ConnectSuccessCallback = (bankID: string, userID: string) => void;
+export type ConnectFailureCallback = (bankID: string, error: string) => void;

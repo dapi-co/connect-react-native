@@ -3,7 +3,11 @@
 #import <React/RCTUtils.h>
 #import <DapiConnect/DapiConnect.h>
 
-@interface DapiConnectManager ()
+@interface DapiConnectManager () <DPCConnectDelegate>
+
+@property (nonatomic, copy, nonnull) RCTPromiseResolveBlock connectSuccessCallback;
+@property (nonatomic, copy, nonnull) RCTPromiseRejectBlock connectFailureCallback;
+@property (nonatomic, copy, nullable) RCTResponseSenderBlock beneficiaryInfoCallback;
 
 @end
 
@@ -11,19 +15,48 @@
 
 RCT_EXPORT_MODULE();
 
-RCT_EXPORT_METHOD(show:(NSString *)text) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        DPCClient *lastClient = [self getLastClientIfAvailable];
-        [lastClient.autoFlow present];
-    });
-}
-
 RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     dispatch_async(dispatch_get_main_queue(), ^{
         DPCConfigurations *configurations = [self configurationsFromDictionary:configs];
         DPCClient *client = [[DPCClient alloc] initWithConfigurations:configurations];
     });
 }
+
+RCT_EXPORT_METHOD(presentConnect:(RCTResponseSenderBlock)info) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DPCClient *lastClient = [self getLastClientIfAvailable];
+        DPCConnect *connect = lastClient.connect;
+        if (connect) {
+            // self.connectSuccessCallback = success;
+            // self.connectFailureCallback = failure;
+            self.beneficiaryInfoCallback = info;
+            connect.delegate = self;
+            [connect present];
+        } else {
+            NSString *errorMessage = @"Couldn't find an initialized connect, make sure you have successfully initialized DapiClient";
+            NSError *error = [NSError errorWithDomain:@"com.dapi.DapiConnect.reactnative" code:1001 userInfo:@{NSLocalizedDescriptionKey:errorMessage}];
+            self.connectFailureCallback(@"connect_not_initialized", @"DapiConnect not found", error);
+        }
+    });
+}
+
+- (void)connectBeneficiaryInfoForBankWithID:(nonnull NSString *)bankID beneficiaryInfo:(nonnull void (^)(DPCBeneficiaryInfo * _Nullable))info {
+    self.beneficiaryInfoCallback(@[bankID]);
+}
+
+- (void)connectDidFailConnectingToBankID:(nonnull NSString *)bankID withError:(nonnull NSString *)error {
+    NSError *newError = [NSError errorWithDomain:@"com.dapi.DapiConnect.reactnative" code:1005 userInfo:@{NSLocalizedDescriptionKey:error}];
+    self.connectFailureCallback(@"connect_failure", bankID, newError);
+}
+
+- (void)connectDidProceedWithBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
+    
+}
+
+- (void)connectDidSuccessfullyConnectToBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
+    self.connectSuccessCallback(userID);
+}
+
 
 - (DPCClient *)getLastClientIfAvailable {
     DPCClient *lastClient = DPCClient.instances.lastObject;
@@ -49,7 +82,7 @@ RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     // init native objects
     NSURLComponents *urlComponents = [[NSURLComponents alloc] initWithString:baseURL];
     DPCAppEnvironment parsedEnvironment = [self parseEnvironment:environment];
-
+    
     DPCConfigurations *configurations = [[DPCConfigurations alloc] initWithAppKey:appKey baseUrl:urlComponents countries:countries clientUserID:clientUserID];
     configurations.colorScheme = [self parseColorScheme:colorScheme];
     configurations.environment = parsedEnvironment;
@@ -85,13 +118,13 @@ RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
 }
 
 - (NSDictionary<DPCEndPoint, NSString *> *)parseEndpoints:(NSDictionary *)endpoints {
-     NSMutableDictionary<DPCEndPoint, NSString *> *result = [NSMutableDictionary dictionary];
+    NSMutableDictionary<DPCEndPoint, NSString *> *result = [NSMutableDictionary dictionary];
     
-     [endpoints enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+    [endpoints enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([key isKindOfClass:[NSString class]] && [obj isKindOfClass:[NSString class]]) {
-             NSString *k = (NSString *)key;
-             NSString *v = (NSString *)obj;
-    
+            NSString *k = (NSString *)key;
+            NSString *v = (NSString *)obj;
+            
             if (![k isEqualToString:v]) {
                 DPCEndPoint endpoint = [self nativeEndpointToJSEndpoint:k];
                 if (endpoint) {
@@ -100,7 +133,7 @@ RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
             }
         }
     }];
-
+    
     return result;
 }
 
