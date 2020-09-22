@@ -63,7 +63,7 @@ function startConnect() {
   
   client.connect.present();
   
-  dapiConnectManagerEmitter.addListener('EventConnectSuccessful', (connectResult) => console.dir(connectResultå) );
+  dapiConnectManagerEmitter.addListener('EventConnectSuccessful', (connectResult) => console.dir(connectResult) );
   dapiConnectManagerEmitter.addListener('EventConnectFailure', (connectResult) => console.dir(connectResult) );
   
 }
@@ -83,7 +83,7 @@ const App: () => React$Node = () => {
             </View>
           )}
           <Button
-            title="Click Hehe"
+            title="Click me"
             onPress={() => {
               startConnect();
             }}
