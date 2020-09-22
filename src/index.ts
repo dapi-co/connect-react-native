@@ -11,8 +11,8 @@ import NativeInterface from './internal/nativeInterface';
 import { DapiConfigurations, BeneficiaryInfoCallback, ConnectSuccessCallback, ConnectFailureCallback } from './internal/types';
 
 class DapiConnect {
-  present(beneficiaryInfo: BeneficiaryInfoCallback): void {
-    NativeInterface.presentConnect(beneficiaryInfo);
+  present(): void {
+    NativeInterface.presentConnect();
   }
 }
 

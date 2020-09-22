@@ -5,15 +5,26 @@
 
 @interface DapiConnectManager () <DPCConnectDelegate>
 
-@property (nonatomic, copy, nonnull) RCTPromiseResolveBlock connectSuccessCallback;
-@property (nonatomic, copy, nonnull) RCTPromiseRejectBlock connectFailureCallback;
-@property (nonatomic, copy, nullable) RCTResponseSenderBlock beneficiaryInfoCallback;
-
 @end
 
 @implementation DapiConnectManager
+{
+    bool hasListeners;
+}
 
 RCT_EXPORT_MODULE();
+
+- (NSArray<NSString *> *)supportedEvents {
+    return @[@"EventConnectSuccessful", @"EventConnectFailure"];
+}
+
+- (void)startObserving {
+    hasListeners = YES;
+}
+
+- (void)stopObserving {
+    hasListeners = NO;
+}
 
 RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -22,31 +33,31 @@ RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     });
 }
 
-RCT_EXPORT_METHOD(presentConnect:(RCTResponseSenderBlock)info) {
+RCT_EXPORT_METHOD(presentConnect) {
     dispatch_async(dispatch_get_main_queue(), ^{
         DPCClient *lastClient = [self getLastClientIfAvailable];
         DPCConnect *connect = lastClient.connect;
         if (connect) {
-            // self.connectSuccessCallback = success;
-            // self.connectFailureCallback = failure;
-            self.beneficiaryInfoCallback = info;
             connect.delegate = self;
             [connect present];
         } else {
-            NSString *errorMessage = @"Couldn't find an initialized connect, make sure you have successfully initialized DapiClient";
-            NSError *error = [NSError errorWithDomain:@"com.dapi.DapiConnect.reactnative" code:1001 userInfo:@{NSLocalizedDescriptionKey:errorMessage}];
-            self.connectFailureCallback(@"connect_not_initialized", @"DapiConnect not found", error);
+            // TODO: We need to handle the case of not having initialized connect (it would happen in case of false positive configurations object being passed to DapiClient)
+            // In this case, JS module will have a an instance of DapiClient, but DapiConnect Native SDK does NOT.
         }
     });
 }
 
 - (void)connectBeneficiaryInfoForBankWithID:(nonnull NSString *)bankID beneficiaryInfo:(nonnull void (^)(DPCBeneficiaryInfo * _Nullable))info {
-    self.beneficiaryInfoCallback(@[bankID]);
+    info(nil);
 }
 
 - (void)connectDidFailConnectingToBankID:(nonnull NSString *)bankID withError:(nonnull NSString *)error {
-    NSError *newError = [NSError errorWithDomain:@"com.dapi.DapiConnect.reactnative" code:1005 userInfo:@{NSLocalizedDescriptionKey:error}];
-    self.connectFailureCallback(@"connect_failure", bankID, newError);
+    id body = @{
+        @"bankID": bankID,
+        @"error": error
+    };
+    if (hasListeners)
+        [self sendEventWithName:@"EventConnectFailure" body:body];
 }
 
 - (void)connectDidProceedWithBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
@@ -54,7 +65,12 @@ RCT_EXPORT_METHOD(presentConnect:(RCTResponseSenderBlock)info) {
 }
 
 - (void)connectDidSuccessfullyConnectToBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
-    self.connectSuccessCallback(userID);
+    id body = @{
+        @"bankID": bankID,
+        @"userID": userID
+    };
+    if (hasListeners)
+        [self sendEventWithName:@"EventConnectSuccessful" body:body];
 }
 
 

@@ -15,7 +15,12 @@ import {
   Text,
   StatusBar,
   Button,
+  NativeEventEmitter,
+  NativeModules,
 } from 'react-native';
+
+const { DapiConnectManager } = NativeModules;
+const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 import {
   Header,
@@ -27,7 +32,7 @@ import {
 
 import DapiClient from 'dapiconnect-reactnative';
 
-async function startConnect() {
+function startConnect() {
   const configs = {
     appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
     baseURL: 'http://localhost:4561',
@@ -36,7 +41,6 @@ async function startConnect() {
     environment: 'sandbox',
   }
   const client = new DapiClient(configs);
-
 
   const lineAddress = {
     line1: "1",
@@ -56,13 +60,12 @@ async function startConnect() {
     branchAddress: "FUTI",
     branchName: "ITUF",
   }
-
-  try {
-      await client.connect.presentConnect((bankID) => { console.log(`BankID: ${bankID}`); return info});
-    // console.log(`Connection Result: ${connectionResult}`);
-  } catch (error) {
-    // console.log(`Connection Error: ${error}`);
-  }
+  
+  client.connect.present();
+  
+  dapiConnectManagerEmitter.addListener('EventConnectSuccessful', (connectResult) => console.dir(connectResultå) );
+  dapiConnectManagerEmitter.addListener('EventConnectFailure', (connectResult) => console.dir(connectResult) );
+  
 }
 
 const App: () => React$Node = () => {
