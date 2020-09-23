@@ -8,11 +8,24 @@
  */
 
 import NativeInterface from './internal/nativeInterface';
-import { DapiConfigurations, BeneficiaryInfoCallback, ConnectSuccessCallback, ConnectFailureCallback } from './internal/types';
+import { DapiConfigurations, BeneficiaryInfoCallback } from './internal/types';
 
 class DapiConnect {
-  present(): void {
-    NativeInterface.presentConnect();
+  present(beneficiaryInfo: BeneficiaryInfoCallback): void {
+    const isFunction = typeof (beneficiaryInfo) === "function"
+    if (beneficiaryInfo && isFunction) {
+      NativeInterface.presentConnect(`(${beneficiaryInfo.toString()})`);
+    } else if (!beneficiaryInfo) {
+      throw Error('Missing required param: beneficiaryInfo');
+    } else if (!isFunction) {
+      throw Error('Passing incorrect type: beneficiaryInfo must be a function that returns BeneficiaryInfo object or null');
+    } else {
+      throw Error('Unknown Error');
+    }
+  }
+
+  dismiss(): void {
+    NativeInterface.dismissConnect();
   }
 }
 

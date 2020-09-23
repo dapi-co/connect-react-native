@@ -2,28 +2,43 @@
 #import <React/RCTConvert.h>
 #import <React/RCTUtils.h>
 #import <DapiConnect/DapiConnect.h>
+#import <WebKit/WebKit.h>
 
 @interface DapiConnectManager () <DPCConnectDelegate>
+
+@property (nonatomic, assign) BOOL hasListeners;
+@property (nonatomic, strong) WKWebView *webView;
+@property (nonatomic, copy) NSString *connectBeneficiaryInfoCallback;
 
 @end
 
 @implementation DapiConnectManager
-{
-    bool hasListeners;
-}
 
 RCT_EXPORT_MODULE();
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.webView = [[WKWebView alloc] init];
+    }
+    return self;
+}
+
++ (BOOL)requiresMainQueueSetup {
+    return YES;
+}
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[@"EventConnectSuccessful", @"EventConnectFailure"];
 }
 
 - (void)startObserving {
-    hasListeners = YES;
+    self.hasListeners = YES;
 }
 
 - (void)stopObserving {
-    hasListeners = NO;
+    self.hasListeners = NO;
 }
 
 RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
@@ -33,12 +48,26 @@ RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     });
 }
 
-RCT_EXPORT_METHOD(presentConnect) {
+RCT_EXPORT_METHOD(presentConnect:(NSString *)beneficiaryCallback) {
     dispatch_async(dispatch_get_main_queue(), ^{
-        DPCClient *lastClient = [self getLastClientIfAvailable];
-        DPCConnect *connect = lastClient.connect;
+        
+        if (!beneficiaryCallback || [beneficiaryCallback isEqualToString:@""]) {
+            if (self.hasListeners) {
+                id body = @{
+                    @"bankID": [NSNull null],
+                    @"error": @"Missing beneficiaryInfoCallback"
+                };
+                [self sendEventWithName:@"EventConnectFailure" body:body];
+            }
+            return;
+        }
+        
+        DPCClient *client = [self getFirstClientIfAvailable];
+        DPCConnect *connect = client.connect;
+        connect.delegate = self;
+        
         if (connect) {
-            connect.delegate = self;
+            self.connectBeneficiaryInfoCallback = beneficiaryCallback;
             [connect present];
         } else {
             // TODO: We need to handle the case of not having initialized connect (it would happen in case of false positive configurations object being passed to DapiClient)
@@ -47,8 +76,28 @@ RCT_EXPORT_METHOD(presentConnect) {
     });
 }
 
+RCT_EXPORT_METHOD(dismissConnect) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DPCClient *client = [self getFirstClientIfAvailable];
+        DPCConnect *connect = client.connect;
+        [connect dismissWithCompletion:nil];
+    });
+}
+
 - (void)connectBeneficiaryInfoForBankWithID:(nonnull NSString *)bankID beneficiaryInfo:(nonnull void (^)(DPCBeneficiaryInfo * _Nullable))info {
-    info(nil);
+    NSMutableString *mutableCallback = self.connectBeneficiaryInfoCallback.mutableCopy;
+    [mutableCallback appendFormat:@"(`%@`)", bankID];
+    NSString *callback = mutableCallback;
+    [self.webView evaluateJavaScript:callback completionHandler:^(id beneficiaryInfoJsonObject, NSError *iifeError) {
+        BOOL isObject = [beneficiaryInfoJsonObject isKindOfClass:[NSDictionary class]];
+        if (isObject) {
+            NSDictionary<NSString *, id> *beneficiaryInfoDictionary = (NSDictionary *)beneficiaryInfoJsonObject;
+            DPCBeneficiaryInfo * beneficiaryInfo = [self nativeBeneficiaryInfoFromDictionary:beneficiaryInfoDictionary];
+            info(beneficiaryInfo);
+        } else {
+            info(nil);
+        }
+    }];
 }
 
 - (void)connectDidFailConnectingToBankID:(nonnull NSString *)bankID withError:(nonnull NSString *)error {
@@ -56,7 +105,7 @@ RCT_EXPORT_METHOD(presentConnect) {
         @"bankID": bankID,
         @"error": error
     };
-    if (hasListeners)
+    if (self.hasListeners)
         [self sendEventWithName:@"EventConnectFailure" body:body];
 }
 
@@ -69,17 +118,17 @@ RCT_EXPORT_METHOD(presentConnect) {
         @"bankID": bankID,
         @"userID": userID
     };
-    if (hasListeners)
+    if (self.hasListeners)
         [self sendEventWithName:@"EventConnectSuccessful" body:body];
 }
 
 
-- (DPCClient *)getLastClientIfAvailable {
-    DPCClient *lastClient = DPCClient.instances.lastObject;
-    if (!lastClient) {
+- (DPCClient *)getFirstClientIfAvailable {
+    DPCClient *firstClient = DPCClient.instances.firstObject;
+    if (!firstClient) {
         NSLog(@"No client exists. Make sure you construct new DapiClient first");
     }
-    return lastClient;
+    return firstClient;
 }
 
 - (DPCConfigurations *)configurationsFromDictionary:(NSDictionary *)dictionary {
@@ -178,6 +227,24 @@ RCT_EXPORT_METHOD(presentConnect) {
     } else {
         return nil;
     }
+}
+
+- (DPCBeneficiaryInfo *)nativeBeneficiaryInfoFromDictionary:(NSDictionary<NSString *,id> *)beneficiaryInfoDictionary {
+    DPCBeneficiaryInfo *beneficiaryInfo = [[DPCBeneficiaryInfo alloc] init];
+    NSDictionary<NSString *, id> *lineAddressDictionary = [beneficiaryInfoDictionary objectForKey:@"linesAddress"];
+    beneficiaryInfo.linesAddress = [[DPCLinesAddress alloc] initWithDictionary:lineAddressDictionary];
+    beneficiaryInfo.accountNumber = [beneficiaryInfoDictionary objectForKey:@"accountNumber"];
+    beneficiaryInfo.name = [beneficiaryInfoDictionary objectForKey:@"name"];
+    beneficiaryInfo.bankName = [beneficiaryInfoDictionary objectForKey:@"bankName"];
+    beneficiaryInfo.swiftCode = [beneficiaryInfoDictionary objectForKey:@"swiftCode"];
+    beneficiaryInfo.sendingSwiftCode = [beneficiaryInfoDictionary objectForKey:@"sendingSwiftCode"];
+    beneficiaryInfo.iban = [beneficiaryInfoDictionary objectForKey:@"iban"];
+    beneficiaryInfo.phoneNumber = [beneficiaryInfoDictionary objectForKey:@"phoneNumber"];
+    beneficiaryInfo.country = [beneficiaryInfoDictionary objectForKey:@"country"];
+    beneficiaryInfo.sendingCountry = [beneficiaryInfoDictionary objectForKey:@"sendingCountry"];
+    beneficiaryInfo.branchAddress = [beneficiaryInfoDictionary objectForKey:@"branchAddress"];
+    beneficiaryInfo.branchName = [beneficiaryInfoDictionary objectForKey:@"branchName"];
+    return beneficiaryInfo;
 }
 
 @end

@@ -7,9 +7,10 @@
  * @format
  */
 
-import { DapiConfigurations, BeneficiaryInfoCallback, ConnectSuccessCallback, ConnectFailureCallback } from './types';
+import { DapiConfigurations, BeneficiaryInfoCallback } from './types';
 
 export interface DapiConnectNativeModule {
-  presentConnect(): void;
   newClientWithConfigurations(configs: DapiConfigurations): void;
+  presentConnect(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
+  dismissConnect(): void;
 }

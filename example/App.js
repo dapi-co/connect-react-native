@@ -41,27 +41,30 @@ function startConnect() {
     environment: 'sandbox',
   }
   const client = new DapiClient(configs);
+  
+  client.connect.present((bankID) => { 
+    
+    const lineAddress = {
+      line1: "1",
+      line2: "2",
+      line3: "3",
+    }
+    
+    const info = {
+      lineAddress: lineAddress,
+      accountNumber: "1234",
+      name: "Ennabah",
+      bankName: "ADCB",
+      swiftCode: "ADCBXXX",
+      iban: "ACB000001234",
+      phoneNumber: "0581243",
+      country: "United Arab Emirates",
+      branchAddress: "FUTI",
+      branchName: "ITUF",
+    }
 
-  const lineAddress = {
-    line1: "1",
-    line2: "2",
-    line3: "3",
-  }
-  
-  const info = {
-    lineAddress: lineAddress,
-    accountNumber: "1234",
-    name: "Ennabah",
-    bankName: "ADCB",
-    swiftCode: "ADCBXXX",
-    iban: "ACB000001234",
-    phoneNumber: "0581243",
-    country: "United Arab Emirates",
-    branchAddress: "FUTI",
-    branchName: "ITUF",
-  }
-  
-  client.connect.present();
+    return info;
+  });
   
   dapiConnectManagerEmitter.addListener('EventConnectSuccessful', (connectResult) => console.dir(connectResult) );
   dapiConnectManagerEmitter.addListener('EventConnectFailure', (connectResult) => console.dir(connectResult) );

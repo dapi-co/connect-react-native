@@ -60,5 +60,3 @@ export interface BeneficiaryInfo {
 }
 
 export type BeneficiaryInfoCallback = (bankID: string) => BeneficiaryInfo;
-export type ConnectSuccessCallback = (bankID: string, userID: string) => void;
-export type ConnectFailureCallback = (bankID: string, error: string) => void;
