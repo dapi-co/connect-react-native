@@ -19,7 +19,7 @@ import {
   NativeModules,
 } from 'react-native';
 
-const { DapiConnectManager } = NativeModules;
+const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 import {
@@ -41,38 +41,43 @@ function intiClient() {
     countries: ['AE'],
     clientUserID: 'MEnnabah',
     environment: 'sandbox',
-  }
+  };
   const client = new DapiClient(configs);
   globalClient = client;
 }
-  
+
 function presentConnect() {
-  client.connect.present((bankID) => { 
-    
+  globalClient.connect.present((bankID) => {
     const lineAddress = {
-      line1: "1",
-      line2: "2",
-      line3: "3",
-    }
-    
+      line1: '1',
+      line2: '2',
+      line3: '3',
+    };
+
     const info = {
       lineAddress: lineAddress,
-      accountNumber: "1234",
-      name: "Ennabah",
-      bankName: "ADCB",
-      swiftCode: "ADCBXXX",
-      iban: "ACB000001234",
-      phoneNumber: "0581243",
-      country: "United Arab Emirates",
-      branchAddress: "FUTI",
-      branchName: "ITUF",
-    }
+      accountNumber: '1234',
+      name: 'Ennabah',
+      bankName: 'ADCB',
+      swiftCode: 'ADCBXXX',
+      iban: 'ACB000001234',
+      phoneNumber: '0581243',
+      country: 'United Arab Emirates',
+      branchAddress: 'FUTI',
+      branchName: 'ITUF',
+    };
 
     return info;
   });
-  
-  dapiConnectManagerEmitter.addListener('EventConnectSuccessful', (connectResult) => console.dir(connectResult) );
-  dapiConnectManagerEmitter.addListener('EventConnectFailure', (connectResult) => console.dir(connectResult) );
+
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectSuccessful',
+    (connectResult) => console.dir(connectResult),
+  );
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectFailure',
+    (connectResult) => console.dir(connectResult),
+  );
 }
 
 function getConnections() {
@@ -82,60 +87,80 @@ function getConnections() {
     } else {
       console.log(connections);
     }
-  })
+  });
+}
+
+function presentAutoFlow() {
+  globalClient.autoFlow.present((bankID) => {
+    const lineAddress = {
+      line1: '1',
+      line2: '2',
+      line3: '3',
+    };
+
+    const info = {
+      lineAddress: lineAddress,
+      accountNumber: '1234',
+      name: 'Ennabah',
+      bankName: 'ADCB',
+      swiftCode: 'ADCBXXX',
+      iban: 'ACB000001234',
+      phoneNumber: '0581243',
+      country: 'United Arab Emirates',
+      branchAddress: 'FUTI',
+      branchName: 'ITUF',
+    };
+
+    return info;
+  });
+
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectSuccessful',
+    (connectResult) => console.dir(connectResult),
+  );
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectFailure',
+    (connectResult) => console.dir(connectResult),
+  );
+  dapiConnectManagerEmitter.addListener(
+    'EventAutoFlowSuccessful',
+    (connectResult) => console.dir(connectResult),
+  );
+  dapiConnectManagerEmitter.addListener(
+    'EventAutoFlowFailure',
+    (connectResult) => console.dir(connectResult),
+  );
 }
 
 const App: () => React$Node = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <Button
-            title="Click me"
-            onPress={() => {
-              intiClient();
-              getConnections();
-            }}
-          />
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={styles.scrollView}>
+        <Header />
+        {global.HermesInternal == null ? null : (
+          <View style={styles.engine}>
+            <Text style={styles.footer}>Engine: Hermes</Text>
           </View>
-        </ScrollView>
-      </SafeAreaView>
+        )}
+        <View style={styles.body}>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Start Connect</Text>
+            <Button title="Init Client" onPress={() => intiClient()} disabled={this.globalClient === null}/>
+          </View>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Connect</Text>
+            <Button title="Present Connect" onPress={() => presentConnect()} />
+            <Button title="Get Connections" onPress={() => getConnections()} />
+          </View>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>AutoFlow</Text>
+            <Button title="Present" onPress={() => presentAutoFlow()} />
+          </View>
+        </View>
+      </ScrollView>
     </>
   );
 };

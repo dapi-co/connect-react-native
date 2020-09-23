@@ -65,7 +65,6 @@ class DapiClient {
   private _configurations: DapiConfigurations;
 
   get connect() {
-  //   console.log('test')
     return this._connect;
   }
   get autoFlow() {
