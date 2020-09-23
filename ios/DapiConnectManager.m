@@ -4,16 +4,18 @@
 #import <DapiConnect/DapiConnect.h>
 #import <WebKit/WebKit.h>
 
-@interface DapiConnectManager () <DPCConnectDelegate>
+@interface DapiConnectManager () <DPCConnectDelegate, DPCAutoFlowDelegate>
 
 @property (nonatomic, assign) BOOL hasListeners;
 @property (nonatomic, strong) WKWebView *webView;
 @property (nonatomic, copy) NSString *connectBeneficiaryInfoCallback;
+@property (nonatomic, copy) NSString *autoFlowBeneficiaryInfoCallback;
 
 @end
 
 @implementation DapiConnectManager
 
+// MARK: - Native Module Setup
 RCT_EXPORT_MODULE();
 
 - (instancetype)init
@@ -30,7 +32,10 @@ RCT_EXPORT_MODULE();
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"EventConnectSuccessful", @"EventConnectFailure"];
+    return @[
+        @"EventConnectSuccessful", @"EventConnectFailure", // connect
+        @"EventAutoFlowSuccessful", @"EventAutoFlowFailure" // autoflow
+    ];
 }
 
 - (void)startObserving {
@@ -41,6 +46,7 @@ RCT_EXPORT_MODULE();
     self.hasListeners = NO;
 }
 
+// MARK: - Client
 RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     dispatch_async(dispatch_get_main_queue(), ^{
         DPCConfigurations *configurations = [self configurationsFromDictionary:configs];
@@ -48,6 +54,7 @@ RCT_EXPORT_METHOD(newClientWithConfigurations:(NSDictionary *)configs) {
     });
 }
 
+// MARK: - Connect
 RCT_EXPORT_METHOD(presentConnect:(NSString *)beneficiaryCallback) {
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -132,6 +139,7 @@ RCT_EXPORT_METHOD(getConnections:(RCTResponseSenderBlock)callback) {
     });
 }
 
+// MARK: - Connect Delegate
 - (void)connectBeneficiaryInfoForBankWithID:(nonnull NSString *)bankID beneficiaryInfo:(nonnull void (^)(DPCBeneficiaryInfo * _Nullable))info {
     NSMutableString *mutableCallback = self.connectBeneficiaryInfoCallback.mutableCopy;
     [mutableCallback appendFormat:@"(`%@`)", bankID];
@@ -154,7 +162,7 @@ RCT_EXPORT_METHOD(getConnections:(RCTResponseSenderBlock)callback) {
         @"error": error
     };
     if (self.hasListeners)
-        [self sendEventWithName:@"EventConnectFailure" body:body];
+        [self sendEventWithName:self.supportedEvents[1] body:body];
 }
 
 - (void)connectDidProceedWithBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
@@ -167,10 +175,78 @@ RCT_EXPORT_METHOD(getConnections:(RCTResponseSenderBlock)callback) {
         @"userID": userID
     };
     if (self.hasListeners)
-        [self sendEventWithName:@"EventConnectSuccessful" body:body];
+        [self sendEventWithName:self.supportedEvents[0] body:body];
 }
 
 
+// MARK: - AutoFlow
+RCT_EXPORT_METHOD(presentAutoFlow:(NSString *)beneficiaryCallback) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        if (!beneficiaryCallback || [beneficiaryCallback isEqualToString:@""]) {
+            if (self.hasListeners) {
+                id body = @{
+                    @"bankID": [NSNull null],
+                    @"error": @"Missing beneficiaryInfoCallback"
+                };
+                [self sendEventWithName:self.supportedEvents[3] body:body];
+            }
+            return;
+        }
+        
+        DPCClient *client = [self getFirstClientIfAvailable];
+        DPCAutoFlow *autoFlow = client.autoFlow;
+        autoFlow.autoflowDelegate = self;
+        autoFlow.connectDelegate = self;
+        
+        if (autoFlow) {
+            self.autoFlowBeneficiaryInfoCallback = beneficiaryCallback;
+            [autoFlow present];
+        } else {
+            // TODO: We need to handle the case of not having initialized connect (it would happen in case of false positive configurations object being passed to DapiClient)
+            // In this case, JS module will have a an instance of DapiClient, but DapiConnect Native SDK does NOT.
+        }
+    });
+}
+
+// MARK: - AutoFlow Delegate
+- (void)autoFlow:(nonnull DPCAutoFlow *)autoFlow beneficiaryInfoForBankWithID:(nonnull NSString *)bankID beneficiaryInfo:(nonnull void (^)(DPCBeneficiaryInfo * _Nullable))info {
+    NSMutableString *mutableCallback = self.autoFlowBeneficiaryInfoCallback.mutableCopy;
+    [mutableCallback appendFormat:@"(`%@`)", bankID];
+    NSString *callback = mutableCallback;
+    [self.webView evaluateJavaScript:callback completionHandler:^(id beneficiaryInfoJsonObject, NSError *iifeError) {
+        BOOL isObject = [beneficiaryInfoJsonObject isKindOfClass:[NSDictionary class]];
+        if (isObject) {
+            NSDictionary<NSString *, id> *beneficiaryInfoDictionary = (NSDictionary *)beneficiaryInfoJsonObject;
+            DPCBeneficiaryInfo * beneficiaryInfo = [self nativeBeneficiaryInfoFromDictionary:beneficiaryInfoDictionary];
+            info(beneficiaryInfo);
+        } else {
+            info(nil);
+        }
+    }];
+}
+
+- (void)autoFlow:(nonnull DPCAutoFlow *)autoFlow didFailToTransferFromAccount:(nonnull NSString *)senderAccountID toAccuntID:(NSString * _Nullable)recipientAccountID withError:(nonnull NSError *)error {
+    id body = @{
+        @"error": error.localizedDescription,
+        @"senderID": senderAccountID,
+        @"receiverID": recipientAccountID,
+    };
+    if (self.hasListeners)
+        [self sendEventWithName:self.supportedEvents[3] body:body];
+}
+
+- (void)autoFlow:(nonnull DPCAutoFlow *)autoFlow didSuccessfullyTransferAmount:(double)amount fromAccount:(nonnull NSString *)senderAccountID toAccuntID:(nonnull NSString *)recipientAccountID {
+    id body = @{
+        @"amount": [NSNumber numberWithDouble:amount],
+        @"senderID": senderAccountID,
+        @"receiverID": recipientAccountID,
+    };
+    if (self.hasListeners)
+        [self sendEventWithName:self.supportedEvents[2] body:body];
+}
+
+// MARK: - Helper Methods
 - (DPCClient *)getFirstClientIfAvailable {
     DPCClient *firstClient = DPCClient.instances.firstObject;
     if (!firstClient) {

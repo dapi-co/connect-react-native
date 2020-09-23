@@ -33,6 +33,25 @@ class DapiConnect {
   }
 }
 
+class DapiAutoFlow {
+  present(beneficiaryInfo: BeneficiaryInfoCallback): void {
+    const isFunction = typeof (beneficiaryInfo) === "function"
+    if (beneficiaryInfo && isFunction) {
+      NativeInterface.presentAutoFlow(`(${beneficiaryInfo.toString()})`);
+    } else if (!beneficiaryInfo) {
+      throw Error('Missing required param: beneficiaryInfo');
+    } else if (!isFunction) {
+      throw Error('Passing incorrect type: beneficiaryInfo must be a function that returns BeneficiaryInfo object or null');
+    } else {
+      throw Error('Unknown Error');
+    }
+  }
+
+  dismiss(): void {
+    NativeInterface.dismissAutoFlow();
+  }
+}
+
 class DapiClient {
 
   private static _allConfigurations: DapiConfigurations[] = [];
@@ -42,13 +61,16 @@ class DapiClient {
   }
 
   private _connect = new DapiConnect();
+  private _autoFlow = new DapiAutoFlow();
   private _configurations: DapiConfigurations;
 
   get connect() {
   //   console.log('test')
     return this._connect;
   }
-
+  get autoFlow() {
+    return this._autoFlow;
+  }
   get configurations() {
     return this._configurations;
   }
