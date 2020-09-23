@@ -84,6 +84,54 @@ RCT_EXPORT_METHOD(dismissConnect) {
     });
 }
 
+RCT_EXPORT_METHOD(getConnections:(RCTResponseSenderBlock)callback) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DPCClient *client = [self getFirstClientIfAvailable];
+        DPCConnect *connect = client.connect;
+        
+        if (connect) {
+            NSArray<DPCConnectionDetails *> *connectionDetails = [connect getConnections];
+            NSMutableArray<NSDictionary<NSString *, id> *> *connections = [NSMutableArray array];
+            [connectionDetails enumerateObjectsUsingBlock:^(DPCConnectionDetails * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSMutableDictionary *connection = @{
+                    @"userID": obj.userID,
+                    @"clientUserID": obj.clientUserID,
+                    @"bankID": obj.bankID,
+                    @"bankName": obj.bankName,
+                    @"beneficiaryCoolDownPeriod": [NSNumber numberWithDouble:obj.beneficiaryCoolDownPeriod],
+                    @"countryName": obj.countryName,
+                    @"isCreateBeneficiaryEndpointRequired": [NSNumber numberWithDouble:obj.isCreateBeneficiaryEndpointRequired],
+                }.mutableCopy;
+                
+                NSMutableArray<NSDictionary<NSString *, id> *> *accounts = [NSMutableArray array];
+                [obj.accounts enumerateObjectsUsingBlock:^(DPCAccount * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    NSDictionary *account = @{
+                        @"iban": obj.iban,
+                        @"number": obj.number,
+                        @"currency": obj.currency,
+                        @"type": obj.type,
+                        @"name": obj.name,
+                        @"id": obj.accountID,
+                        @"isFavourite": [NSNumber numberWithDouble:obj.isFavourite],
+                    };
+                    
+                    [accounts addObject:account];
+                }];
+                
+                [connection setObject:accounts forKey:@"accounts"];
+                
+                [connections addObject:connection];
+            }];
+            
+            callback(@[[NSNull null], connections]);
+        } else {
+            NSString *error = @"Couldn't find an initialized connect, make sure you have successfully initialized DapiClient";
+            callback(@[error, [NSNull null]]);
+        }
+        
+    });
+}
+
 - (void)connectBeneficiaryInfoForBankWithID:(nonnull NSString *)bankID beneficiaryInfo:(nonnull void (^)(DPCBeneficiaryInfo * _Nullable))info {
     NSMutableString *mutableCallback = self.connectBeneficiaryInfoCallback.mutableCopy;
     [mutableCallback appendFormat:@"(`%@`)", bankID];

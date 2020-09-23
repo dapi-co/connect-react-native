@@ -32,7 +32,9 @@ import {
 
 import DapiClient from 'dapiconnect-reactnative';
 
-function startConnect() {
+let globalClient;
+
+function intiClient() {
   const configs = {
     appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
     baseURL: 'http://localhost:4561',
@@ -41,7 +43,10 @@ function startConnect() {
     environment: 'sandbox',
   }
   const client = new DapiClient(configs);
+  globalClient = client;
+}
   
+function presentConnect() {
   client.connect.present((bankID) => { 
     
     const lineAddress = {
@@ -68,7 +73,16 @@ function startConnect() {
   
   dapiConnectManagerEmitter.addListener('EventConnectSuccessful', (connectResult) => console.dir(connectResult) );
   dapiConnectManagerEmitter.addListener('EventConnectFailure', (connectResult) => console.dir(connectResult) );
-  
+}
+
+function getConnections() {
+  globalClient.connect.getConnections((error, connections) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(connections);
+    }
+  })
 }
 
 const App: () => React$Node = () => {
@@ -88,7 +102,8 @@ const App: () => React$Node = () => {
           <Button
             title="Click me"
             onPress={() => {
-              startConnect();
+              intiClient();
+              getConnections();
             }}
           />
           <View style={styles.body}>

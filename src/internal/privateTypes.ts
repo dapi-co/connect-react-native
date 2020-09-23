@@ -11,6 +11,9 @@ import { DapiConfigurations, BeneficiaryInfoCallback } from './types';
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: DapiConfigurations): void;
+  
   presentConnect(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
   dismissConnect(): void;
+  getConnections(callback: any): void;
+  
 }

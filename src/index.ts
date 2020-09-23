@@ -27,6 +27,10 @@ class DapiConnect {
   dismiss(): void {
     NativeInterface.dismissConnect();
   }
+
+  getConnections(callback: any): void {
+    NativeInterface.getConnections(callback)
+  }
 }
 
 class DapiClient {
