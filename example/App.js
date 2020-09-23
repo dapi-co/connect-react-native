@@ -72,11 +72,11 @@ function presentConnect() {
 
   dapiConnectManagerEmitter.addListener(
     'EventConnectSuccessful',
-    (connectResult) => console.dir(connectResult),
+    (connectResult) => console.log(connectResult),
   );
   dapiConnectManagerEmitter.addListener(
     'EventConnectFailure',
-    (connectResult) => console.dir(connectResult),
+    (connectResult) => console.log(connectResult),
   );
 }
 
@@ -116,20 +116,28 @@ function presentAutoFlow() {
 
   dapiConnectManagerEmitter.addListener(
     'EventConnectSuccessful',
-    (connectResult) => console.dir(connectResult),
+    (connectResult) => console.log(connectResult),
   );
   dapiConnectManagerEmitter.addListener(
     'EventConnectFailure',
-    (connectResult) => console.dir(connectResult),
+    (connectResult) => console.log(connectResult),
   );
   dapiConnectManagerEmitter.addListener(
     'EventAutoFlowSuccessful',
-    (connectResult) => console.dir(connectResult),
+    (connectResult) => console.log(connectResult),
   );
   dapiConnectManagerEmitter.addListener(
     'EventAutoFlowFailure',
-    (connectResult) => console.dir(connectResult),
+    (connectResult) => console.log(connectResult),
   );
+}
+
+function getIdentity() {
+  globalClient.data.getIdentity().then((id) => {
+    console.log(id)
+  }).catch((e) => {
+    console.error(e)
+  });
 }
 
 const App: () => React$Node = () => {
@@ -158,6 +166,10 @@ const App: () => React$Node = () => {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>AutoFlow</Text>
             <Button title="Present" onPress={() => presentAutoFlow()} />
+          </View>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Data</Text>
+            <Button title="Identity" onPress={() => getIdentity()} />
           </View>
         </View>
       </ScrollView>

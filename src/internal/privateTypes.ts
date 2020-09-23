@@ -7,7 +7,7 @@
  * @format
  */
 
-import { DapiConfigurations, BeneficiaryInfoCallback } from './types';
+import { DapiConfigurations, Identity } from './types';
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: DapiConfigurations): void;
@@ -18,4 +18,9 @@ export interface DapiConnectNativeModule {
   // autoflow
   presentAutoFlow(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
   dismissAutoFlow(): void;
+  // data
+  getIdentity(): Promise<Identity>;
+  // getAccounts(): void;
+  // getBalance(accountID: string): void;
+  // getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): void;
 }

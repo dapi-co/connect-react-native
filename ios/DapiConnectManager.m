@@ -246,6 +246,69 @@ RCT_EXPORT_METHOD(presentAutoFlow:(NSString *)beneficiaryCallback) {
         [self sendEventWithName:self.supportedEvents[2] body:body];
 }
 
+// MARK: - Data
+RCT_EXPORT_METHOD(getIdentity:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DPCClient *client = [self getFirstClientIfAvailable];
+        DPCData *data = client.data;
+        if (data) {
+            [data getIdentity:^(DPCIdentity * _Nullable identity, NSError * _Nullable error, NSString * _Nullable jobID) {
+                [self respondForDictionaryRepresentableObject:identity error:error resolver:resolve rejecter:reject];
+            }];
+        } else {
+            NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];
+            reject(@"1015", castingError.localizedDescription, castingError);
+        }
+    });
+}
+
+//RCT_REMAP_METHOD(getAccounts,
+//                 resolver:(RCTPromiseResolveBlock)resolve
+//                 rejecter:(RCTPromiseRejectBlock)reject)
+//{
+//    DPCClient *client = [self getFirstClientIfAvailable];
+//    DPCData *data = client.data;
+//    if (data) {
+//        [data getAccounts:^(NSArray<DPCAccount *> * _Nullable accounts, NSError * _Nullable error, NSString * _Nullable jobID) {
+//            [self respondForDictionaryRepresentableObject:accounts error:error resolver:resolve rejecter:reject];
+//        }];
+//    } else {
+//        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];
+//        reject(@"1015", castingError.localizedDescription, castingError);
+//    }
+//}
+
+// MARK: - Helper Methods
+- (void)respondForDictionaryRepresentableObject:(NSObject *)object error:(NSError *)error resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject{
+    
+    if (error) {
+        reject(@"1011", error.localizedDescription, error);
+    } else if ([object isKindOfClass:[NSArray class]]) {
+        NSMutableArray<NSDictionary *> *resultObjectsArray = [NSMutableArray array];
+        NSArray *arrayObjects = (NSArray *)object;
+        
+        [arrayObjects enumerateObjectsUsingBlock:^(id  _Nonnull element, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([element respondsToSelector:@selector(dictionaryRepresentation)]) {
+                NSDictionary<NSString *, id> *dictionaryResponse = [element valueForKey:@"dictionaryRepresentation"];
+                [resultObjectsArray addObject:dictionaryResponse];
+                resolve(resultObjectsArray);
+            } else {
+                NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't construct JSON representation of native array objects"}];
+                reject(@"1012", castingError.localizedDescription, castingError);
+                *stop = YES;
+            }
+        }];
+    } else {
+        if ([object respondsToSelector:@selector(dictionaryRepresentation)]) {
+            NSDictionary<NSString *, id> *dictionaryResponse = [object valueForKey:@"dictionaryRepresentation"];
+            resolve(dictionaryResponse);
+        } else {
+            NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't construct JSON representation of native array objects"}];
+            reject(@"1012", castingError.localizedDescription, castingError);
+        }
+    }
+}
+
 // MARK: - Helper Methods
 - (DPCClient *)getFirstClientIfAvailable {
     DPCClient *firstClient = DPCClient.instances.firstObject;
