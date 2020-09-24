@@ -179,6 +179,15 @@ async function delinkUser() {
   }
 }
 
+async function getAccountsMetadata() {
+  try {
+    const metadata = await globalClient.metadata.getAccountsMetadata()
+    console.log(metadata)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -219,6 +228,12 @@ const App: () => React$Node = () => {
             <Button title="Balance (first account)" onPress={() => getBalance()} />
             <Button title="Transactions (first account)" onPress={() => getTransactions()} />
           </View>
+          
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Metadata</Text>
+            <Button title="Accounts Metadata" onPress={() => getAccountsMetadata()} />
+          </View>
+
           
         </View>
       </ScrollView>

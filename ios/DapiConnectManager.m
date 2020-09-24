@@ -310,7 +310,21 @@ RCT_EXPORT_METHOD(delinkUser:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
             [self respondForDictionaryRepresentableObject:result error:error resolver:resolve rejecter:reject];
         }];
     } else {
-        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized auth, make sure you have successfully initialized DapiClient"}];
+        reject(@"1015", castingError.localizedDescription, castingError);
+    }
+}
+
+// Metadata
+RCT_EXPORT_METHOD(getAccountsMetadata:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCMetadata *metadata = client.metadata;
+    if (metadata) {
+        [metadata getAccountMetadata:^(DPCBankMetadata * _Nullable accounts, NSError * _Nullable error, NSString * _Nullable jobID) {
+            [self respondForDictionaryRepresentableObject:accounts error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized metadata, make sure you have successfully initialized DapiClient"}];
         reject(@"1015", castingError.localizedDescription, castingError);
     }
 }

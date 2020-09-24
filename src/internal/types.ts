@@ -69,7 +69,7 @@ enum AccountType {
   OTHER = 'other',
 }
 
-interface ICurrency {
+interface IPair {
   code: string
   name: string
 }
@@ -77,7 +77,7 @@ interface ICurrency {
 export interface IAccount {
   iban: string | null
   number: string | null
-  currency: ICurrency
+  currency: IPair
   type: AccountType
   id: string
   isFavourite: boolean | null
@@ -146,10 +146,49 @@ export interface ITransaction {
   type: TransactionType
   description: string | null
   details: string | null
-  currency: ICurrency
+  currency: IPair
   beforeAmount: number | null
   afterAmount: number | null
   reference?: string | null
+}
+
+export enum BeneficiaryType {
+  SAME = 'same',
+  LOCAL = 'local',
+  INTERNATIONAL = 'intl',
+  OWN = 'own',
+}
+
+interface ITransferBounds {
+  minimum: number
+  currency: IPair
+  type: BeneficiaryType
+}
+
+export interface IAccountsMetadata {
+  swiftCode: string
+  sortCode: string | null
+  bankName: string
+  branchName: string
+  branchAddress: string
+  address: {
+    line1: string //street - make sure no commas and lowercase
+    line2: string //city - make sure no commas and lowercase
+    line3: string //country - make sure no commas and lowercase
+  }
+  transferBounds: Array<ITransferBounds>
+  beneficiaryCoolDownPeriod: {
+    value: number
+    unit: 'hrs'
+  }
+  transactionRange: {
+    unit: 'days'
+    value: number
+  }
+  country: IPair
+  isCreateBeneficiaryEndpointRequired: boolean
+  willNewlyAddedBeneficiaryExistBeforeCoolDownPeriod: boolean
+  routingNumber?: string // for US
 }
 
 export type IAddress = IAddressGeneral

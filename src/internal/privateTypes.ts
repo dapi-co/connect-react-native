@@ -7,7 +7,7 @@
  * @format
  */
 
-import { IDapiConfigurations, IIdentity, IAccount, IBalance, ITransaction } from './types';
+import { IDapiConfigurations, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata } from './types';
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: IDapiConfigurations): void;
@@ -25,4 +25,6 @@ export interface DapiConnectNativeModule {
   getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): Promise<Array<ITransaction>>;
   // auth
   delinkUser(): Promise<any>;
+  // metadata
+  getAccountsMetadata(): Promise<IAccountsMetadata>
 }
