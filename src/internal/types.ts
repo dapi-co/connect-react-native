@@ -129,6 +129,12 @@ export interface IIdentity {
   identification: Array<IIdentification>
 }
 
+export interface IBalance {
+  amount: number
+  currency: ICurrency
+  accountNumber: string
+}
+
 export type IAddress = IAddressGeneral
 
 export type BeneficiaryInfoCallback = (bankID: string) => IBeneficiaryInfo;

@@ -275,6 +275,19 @@ RCT_EXPORT_METHOD(getAccounts:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromi
     }
 }
 
+RCT_EXPORT_METHOD(getBalance:(NSString *)accountID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCData *data = client.data;
+    if (data) {
+        [data getBalanceForAccountID:accountID completion:^(DPCBalance * _Nullable balance, NSError * _Nullable error, NSString * _Nullable jobID) {
+            [self respondForDictionaryRepresentableObject:balance error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];
+        reject(@"1015", castingError.localizedDescription, castingError);
+    }
+}
+
 // MARK: - Helper Methods
 - (void)respondForDictionaryRepresentableObject:(NSObject *)object error:(NSError *)error resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject{
     

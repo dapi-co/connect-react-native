@@ -33,6 +33,7 @@ import {
 import DapiClient from 'dapiconnect-reactnative';
 
 let globalClient;
+let firstAccountID;
 
 function intiClient() {
   const configs = {
@@ -132,20 +133,32 @@ function presentAutoFlow() {
   );
 }
 
-function getIdentity() {
-  globalClient.data.getIdentity().then((id) => {
-    console.log(id)
-  }).catch((e) => {
-    console.error(e)
-  });
+async function getIdentity() {
+  try {
+    const id = await globalClient.data.getIdentity();
+    console.log(id);
+  } catch (e) {
+    console.log(e);
+  }
 }
 
-function getAccounts() {
-  globalClient.data.getAccounts().then((accs) => {
-    console.log(accs)
-  }).catch((e) => {
-    console.error(e)
-  });
+async function getAccounts() {
+  try {
+    const accounts = await globalClient.data.getAccounts();
+    firstAccountID = accounts[0].id
+    console.log(accounts)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+async function getBalance() {
+  try {
+    const balance = await globalClient.data.getBalance(firstAccountID);
+    console.log(balance);
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 const App: () => React$Node = () => {
@@ -179,6 +192,7 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
+            <Button title="Balance (first account)" onPress={() => getBalance()} />
           </View>
           
         </View>

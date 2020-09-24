@@ -2195,10 +2195,10 @@ cssstyle@^2.0.0:
     cssom "~0.3.6"
 
 "dapiconnect-reactnative@file:..":
-  version "2.3.3"
+  version "1.0.0"
 
 "dapiconnect-reactnative@file:../":
-  version "2.3.3"
+  version "1.0.0"
 
 dashdash@^1.12.0:
   version "1.14.1"

@@ -8,7 +8,7 @@
  */
 
 import NativeInterface from './internal/nativeInterface';
-import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount } from './internal/types';
+import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount, IBalance } from './internal/types';
 
 class DapiConnect {
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
@@ -61,9 +61,9 @@ class DapiData {
     return NativeInterface.getAccounts();
   }
 
-  // getBalance(accountID: string) {
-  //   NativeInterface.getBalance(accountID);
-  // }
+  getBalance(accountID: string): Promise<IBalance> {
+    return NativeInterface.getBalance(accountID);
+  }
 
   // getTransactions(accountID: string, startDate: Date, endDate: Date) {
   //   NativeInterface.getTransactions(accountID, startDate.getTime(), endDate.getTime());
