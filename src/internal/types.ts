@@ -7,7 +7,7 @@
  * @format
  */
 
-export interface DapiConfigurations {
+export interface IDapiConfigurations {
   appKey: string;
   baseURL: string;
   countries: string[];
@@ -16,7 +16,7 @@ export interface DapiConfigurations {
   colorScheme?: 'general' | 'bw' | 'neon';
   isExperimental?: boolean;
   endpoints?: Map<DapiEndpoint, string>;
-  endPointExtraQueryItems?: Map<DapiEndpoint, DapiQueryParameter[]>;
+  endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]>;
   endPointExtraHeaderFields?: Map<DapiEndpoint, Map<string, string>>;
   endPointExtraBody?: Map<DapiEndpoint, Map<string, any>>;
 }
@@ -35,19 +35,19 @@ export enum DapiEndpoint {
   delinkUser,
 }
 
-export interface DapiQueryParameter {
+interface IDapiQueryParameter {
   name: string;
   value: string;
 }
 
-export interface LineAddress {
+interface ILineAddress {
   line1: string;
   line2: string;
   line3: string;
 }
 
-export interface BeneficiaryInfo {
-  lineAddress: LineAddress;
+export interface IBeneficiaryInfo {
+  lineAddress: ILineAddress;
   accountNumber: string;
   name: string;
   bankName: string;
@@ -59,4 +59,76 @@ export interface BeneficiaryInfo {
   branchName: string;
 }
 
-export type BeneficiaryInfoCallback = (bankID: string) => BeneficiaryInfo;
+enum AccountType {
+  CURRENT = 'current',
+  CHECKING = 'checking',
+  SAVINGS = 'savings',
+  LOAN = 'loan',
+  CREDIT = 'credit',
+  DEPOSIT = 'deposit',
+  OTHER = 'other',
+}
+
+interface ICurrency {
+  code: string
+  name: string
+}
+
+export interface IAccount {
+  iban: string | null
+  number: string | null
+  currency: ICurrency
+  type: AccountType
+  id: string
+  isFavourite: boolean | null
+  name: string
+}
+
+enum IDType {
+  PASSPORT = 'passport',
+  NATIONALID = 'national_id',
+  VISANUMBER = 'visa_number',
+}
+
+interface IIdentification {
+  type: IDType
+  value: string
+}
+
+enum PhoneNumberType {
+  MOBILE = 'mobile',
+  HOME = 'home',
+  OFFICE = 'office',
+  FAX = 'fax'
+}
+
+
+interface IPhoneNumber {
+  type: PhoneNumberType
+  value: string //Change to Mobile Value string ie IPhoneNumberValue
+}
+
+interface IAddressGeneral {
+  flat: string
+  building: string
+  full: string
+  area: string
+  poBox: string
+  city: string
+  state: string
+  country: string
+}
+
+export interface IIdentity {
+  nationality: string
+  dateOfBirth: Date
+  numbers: Array<IPhoneNumber>
+  emailAddress: string
+  name: string
+  address: IAddress
+  identification: Array<IIdentification>
+}
+
+export type IAddress = IAddressGeneral
+
+export type BeneficiaryInfoCallback = (bankID: string) => IBeneficiaryInfo;

@@ -8,7 +8,7 @@
  */
 
 import NativeInterface from './internal/nativeInterface';
-import { DapiConfigurations, BeneficiaryInfoCallback, Identity } from './internal/types';
+import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount } from './internal/types';
 
 class DapiConnect {
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
@@ -53,13 +53,13 @@ class DapiAutoFlow {
 }
 
 class DapiData {
-  getIdentity(): Promise<Identity> {
+  getIdentity(): Promise<IIdentity> {
     return NativeInterface.getIdentity();
   }
 
-  // getAccounts() {
-  //   NativeInterface.getAccounts();
-  // }
+  getAccounts(): Promise<IAccount> {
+    return NativeInterface.getAccounts();
+  }
 
   // getBalance(accountID: string) {
   //   NativeInterface.getBalance(accountID);
@@ -72,7 +72,7 @@ class DapiData {
 
 class DapiClient {
 
-  private static _allConfigurations: DapiConfigurations[] = [];
+  private static _allConfigurations: IDapiConfigurations[] = [];
 
   static get allConfigurations() {
     return DapiClient._allConfigurations;
@@ -81,7 +81,7 @@ class DapiClient {
   private _connect = new DapiConnect();
   private _autoFlow = new DapiAutoFlow();
   private _data = new DapiData();
-  private _configurations: DapiConfigurations;
+  private _configurations: IDapiConfigurations;
 
   get connect() {
     return this._connect;

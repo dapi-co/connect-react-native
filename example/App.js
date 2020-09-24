@@ -140,6 +140,14 @@ function getIdentity() {
   });
 }
 
+function getAccounts() {
+  globalClient.data.getAccounts().then((accs) => {
+    console.log(accs)
+  }).catch((e) => {
+    console.error(e)
+  });
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -155,7 +163,7 @@ const App: () => React$Node = () => {
         )}
         <View style={styles.body}>
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Start Connect</Text>
+            <Text style={styles.sectionTitle}>Start Client</Text>
             <Button title="Init Client" onPress={() => intiClient()} disabled={this.globalClient === null}/>
           </View>
           <View style={styles.sectionContainer}>
@@ -170,7 +178,9 @@ const App: () => React$Node = () => {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
+            <Button title="Accounts" onPress={() => getAccounts()} />
           </View>
+          
         </View>
       </ScrollView>
     </>

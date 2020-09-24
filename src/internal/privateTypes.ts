@@ -7,10 +7,10 @@
  * @format
  */
 
-import { DapiConfigurations, Identity } from './types';
+import { IDapiConfigurations, IIdentity, IAccount } from './types';
 
 export interface DapiConnectNativeModule {
-  newClientWithConfigurations(configs: DapiConfigurations): void;
+  newClientWithConfigurations(configs: IDapiConfigurations): void;
   // connect
   presentConnect(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
   dismissConnect(): void;
@@ -19,8 +19,8 @@ export interface DapiConnectNativeModule {
   presentAutoFlow(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
   dismissAutoFlow(): void;
   // data
-  getIdentity(): Promise<Identity>;
-  // getAccounts(): void;
+  getIdentity(): Promise<IIdentity>;
+  getAccounts(): Promise<IAccount>;
   // getBalance(accountID: string): void;
   // getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): void;
 }
