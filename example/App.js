@@ -188,6 +188,60 @@ async function getAccountsMetadata() {
   }
 }
 
+async function getBeneficiaries() {
+  try {
+    const beneficiaries = await globalClient.payment.getBeneficiaries()
+    console.log(beneficiaries)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function createBeneficiary() {
+  const beneficiaryRequestData = {
+    address: {
+      line1: "line1",
+      line2: "line2",
+      line3: "line3",
+    },
+    country: "United Arab Emirates",
+    branchAddress: "United Arab Emirates",
+    branchName: "Dubai Branch",
+    phoneNumber: "0123456789",
+    iban: "AE654400000122845198002",
+    swiftCode: "DBXXXX",
+    bankName: "Dubai Bank",
+    name: "Mohammed Ennabah",
+    accountNumber: "122845198002",
+  }
+
+  try {
+    const beneficiary = await globalClient.payment.createBeneficiary(beneficiaryRequestData)
+    console.log(beneficiary)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function createTransferToExistingBeneficiary() {
+  try {
+    const transfer = await globalClient.payment.createTransferToExistingBeneficiary(firstAccountID, 5, 'FTQ72AEDB20201555555893', 'Aziz Ahmad')
+    console.log(transfer)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function createTransferToNonExistenceBeneficiary() {
+  try {
+    const transfer = await globalClient.payment.createTransferToNonExistenceBeneficiary(firstAccountID, 'FTQ72AEDB20201555555893', 5)
+    console.log(transfer)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -234,6 +288,14 @@ const App: () => React$Node = () => {
             <Button title="Accounts Metadata" onPress={() => getAccountsMetadata()} />
           </View>
 
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button title="Get Beneficiaries" onPress={() => getBeneficiaries()} />
+            <Button title="Create Beneficiary" onPress={() => createBeneficiary()} />
+            <Button title="Create Transfer To Existing Beneficiary" onPress={() => createTransferToExistingBeneficiary()} />
+            <Button title="Create To Non Existence Beneficiary" onPress={() => createTransferToNonExistenceBeneficiary()} />
+            
+          </View>
           
         </View>
       </ScrollView>

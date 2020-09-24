@@ -207,7 +207,6 @@ export interface IBeneficiary {
 export interface ICreateBeneficiaryRequestData {
   address: ILineAddress
   country: string
-  sortCode: string
   branchAddress: string
   branchName: string
   phoneNumber: string
@@ -216,8 +215,6 @@ export interface ICreateBeneficiaryRequestData {
   bankName: string
   name: string
   accountNumber: string
-  type: string
-  nickname?: string
 }
 
 export type IAddress = IAddressGeneral

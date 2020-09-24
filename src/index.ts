@@ -87,7 +87,7 @@ class DapiPayment {
     return NativeInterface.getBeneficiaries();
   }
 
-  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<any> {
+  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<IBeneficiary> {
     return NativeInterface.createBeneficiary(beneficiaryRequestData);
   }
 

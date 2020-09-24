@@ -29,7 +29,7 @@ export interface DapiConnectNativeModule {
   getAccountsMetadata(): Promise<IAccountsMetadata>;
   // payment
   getBeneficiaries(): Promise<Array<IBeneficiary>>;
-  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<any>;
+  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<IBeneficiary>;
   createTransferToExistingBeneficiary(senderID: string, amount: number, iban: string, name: string): Promise<any>;
   createTransferToNonExistenceBeneficiary(senderID: string, receiverID: string, amount: number): Promise<any>;
 }

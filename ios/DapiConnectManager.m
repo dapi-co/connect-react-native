@@ -362,7 +362,7 @@ RCT_EXPORT_METHOD(createBeneficiary:(NSDictionary *)createBeneficiaryRequest res
     }
 }
 
-RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)senderID amount:(NSNumber *)amount iban:(NSString *)iban name:(NSString *)name resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)senderID amount:(nonnull NSNumber *)amount iban:(NSString *)iban name:(NSString *)name resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     DPCClient *client = [self getFirstClientIfAvailable];
     DPCPayment *payment = client.payment;
     if (payment) {
@@ -375,7 +375,7 @@ RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)senderID amoun
     }
 }
 
-RCT_EXPORT_METHOD(createTransferToNonExistenceBeneficiary:(NSString *)senderID receiverID:(NSString *)receiverID amount:(NSNumber *)amount resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(createTransferToNonExistenceBeneficiary:(NSString *)senderID receiverID:(NSString *)receiverID amount:(nonnull NSNumber *)amount resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     DPCClient *client = [self getFirstClientIfAvailable];
     DPCPayment *payment = client.payment;
     if (payment) {
