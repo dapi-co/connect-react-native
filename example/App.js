@@ -170,6 +170,15 @@ async function getTransactions() {
   }
 }
 
+async function delinkUser() {
+  try {
+    const transactions = await globalClient.auth.delinkUser()
+    console.log(transactions)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -197,6 +206,12 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>AutoFlow</Text>
             <Button title="Present" onPress={() => presentAutoFlow()} />
           </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Auth</Text>
+            <Button title="Delink User" onPress={() => delinkUser()} />
+          </View>
+
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />

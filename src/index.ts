@@ -70,6 +70,12 @@ class DapiData {
   }
 }
 
+class DapiAuth {
+  delinkUser(): Promise<any> {
+    return NativeInterface.delinkUser();
+  }
+}
+
 class DapiClient {
 
   private static _allConfigurations: IDapiConfigurations[] = [];
@@ -81,6 +87,7 @@ class DapiClient {
   private _connect = new DapiConnect();
   private _autoFlow = new DapiAutoFlow();
   private _data = new DapiData();
+  private _auth = new DapiAuth();
   private _configurations: IDapiConfigurations;
 
   get connect() {
@@ -91,6 +98,9 @@ class DapiClient {
   }
   get data() {
     return this._data;
+  }
+  get auth() {
+    return this._auth;
   }
   get configurations() {
     return this._configurations;

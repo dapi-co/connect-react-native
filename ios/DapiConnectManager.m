@@ -292,9 +292,22 @@ RCT_EXPORT_METHOD(getTransactions:(NSString *)accountID startDate:(NSDate *)star
     DPCClient *client = [self getFirstClientIfAvailable];
     DPCData *data = client.data;
     if (data) {
-//        [data getBalanceForAccountID:accountID completion:^(DPCBalance * _Nullable balance, NSError * _Nullable error, NSString * _Nullable jobID) {
         [data getTransactionsForAccountID:accountID fromDate:startDate toDate:endDate completion:^(NSArray<DPCTransaction *> * _Nullable transactions, NSError * _Nullable error, NSString * _Nullable jobID) {
             [self respondForDictionaryRepresentableObject:transactions error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];
+        reject(@"1015", castingError.localizedDescription, castingError);
+    }
+}
+
+// Auth
+RCT_EXPORT_METHOD(delinkUser:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCAuth *auth = client.auth;
+    if (auth) {
+        [auth delinkUser:^(DPCResult * _Nullable result, NSError * _Nullable error) {
+            [self respondForDictionaryRepresentableObject:result error:error resolver:resolve rejecter:reject];
         }];
     } else {
         NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];

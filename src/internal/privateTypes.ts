@@ -23,4 +23,6 @@ export interface DapiConnectNativeModule {
   getAccounts(): Promise<Array<IAccount>>;
   getBalance(accountID: string): Promise<IBalance>;
   getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): Promise<Array<ITransaction>>;
+  // auth
+  delinkUser(): Promise<any>;
 }
