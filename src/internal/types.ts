@@ -131,7 +131,7 @@ export interface IIdentity {
 
 export interface IBalance {
   amount: number
-  currency: ICurrency
+  currency: IPair
   accountNumber: string
 }
 
@@ -171,11 +171,7 @@ export interface IAccountsMetadata {
   bankName: string
   branchName: string
   branchAddress: string
-  address: {
-    line1: string //street - make sure no commas and lowercase
-    line2: string //city - make sure no commas and lowercase
-    line3: string //country - make sure no commas and lowercase
-  }
+  address: ILineAddress
   transferBounds: Array<ITransferBounds>
   beneficiaryCoolDownPeriod: {
     value: number
@@ -189,6 +185,39 @@ export interface IAccountsMetadata {
   isCreateBeneficiaryEndpointRequired: boolean
   willNewlyAddedBeneficiaryExistBeforeCoolDownPeriod: boolean
   routingNumber?: string // for US
+}
+
+export enum BeneficiaryStatus {
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  CANCELLED = 'cancelled',
+  PENDING = 'waiting_for_confirmation',
+  MODIFIED = 'modified_for_pending_approval',
+}
+
+export interface IBeneficiary {
+  name: string
+  iban: string
+  accountNumber: string
+  status: BeneficiaryStatus
+  type: BeneficiaryType
+  id: string
+}
+
+export interface ICreateBeneficiaryRequestData {
+  address: ILineAddress
+  country: string
+  sortCode: string
+  branchAddress: string
+  branchName: string
+  phoneNumber: string
+  iban: string
+  swiftCode: string
+  bankName: string
+  name: string
+  accountNumber: string
+  type: string
+  nickname?: string
 }
 
 export type IAddress = IAddressGeneral

@@ -8,7 +8,7 @@
  */
 
 import NativeInterface from './internal/nativeInterface';
-import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata } from './internal/types';
+import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata, IBeneficiary, ICreateBeneficiaryRequestData } from './internal/types';
 
 class DapiConnect {
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
@@ -83,6 +83,21 @@ class DapiMetadata {
 }
 
 class DapiPayment {
+  getBeneficiaries(): Promise<Array<IBeneficiary>> {
+    return NativeInterface.getBeneficiaries();
+  }
+
+  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<any> {
+    return NativeInterface.createBeneficiary(beneficiaryRequestData);
+  }
+
+  createTransferToExistingBeneficiary(senderID: string, amount: number, iban: string, name: string): Promise<any> {
+    return NativeInterface.createTransferToExistingBeneficiary(senderID, amount, iban, name);
+  }
+
+  createTransferToNonExistenceBeneficiary(senderID: string, receiverID: string, amount: number): Promise<any> {
+    return NativeInterface.createTransferToNonExistenceBeneficiary(senderID, receiverID, amount);
+  }
 }
 
 class DapiClient {
@@ -115,6 +130,9 @@ class DapiClient {
   }
   get metadata() {
     return this._metadata;
+  }
+  get payment() {
+    return this._payment;
   }
   get configurations() {
     return this._configurations;

@@ -329,6 +329,64 @@ RCT_EXPORT_METHOD(getAccountsMetadata:(RCTPromiseResolveBlock)resolve rejecter:(
     }
 }
 
+// Payment
+RCT_EXPORT_METHOD(getBeneficiaries:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCPayment *payment = client.payment;
+    if (payment) {
+        [payment getBeneficiaries:^(NSArray<DPCBeneficiary *> * _Nullable beneficiaries, NSError * _Nullable error, NSString * _Nullable jobID) {
+            [self respondForDictionaryRepresentableObject:beneficiaries error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized payment, make sure you have successfully initialized DapiClient"}];
+        reject(@"1012", castingError.localizedDescription, castingError);
+    }
+}
+
+RCT_EXPORT_METHOD(createBeneficiary:(NSDictionary *)createBeneficiaryRequest resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCPayment *payment = client.payment;
+    if (payment) {
+        DPCBeneficiaryInfo *beneficiaryInfo = [self nativeBeneficiaryInfoFromDictionary:createBeneficiaryRequest];
+        if (beneficiaryInfo) {
+            [payment createBeneficiaryWithInfo:beneficiaryInfo completion:^(DPCResult * _Nullable result, NSError * _Nullable error, NSString * _Nullable jobID) {
+                [self respondForDictionaryRepresentableObject:beneficiaryInfo error:error resolver:resolve rejecter:reject];
+            }];
+        } else {
+            NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1017 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't construct beneficiary object from passed object"}];
+            reject(@"1017", castingError.localizedDescription, castingError);
+        }
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized payment, make sure you have successfully initialized DapiClient"}];
+        reject(@"1012", castingError.localizedDescription, castingError);
+    }
+}
+
+RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)senderID amount:(NSNumber *)amount iban:(NSString *)iban name:(NSString *)name resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCPayment *payment = client.payment;
+    if (payment) {
+        [payment createTransferWithSenderID:senderID amount:amount iban:iban name:name completion:^(DPCResult * _Nullable result, NSError * _Nullable error, NSString * _Nullable jobID) {
+            [self respondForDictionaryRepresentableObject:result error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized payment, make sure you have successfully initialized DapiClient"}];
+        reject(@"1012", castingError.localizedDescription, castingError);
+    }
+}
+
+RCT_EXPORT_METHOD(createTransferToNonExistenceBeneficiary:(NSString *)senderID receiverID:(NSString *)receiverID amount:(NSNumber *)amount resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCPayment *payment = client.payment;
+    if (payment) {
+        [payment createTransferWithSenderID:senderID amount:amount toReceiverID:receiverID completion:^(DPCResult * _Nullable result, NSError * _Nullable error, NSString * _Nullable jobID) {
+            [self respondForDictionaryRepresentableObject:result error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized payment, make sure you have successfully initialized DapiClient"}];
+        reject(@"1012", castingError.localizedDescription, castingError);
+    }
+}
 // MARK: - Helper Methods
 - (void)respondForDictionaryRepresentableObject:(NSObject *)object error:(NSError *)error resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject{
     

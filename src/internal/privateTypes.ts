@@ -7,7 +7,7 @@
  * @format
  */
 
-import { IDapiConfigurations, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata } from './types';
+import { IDapiConfigurations, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata, IBeneficiary, ICreateBeneficiaryRequestData } from './types';
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: IDapiConfigurations): void;
@@ -26,5 +26,10 @@ export interface DapiConnectNativeModule {
   // auth
   delinkUser(): Promise<any>;
   // metadata
-  getAccountsMetadata(): Promise<IAccountsMetadata>
+  getAccountsMetadata(): Promise<IAccountsMetadata>;
+  // payment
+  getBeneficiaries(): Promise<Array<IBeneficiary>>;
+  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<any>;
+  createTransferToExistingBeneficiary(senderID: string, amount: number, iban: string, name: string): Promise<any>;
+  createTransferToNonExistenceBeneficiary(senderID: string, receiverID: string, amount: number): Promise<any>;
 }
