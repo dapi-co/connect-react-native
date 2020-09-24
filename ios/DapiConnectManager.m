@@ -288,6 +288,20 @@ RCT_EXPORT_METHOD(getBalance:(NSString *)accountID resolver:(RCTPromiseResolveBl
     }
 }
 
+RCT_EXPORT_METHOD(getTransactions:(NSString *)accountID startDate:(NSDate *)startDate endDate:(NSDate *)endDate resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCClient *client = [self getFirstClientIfAvailable];
+    DPCData *data = client.data;
+    if (data) {
+//        [data getBalanceForAccountID:accountID completion:^(DPCBalance * _Nullable balance, NSError * _Nullable error, NSString * _Nullable jobID) {
+        [data getTransactionsForAccountID:accountID fromDate:startDate toDate:endDate completion:^(NSArray<DPCTransaction *> * _Nullable transactions, NSError * _Nullable error, NSString * _Nullable jobID) {
+            [self respondForDictionaryRepresentableObject:transactions error:error resolver:resolve rejecter:reject];
+        }];
+    } else {
+        NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't find an initialized data, make sure you have successfully initialized DapiClient"}];
+        reject(@"1015", castingError.localizedDescription, castingError);
+    }
+}
+
 // MARK: - Helper Methods
 - (void)respondForDictionaryRepresentableObject:(NSObject *)object error:(NSError *)error resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject{
     
@@ -296,18 +310,21 @@ RCT_EXPORT_METHOD(getBalance:(NSString *)accountID resolver:(RCTPromiseResolveBl
     } else if ([object isKindOfClass:[NSArray class]]) {
         NSMutableArray<NSDictionary *> *resultObjectsArray = [NSMutableArray array];
         NSArray *arrayObjects = (NSArray *)object;
+        __block NSError *castingError;
         
         [arrayObjects enumerateObjectsUsingBlock:^(id  _Nonnull element, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([element respondsToSelector:@selector(dictionaryRepresentation)]) {
                 NSDictionary<NSString *, id> *dictionaryResponse = [element valueForKey:@"dictionaryRepresentation"];
                 [resultObjectsArray addObject:dictionaryResponse];
-                resolve(resultObjectsArray);
             } else {
-                NSError *castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't construct JSON representation of native array objects"}];
+                castingError = [NSError errorWithDomain:@"com.dapi.dapiconnect.reactnative" code:1012 userInfo:@{NSLocalizedDescriptionKey: @"Couldn't construct JSON representation of native array objects"}];
                 reject(@"1012", castingError.localizedDescription, castingError);
                 *stop = YES;
             }
         }];
+        if (!castingError) {
+            resolve(resultObjectsArray);
+        }
     } else {
         if ([object respondsToSelector:@selector(dictionaryRepresentation)]) {
             NSDictionary<NSString *, id> *dictionaryResponse = [object valueForKey:@"dictionaryRepresentation"];

@@ -135,6 +135,23 @@ export interface IBalance {
   accountNumber: string
 }
 
+enum TransactionType {
+  CREDIT = 'credit',
+  DEBIT = 'debit',
+}
+
+export interface ITransaction {
+  amount: number
+  date: Date
+  type: TransactionType
+  description: string | null
+  details: string | null
+  currency: ICurrency
+  beforeAmount: number | null
+  afterAmount: number | null
+  reference?: string | null
+}
+
 export type IAddress = IAddressGeneral
 
 export type BeneficiaryInfoCallback = (bankID: string) => IBeneficiaryInfo;

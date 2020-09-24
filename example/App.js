@@ -161,6 +161,15 @@ async function getBalance() {
   }
 }
 
+async function getTransactions() {
+  try {
+    const transactions = await globalClient.data.getTransactions(firstAccountID, new Date(2020, 7, 1), new Date())
+    console.log(transactions)
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -193,6 +202,7 @@ const App: () => React$Node = () => {
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
             <Button title="Balance (first account)" onPress={() => getBalance()} />
+            <Button title="Transactions (first account)" onPress={() => getTransactions()} />
           </View>
           
         </View>

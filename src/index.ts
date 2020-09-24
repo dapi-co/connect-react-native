@@ -8,7 +8,7 @@
  */
 
 import NativeInterface from './internal/nativeInterface';
-import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount, IBalance } from './internal/types';
+import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount, IBalance, ITransaction } from './internal/types';
 
 class DapiConnect {
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
@@ -57,7 +57,7 @@ class DapiData {
     return NativeInterface.getIdentity();
   }
 
-  getAccounts(): Promise<IAccount> {
+  getAccounts(): Promise<Array<IAccount>> {
     return NativeInterface.getAccounts();
   }
 
@@ -65,9 +65,9 @@ class DapiData {
     return NativeInterface.getBalance(accountID);
   }
 
-  // getTransactions(accountID: string, startDate: Date, endDate: Date) {
-  //   NativeInterface.getTransactions(accountID, startDate.getTime(), endDate.getTime());
-  // }
+  getTransactions(accountID: string, startDate: Date, endDate: Date): Promise<Array<ITransaction>> {
+    return NativeInterface.getTransactions(accountID, startDate.getTime(), endDate.getTime());
+  }
 }
 
 class DapiClient {
@@ -96,7 +96,7 @@ class DapiClient {
     return this._configurations;
   }
 
-  constructor(configurations: DapiConfigurations) {
+  constructor(configurations: IDapiConfigurations) {
     const isValidConfigs = this._validateConfigurations(configurations);
     if (!isValidConfigs) {
       throw Error('Invalid DapiConfigurations object');
@@ -106,7 +106,7 @@ class DapiClient {
     DapiClient._allConfigurations.push(configurations);
   }
 
-  _validateConfigurations(configurations: DapiConfigurations): boolean {
+  _validateConfigurations(configurations: IDapiConfigurations): boolean {
     const isRootObject = typeof(configurations) === 'object';
     const hasStringAppKey = typeof(configurations.appKey) === 'string';
     const hasStringBaseURL = typeof(configurations.baseURL) === 'string';

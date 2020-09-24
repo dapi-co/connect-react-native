@@ -7,7 +7,7 @@
  * @format
  */
 
-import { IDapiConfigurations, IIdentity, IAccount, IBalance } from './types';
+import { IDapiConfigurations, IIdentity, IAccount, IBalance, ITransaction } from './types';
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: IDapiConfigurations): void;
@@ -20,7 +20,7 @@ export interface DapiConnectNativeModule {
   dismissAutoFlow(): void;
   // data
   getIdentity(): Promise<IIdentity>;
-  getAccounts(): Promise<IAccount>;
+  getAccounts(): Promise<Array<IAccount>>;
   getBalance(accountID: string): Promise<IBalance>;
-  // getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): void;
+  getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): Promise<Array<ITransaction>>;
 }
