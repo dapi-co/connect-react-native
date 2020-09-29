@@ -8,17 +8,29 @@
  */
 
 import NativeInterface from './internal/nativeInterface';
-import { IDapiConfigurations, BeneficiaryInfoCallback, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata, IBeneficiary, ICreateBeneficiaryRequestData } from './internal/types';
+import {
+  IDapiConfigurations,
+  BeneficiaryInfoCallback,
+  IIdentity,
+  IAccount,
+  IBalance,
+  ITransaction,
+  IAccountsMetadata,
+  IBeneficiary,
+  ICreateBeneficiaryRequestData,
+} from './internal/types';
 
 class DapiConnect {
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
-    const isFunction = typeof (beneficiaryInfo) === "function"
+    const isFunction = typeof beneficiaryInfo === 'function';
     if (beneficiaryInfo && isFunction) {
       NativeInterface.presentConnect(`(${beneficiaryInfo.toString()})`);
     } else if (!beneficiaryInfo) {
       throw Error('Missing required param: beneficiaryInfo');
     } else if (!isFunction) {
-      throw Error('Passing incorrect type: beneficiaryInfo must be a function that returns BeneficiaryInfo object or null');
+      throw Error(
+        'Passing incorrect type: beneficiaryInfo must be a function that returns BeneficiaryInfo object or null',
+      );
     } else {
       throw Error('Unknown Error');
     }
@@ -29,19 +41,21 @@ class DapiConnect {
   }
 
   getConnections(callback: any): void {
-    NativeInterface.getConnections(callback)
+    NativeInterface.getConnections(callback);
   }
 }
 
 class DapiAutoFlow {
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
-    const isFunction = typeof (beneficiaryInfo) === "function"
+    const isFunction = typeof beneficiaryInfo === 'function';
     if (beneficiaryInfo && isFunction) {
       NativeInterface.presentAutoFlow(`(${beneficiaryInfo.toString()})`);
     } else if (!beneficiaryInfo) {
       throw Error('Missing required param: beneficiaryInfo');
     } else if (!isFunction) {
-      throw Error('Passing incorrect type: beneficiaryInfo must be a function that returns BeneficiaryInfo object or null');
+      throw Error(
+        'Passing incorrect type: beneficiaryInfo must be a function that returns BeneficiaryInfo object or null',
+      );
     } else {
       throw Error('Unknown Error');
     }
@@ -57,7 +71,7 @@ class DapiData {
     return NativeInterface.getIdentity();
   }
 
-  getAccounts(): Promise<Array<IAccount>> {
+  getAccounts(): Promise<IAccount[]> {
     return NativeInterface.getAccounts();
   }
 
@@ -65,8 +79,16 @@ class DapiData {
     return NativeInterface.getBalance(accountID);
   }
 
-  getTransactions(accountID: string, startDate: Date, endDate: Date): Promise<Array<ITransaction>> {
-    return NativeInterface.getTransactions(accountID, startDate.getTime(), endDate.getTime());
+  getTransactions(
+    accountID: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ITransaction[]> {
+    return NativeInterface.getTransactions(
+      accountID,
+      startDate.getTime(),
+      endDate.getTime(),
+    );
   }
 }
 
@@ -83,25 +105,44 @@ class DapiMetadata {
 }
 
 class DapiPayment {
-  getBeneficiaries(): Promise<Array<IBeneficiary>> {
+  getBeneficiaries(): Promise<IBeneficiary[]> {
     return NativeInterface.getBeneficiaries();
   }
 
-  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<IBeneficiary> {
+  createBeneficiary(
+    beneficiaryRequestData: ICreateBeneficiaryRequestData,
+  ): Promise<IBeneficiary> {
     return NativeInterface.createBeneficiary(beneficiaryRequestData);
   }
 
-  createTransferToExistingBeneficiary(senderID: string, amount: number, iban: string, name: string): Promise<any> {
-    return NativeInterface.createTransferToExistingBeneficiary(senderID, amount, iban, name);
+  createTransferToExistingBeneficiary(
+    senderID: string,
+    amount: number,
+    iban: string,
+    name: string,
+  ): Promise<any> {
+    return NativeInterface.createTransferToExistingBeneficiary(
+      senderID,
+      amount,
+      iban,
+      name,
+    );
   }
 
-  createTransferToNonExistenceBeneficiary(senderID: string, receiverID: string, amount: number): Promise<any> {
-    return NativeInterface.createTransferToNonExistenceBeneficiary(senderID, receiverID, amount);
+  createTransferToNonExistenceBeneficiary(
+    senderID: string,
+    receiverID: string,
+    amount: number,
+  ): Promise<any> {
+    return NativeInterface.createTransferToNonExistenceBeneficiary(
+      senderID,
+      receiverID,
+      amount,
+    );
   }
 }
 
 class DapiClient {
-
   private static _allConfigurations: IDapiConfigurations[] = [];
 
   static get allConfigurations() {
@@ -149,21 +190,29 @@ class DapiClient {
   }
 
   _validateConfigurations(configurations: IDapiConfigurations): boolean {
-    const isRootObject = typeof(configurations) === 'object';
-    const hasStringAppKey = typeof(configurations.appKey) === 'string';
-    const hasStringBaseURL = typeof(configurations.baseURL) === 'string';
-    const hasStringClientUserID = typeof(configurations.clientUserID) === 'string';
+    const isRootObject = typeof configurations === 'object';
+    const hasStringAppKey = typeof configurations.appKey === 'string';
+    const hasStringBaseURL = typeof configurations.baseURL === 'string';
+    const hasStringClientUserID =
+      typeof configurations.clientUserID === 'string';
     const hasArrayCountries = Array.isArray(configurations.countries);
     let countriesAreString = false;
     if (hasArrayCountries) {
-      countriesAreString = configurations.countries.every((value) => typeof(value) === 'string');
+      countriesAreString = configurations.countries.every(
+        value => typeof value === 'string',
+      );
     }
 
-    return isRootObject && hasStringAppKey && hasStringBaseURL && hasStringClientUserID && hasArrayCountries && countriesAreString;
+    return (
+      isRootObject &&
+      hasStringAppKey &&
+      hasStringBaseURL &&
+      hasStringClientUserID &&
+      hasArrayCountries &&
+      countriesAreString
+    );
   }
-
 }
 
 export default DapiClient;
-
-// export * from './internal/types';
+export * from './internal/types';

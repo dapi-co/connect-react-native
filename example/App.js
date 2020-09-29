@@ -19,8 +19,10 @@ import {
   NativeModules,
 } from 'react-native';
 
-const {DapiConnectManager} = NativeModules;
-const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
+import DapiClient, {
+  DapiConnectNativeModule,
+  IDapiConfigurations,
+} from 'connect-react-native';
 
 import {
   Header,
@@ -30,17 +32,18 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import DapiClient from 'dapiconnect-reactnative';
+const {DapiConnectManager} = NativeModules;
+const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 let globalClient;
 let firstAccountID;
 
 function intiClient() {
   const configs = {
-    appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
-    baseURL: 'http://localhost:4561',
+    appKey: 'YOUR_APP_KEY',
+    baseURL: 'http://yourserverbaseurl:4561',
     countries: ['AE'],
-    clientUserID: 'MEnnabah',
+    clientUserID: 'yourUserID',
     environment: 'sandbox',
   };
   const client = new DapiClient(configs);
@@ -48,7 +51,7 @@ function intiClient() {
 }
 
 function presentConnect() {
-  globalClient.connect.present((bankID) => {
+  globalClient.connect.present(bankID => {
     const lineAddress = {
       line1: '1',
       line2: '2',
@@ -73,11 +76,10 @@ function presentConnect() {
 
   dapiConnectManagerEmitter.addListener(
     'EventConnectSuccessful',
-    (connectResult) => console.log(connectResult),
+    connectResult => console.log(connectResult),
   );
-  dapiConnectManagerEmitter.addListener(
-    'EventConnectFailure',
-    (connectResult) => console.log(connectResult),
+  dapiConnectManagerEmitter.addListener('EventConnectFailure', connectResult =>
+    console.log(connectResult),
   );
 }
 
@@ -92,7 +94,7 @@ function getConnections() {
 }
 
 function presentAutoFlow() {
-  globalClient.autoFlow.present((bankID) => {
+  globalClient.autoFlow.present(bankID => {
     const lineAddress = {
       line1: '1',
       line2: '2',
@@ -117,19 +119,17 @@ function presentAutoFlow() {
 
   dapiConnectManagerEmitter.addListener(
     'EventConnectSuccessful',
-    (connectResult) => console.log(connectResult),
+    connectResult => console.log(connectResult),
   );
-  dapiConnectManagerEmitter.addListener(
-    'EventConnectFailure',
-    (connectResult) => console.log(connectResult),
+  dapiConnectManagerEmitter.addListener('EventConnectFailure', connectResult =>
+    console.log(connectResult),
   );
   dapiConnectManagerEmitter.addListener(
     'EventAutoFlowSuccessful',
-    (connectResult) => console.log(connectResult),
+    connectResult => console.log(connectResult),
   );
-  dapiConnectManagerEmitter.addListener(
-    'EventAutoFlowFailure',
-    (connectResult) => console.log(connectResult),
+  dapiConnectManagerEmitter.addListener('EventAutoFlowFailure', connectResult =>
+    console.log(connectResult),
   );
 }
 
@@ -145,10 +145,10 @@ async function getIdentity() {
 async function getAccounts() {
   try {
     const accounts = await globalClient.data.getAccounts();
-    firstAccountID = accounts[0].id
-    console.log(accounts)
+    firstAccountID = accounts[0].id;
+    console.log(accounts);
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 }
 
@@ -163,8 +163,12 @@ async function getBalance() {
 
 async function getTransactions() {
   try {
-    const transactions = await globalClient.data.getTransactions(firstAccountID, new Date(2020, 7, 1), new Date())
-    console.log(transactions)
+    const transactions = await globalClient.data.getTransactions(
+      firstAccountID,
+      new Date(2020, 7, 1),
+      new Date(),
+    );
+    console.log(transactions);
   } catch (e) {
     console.log(e);
   }
@@ -172,8 +176,8 @@ async function getTransactions() {
 
 async function delinkUser() {
   try {
-    const transactions = await globalClient.auth.delinkUser()
-    console.log(transactions)
+    const transactions = await globalClient.auth.delinkUser();
+    console.log(transactions);
   } catch (e) {
     console.log(e);
   }
@@ -181,8 +185,8 @@ async function delinkUser() {
 
 async function getAccountsMetadata() {
   try {
-    const metadata = await globalClient.metadata.getAccountsMetadata()
-    console.log(metadata)
+    const metadata = await globalClient.metadata.getAccountsMetadata();
+    console.log(metadata);
   } catch (e) {
     console.log(e);
   }
@@ -190,8 +194,8 @@ async function getAccountsMetadata() {
 
 async function getBeneficiaries() {
   try {
-    const beneficiaries = await globalClient.payment.getBeneficiaries()
-    console.log(beneficiaries)
+    const beneficiaries = await globalClient.payment.getBeneficiaries();
+    console.log(beneficiaries);
   } catch (e) {
     console.log(e);
   }
@@ -200,24 +204,26 @@ async function getBeneficiaries() {
 async function createBeneficiary() {
   const beneficiaryRequestData = {
     address: {
-      line1: "line1",
-      line2: "line2",
-      line3: "line3",
+      line1: 'line1',
+      line2: 'line2',
+      line3: 'line3',
     },
-    country: "United Arab Emirates",
-    branchAddress: "United Arab Emirates",
-    branchName: "Dubai Branch",
-    phoneNumber: "0123456789",
-    iban: "AE654400000122845198002",
-    swiftCode: "DBXXXX",
-    bankName: "Dubai Bank",
-    name: "Mohammed Ennabah",
-    accountNumber: "122845198002",
-  }
+    country: 'United Arab Emirates',
+    branchAddress: 'United Arab Emirates',
+    branchName: 'Dubai Branch',
+    phoneNumber: '0123456789',
+    iban: 'AE654400000122845198002',
+    swiftCode: 'DBXXXX',
+    bankName: 'Dubai Bank',
+    name: 'John Doe',
+    accountNumber: '122845198002',
+  };
 
   try {
-    const beneficiary = await globalClient.payment.createBeneficiary(beneficiaryRequestData)
-    console.log(beneficiary)
+    const beneficiary = await globalClient.payment.createBeneficiary(
+      beneficiaryRequestData,
+    );
+    console.log(beneficiary);
   } catch (e) {
     console.log(e);
   }
@@ -225,8 +231,13 @@ async function createBeneficiary() {
 
 async function createTransferToExistingBeneficiary() {
   try {
-    const transfer = await globalClient.payment.createTransferToExistingBeneficiary(firstAccountID, 5, 'FTQ72AEDB20201555555893', 'Aziz Ahmad')
-    console.log(transfer)
+    const transfer = await globalClient.payment.createTransferToExistingBeneficiary(
+      firstAccountID,
+      5,
+      'FTQ72AEDB20201555555893',
+      'Aziz Ahmad',
+    );
+    console.log(transfer);
   } catch (e) {
     console.log(e);
   }
@@ -234,13 +245,16 @@ async function createTransferToExistingBeneficiary() {
 
 async function createTransferToNonExistenceBeneficiary() {
   try {
-    const transfer = await globalClient.payment.createTransferToNonExistenceBeneficiary(firstAccountID, 'FTQ72AEDB20201555555893', 5)
-    console.log(transfer)
+    const transfer = await globalClient.payment.createTransferToNonExistenceBeneficiary(
+      firstAccountID,
+      'FTQ72AEDB20201555555893',
+      5,
+    );
+    console.log(transfer);
   } catch (e) {
     console.log(e);
   }
 }
-
 
 const App: () => React$Node = () => {
   return (
@@ -258,7 +272,11 @@ const App: () => React$Node = () => {
         <View style={styles.body}>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Start Client</Text>
-            <Button title="Init Client" onPress={() => intiClient()} disabled={this.globalClient === null}/>
+            <Button
+              title="Init Client"
+              onPress={() => intiClient()}
+              disabled={this.globalClient === null}
+            />
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Connect</Text>
@@ -279,24 +297,43 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
-            <Button title="Balance (first account)" onPress={() => getBalance()} />
-            <Button title="Transactions (first account)" onPress={() => getTransactions()} />
+            <Button
+              title="Balance (first account)"
+              onPress={() => getBalance()}
+            />
+            <Button
+              title="Transactions (first account)"
+              onPress={() => getTransactions()}
+            />
           </View>
-          
+
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Metadata</Text>
-            <Button title="Accounts Metadata" onPress={() => getAccountsMetadata()} />
+            <Button
+              title="Accounts Metadata"
+              onPress={() => getAccountsMetadata()}
+            />
           </View>
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Payment</Text>
-            <Button title="Get Beneficiaries" onPress={() => getBeneficiaries()} />
-            <Button title="Create Beneficiary" onPress={() => createBeneficiary()} />
-            <Button title="Create Transfer To Existing Beneficiary" onPress={() => createTransferToExistingBeneficiary()} />
-            <Button title="Create To Non Existence Beneficiary" onPress={() => createTransferToNonExistenceBeneficiary()} />
-            
+            <Button
+              title="Get Beneficiaries"
+              onPress={() => getBeneficiaries()}
+            />
+            <Button
+              title="Create Beneficiary"
+              onPress={() => createBeneficiary()}
+            />
+            <Button
+              title="Create Transfer To Existing Beneficiary"
+              onPress={() => createTransferToExistingBeneficiary()}
+            />
+            <Button
+              title="Create To Non Existence Beneficiary"
+              onPress={() => createTransferToNonExistenceBeneficiary()}
+            />
           </View>
-          
         </View>
       </ScrollView>
     </>
