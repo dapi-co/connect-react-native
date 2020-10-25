@@ -2101,6 +2101,9 @@ concat-stream@^1.6.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
+"connect-react-native@file:../":
+  version "1.0.0"
+
 connect@^3.6.5:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/connect/-/connect-3.7.0.tgz#5d49348910caa5e07a01800b030d0c35f20484f8"
@@ -2193,12 +2196,6 @@ cssstyle@^2.0.0:
   integrity sha512-AZL67abkUzIuvcHqk7c09cezpGNcxUxU4Ioi/05xHk4DQeTkWmGYftIE6ctU6AEt+Gn4n1lDStOtj7FKycP71A==
   dependencies:
     cssom "~0.3.6"
-
-"dapiconnect-reactnative@file:..":
-  version "1.0.0"
-
-"dapiconnect-reactnative@file:../":
-  version "1.0.0"
 
 dashdash@^1.12.0:
   version "1.14.1"
