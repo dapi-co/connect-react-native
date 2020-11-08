@@ -1,20 +1,23 @@
 buildscript {
+    ext.kotlin_version = '1.4.0'
     repositories {
         google()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
     }
 }
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ReactNativeImagePicker_' + name]
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ReactNativeDapiConnect_' + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeImagePicker_' + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeDapiConnect_' + name]).toInteger()
 }
 
 apply plugin: 'com.android.library'
@@ -26,6 +29,8 @@ android {
     defaultConfig {
         minSdkVersion getExtOrIntegerDefault('minSdkVersion')
         targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
+        multiDexEnabled true
+
     }
     lintOptions {
         abortOnError false
@@ -35,6 +40,11 @@ android {
         unitTests {
             includeAndroidResources = true
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -51,15 +61,12 @@ repositories {
 }
 
 dependencies {
-    api "com.facebook.react:react-native:+"  // From node_modules
+    implementation "com.facebook.react:react-native:+"
 
-    testImplementation('org.robolectric:robolectric:4.3.1') {
-        // https://github.com/robolectric/robolectric/issues/5245
-        exclude group: 'com.google.auto.service', module: 'auto-service'
-    }
+    implementation "com.dapi.connect:dapi:0.3.0"
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.code.gson:gson:2.8.6'
 
-    testImplementation "org.powermock:powermock-api-mockito:${POWERMOCK_VERSION}"
-    testImplementation "org.powermock:powermock-module-junit4:${POWERMOCK_VERSION}"
-    testImplementation "org.powermock:powermock-module-junit4-rule:${POWERMOCK_VERSION}"
-    testImplementation "org.powermock:powermock-classloading-xstream:${POWERMOCK_VERSION}"
+
 }

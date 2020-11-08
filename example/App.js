@@ -40,8 +40,8 @@ let firstAccountID;
 
 function intiClient() {
   const configs = {
-    appKey: 'YOUR_APP_KEY',
-    baseURL: 'http://yourserverbaseurl:4561',
+    appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
+    baseURL: 'http://10.0.2.2:4561',
     countries: ['AE'],
     clientUserID: 'yourUserID',
     environment: 'sandbox',
@@ -59,7 +59,7 @@ function presentConnect() {
     };
 
     const info = {
-      lineAddress: lineAddress,
+      address: lineAddress,
       accountNumber: '1234',
       name: 'Ennabah',
       bankName: 'ADCB',
@@ -102,7 +102,7 @@ function presentAutoFlow() {
     };
 
     const info = {
-      lineAddress: lineAddress,
+      address: lineAddress,
       accountNumber: '1234',
       name: 'Ennabah',
       bankName: 'ADCB',
@@ -144,9 +144,10 @@ async function getIdentity() {
 
 async function getAccounts() {
   try {
-    const accounts = await globalClient.data.getAccounts();
-    firstAccountID = accounts[0].id;
-    console.log(accounts);
+    const response = await globalClient.data.getAccounts();
+    console.log(response);
+    firstAccountID = response.accounts[0].id;
+    console.log(firstAccountID);
   } catch (e) {
     console.log(e);
   }

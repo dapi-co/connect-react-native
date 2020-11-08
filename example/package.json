@@ -10,7 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "dapiconnect-reactnative": "file:../",
+    "connect-react-native": "file:../",
     "react": "16.13.1",
     "react-native": "0.63.2"
   },
@@ -26,5 +26,8 @@
   },
   "jest": {
     "preset": "react-native"
+  },
+  "resolutions": {
+    "stacktrace-parser": "0.1.4"
   }
 }
