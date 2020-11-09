@@ -212,6 +212,22 @@ class DapiClient {
       countriesAreString
     );
   }
+
+  setUserID(userID: string): void {
+    NativeInterface.setUserID(userID);
+  }
+
+  userID(callback: any): void {
+    NativeInterface.userID(callback);
+  }
+
+  setClientUserID(clientUserID: string): void {
+    NativeInterface.setClientUserID(clientUserID);
+  }
+
+  clientUserID(callback: any): void {
+    NativeInterface.clientUserID(callback);
+  }
 }
 
 export default DapiClient;

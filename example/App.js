@@ -89,6 +89,23 @@ function getConnections() {
       console.error(error);
     } else {
       console.log(connections);
+      globalClient.setUserID(connections[0].userID);
+      globalClient.setClientUserID(connections[0].userID);
+      globalClient.userID((error, userID) => {
+        if (error) {
+          console.error(error);
+        } else {
+          console.log(userID);
+        }
+      });
+
+      globalClient.clientUserID((error, clientUserID) => {
+        if (error) {
+          console.error(error);
+        } else {
+          console.log(clientUserID);
+        }
+      });
     }
   });
 }

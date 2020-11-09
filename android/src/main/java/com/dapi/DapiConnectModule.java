@@ -80,6 +80,35 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         new DapiClient(getCurrentActivity().getApplication(), dapiConfigurations);
     }
 
+    @ReactMethod
+    public void setUserID(String userID){
+        DapiClient.Companion.getInstance().setUserID(userID);
+    }
+
+    @ReactMethod
+    public void userID(Callback callback) {
+        String userID = DapiClient.Companion.getInstance().getUserID();
+        if (userID == null){
+            callback.invoke("UserID is not set", null);
+        }else {
+            callback.invoke(null, userID);
+        }
+    }
+
+    @ReactMethod
+    public void setClientUserID(String clientUserID){
+        DapiClient.Companion.getInstance().setClientUserID(clientUserID);
+    }
+
+    @ReactMethod
+    public void clientUserID(Callback callback){
+        String clientUserID = DapiClient.Companion.getInstance().getClientUserID();
+        if (clientUserID == null){
+            callback.invoke("ClientUserID is not set", null);
+        }else {
+            callback.invoke(null, clientUserID);
+        }
+    }
 
     @ReactMethod
     public void presentConnect(String beneficiaryInfo) {
@@ -98,10 +127,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getConnections(final Callback callback) {
         DapiClient dapiClient = DapiClient.Companion.getInstance();
         dapiClient.getConnect().getConnections(dapiConnections -> {
-            //TODO remove
-            if (dapiConnections.size() > 0) {
-                dapiClient.setUserID(dapiConnections.get(0).getUserID());
-            }
             WritableArray writableArray = new WritableNativeArray();
             for (DapiConnection connection : dapiConnections) {
                 try {

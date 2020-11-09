@@ -7,10 +7,23 @@
  * @format
  */
 
-import { IDapiConfigurations, IIdentity, IAccount, IBalance, ITransaction, IAccountsMetadata, IBeneficiary, ICreateBeneficiaryRequestData } from './types';
+import {
+  IDapiConfigurations,
+  IIdentity,
+  IAccount,
+  IBalance,
+  ITransaction,
+  IAccountsMetadata,
+  IBeneficiary,
+  ICreateBeneficiaryRequestData,
+} from './types';
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: IDapiConfigurations): void;
+  setUserID(userID: string): void;
+  userID(callback: any): void;
+  setClientUserID(clientUserID: string): void;
+  clientUserID(callback: any): void;
   // connect
   presentConnect(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
   dismissConnect(): void;
@@ -20,16 +33,31 @@ export interface DapiConnectNativeModule {
   dismissAutoFlow(): void;
   // data
   getIdentity(): Promise<IIdentity>;
-  getAccounts(): Promise<Array<IAccount>>;
+  getAccounts(): Promise<IAccount[]>;
   getBalance(accountID: string): Promise<IBalance>;
-  getTransactions(accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): Promise<Array<ITransaction>>;
+  getTransactions(
+    accountID: string,
+    startDateMilliseconds: number,
+    endDateMilliseconds: number,
+  ): Promise<ITransaction[]>;
   // auth
   delinkUser(): Promise<any>;
   // metadata
   getAccountsMetadata(): Promise<IAccountsMetadata>;
   // payment
-  getBeneficiaries(): Promise<Array<IBeneficiary>>;
-  createBeneficiary(beneficiaryRequestData: ICreateBeneficiaryRequestData): Promise<IBeneficiary>;
-  createTransferToExistingBeneficiary(senderID: string, amount: number, iban: string, name: string): Promise<any>;
-  createTransferToNonExistenceBeneficiary(senderID: string, receiverID: string, amount: number): Promise<any>;
+  getBeneficiaries(): Promise<IBeneficiary[]>;
+  createBeneficiary(
+    beneficiaryRequestData: ICreateBeneficiaryRequestData,
+  ): Promise<IBeneficiary>;
+  createTransferToExistingBeneficiary(
+    senderID: string,
+    amount: number,
+    iban: string,
+    name: string,
+  ): Promise<any>;
+  createTransferToNonExistenceBeneficiary(
+    senderID: string,
+    receiverID: string,
+    amount: number,
+  ): Promise<any>;
 }
