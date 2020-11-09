@@ -99,7 +99,5 @@
       "cd android && ./graldew spotlessApply",
       "git add"
     ]
-  },"resolutions": {
-    "stacktrace-parser": "0.1.4"
   }
 }
