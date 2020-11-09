@@ -115,29 +115,48 @@ class DapiPayment {
     return NativeInterface.createBeneficiary(beneficiaryRequestData);
   }
 
-  createTransferToExistingBeneficiary(
-    senderID: string,
-    amount: number,
+  createTransferToIban(
     iban: string,
     name: string,
+    senderID: string,
+    amount: number,
+    remark: string,
   ): Promise<any> {
-    return NativeInterface.createTransferToExistingBeneficiary(
-      senderID,
-      amount,
+    return NativeInterface.createTransferToIban(
       iban,
       name,
+      senderID,
+      amount,
+      remark,
+    );
+  }
+  createTransferToReceiverID(
+    receiverID: string,
+    senderID: string,
+    amount: number,
+    remark: string,
+  ): Promise<any> {
+    return NativeInterface.createTransferToReceiverID(
+      receiverID,
+      senderID,
+      amount,
+      remark,
     );
   }
 
-  createTransferToNonExistenceBeneficiary(
+  createTransferToAccountNumber(
+    accountNumber: string,
+    name: string,
     senderID: string,
-    receiverID: string,
     amount: number,
+    remark: string,
   ): Promise<any> {
-    return NativeInterface.createTransferToNonExistenceBeneficiary(
+    return NativeInterface.createTransferToAccountNumber(
+      accountNumber,
+      name,
       senderID,
-      receiverID,
       amount,
+      remark,
     );
   }
 }

@@ -49,15 +49,25 @@ export interface DapiConnectNativeModule {
   createBeneficiary(
     beneficiaryRequestData: ICreateBeneficiaryRequestData,
   ): Promise<IBeneficiary>;
-  createTransferToExistingBeneficiary(
-    senderID: string,
-    amount: number,
+  createTransferToIban(
     iban: string,
     name: string,
-  ): Promise<any>;
-  createTransferToNonExistenceBeneficiary(
     senderID: string,
-    receiverID: string,
     amount: number,
+    remark: string,
+  ): Promise<any>;
+  createTransferToReceiverID(
+    receiverID: string,
+    senderID: string,
+    amount: number,
+    remark: string,
+  ): Promise<any>;
+
+  createTransferToAccountNumber(
+    accountNumber: string,
+    name: string,
+    senderID: string,
+    amount: number,
+    remark: string,
   ): Promise<any>;
 }

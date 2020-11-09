@@ -40,8 +40,8 @@ let firstAccountID;
 
 function intiClient() {
   const configs = {
-    appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
-    baseURL: 'http://10.0.2.2:4561',
+    appKey: 'appKey',
+    baseURL: 'yourBaseURL',
     countries: ['AE'],
     clientUserID: 'yourUserID',
     environment: 'sandbox',
@@ -90,22 +90,22 @@ function getConnections() {
     } else {
       console.log(connections);
       globalClient.setUserID(connections[0].userID);
-      globalClient.setClientUserID(connections[0].userID);
-      globalClient.userID((error, userID) => {
-        if (error) {
-          console.error(error);
-        } else {
-          console.log(userID);
-        }
-      });
+      // globalClient.setClientUserID(connections[0].userID);
+      // globalClient.userID((error, userID) => {
+      //   if (error) {
+      //     console.error(error);
+      //   } else {
+      //     console.log(userID);
+      //   }
+      // });
 
-      globalClient.clientUserID((error, clientUserID) => {
-        if (error) {
-          console.error(error);
-        } else {
-          console.log(clientUserID);
-        }
-      });
+      // globalClient.clientUserID((error, clientUserID) => {
+      //   if (error) {
+      //     console.error(error);
+      //   } else {
+      //     console.log(clientUserID);
+      //   }
+      // });
     }
   });
 }
@@ -247,13 +247,15 @@ async function createBeneficiary() {
   }
 }
 
-async function createTransferToExistingBeneficiary() {
+//Send money to an existing beneficiary
+//You can get a receiverID from getBeneficiaries call
+async function createTransferToReceiverID() {
   try {
-    const transfer = await globalClient.payment.createTransferToExistingBeneficiary(
+    const transfer = await globalClient.payment.createTransferToReceiverID(
+      'receiverID',
       firstAccountID,
       5,
-      'FTQ72AEDB20201555555893',
-      'Aziz Ahmad',
+      'remark',
     );
     console.log(transfer);
   } catch (e) {
@@ -261,12 +263,33 @@ async function createTransferToExistingBeneficiary() {
   }
 }
 
-async function createTransferToNonExistenceBeneficiary() {
+//Send money from Liv as well as from an HSBC account to another local account
+//https://docs.dapi.co/docs/exceptions
+async function createTransferToIban() {
   try {
-    const transfer = await globalClient.payment.createTransferToNonExistenceBeneficiary(
+    const transfer = await globalClient.payment.createTransferToIban(
+      'iban',
+      'name',
       firstAccountID,
-      'FTQ72AEDB20201555555893',
       5,
+      'remark',
+    );
+    console.log(transfer);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+//Send money from one HSBC account to another HSBC account
+//https://docs.dapi.co/docs/exceptions
+async function createTransferToAccountNumber() {
+  try {
+    const transfer = await globalClient.payment.createTransferToAccountNumber(
+      'accountNumber',
+      'name',
+      firstAccountID,
+      5,
+      'remark',
     );
     console.log(transfer);
   } catch (e) {
@@ -344,12 +367,16 @@ const App: () => React$Node = () => {
               onPress={() => createBeneficiary()}
             />
             <Button
-              title="Create Transfer To Existing Beneficiary"
-              onPress={() => createTransferToExistingBeneficiary()}
+              title="Create Transfer To IBAN"
+              onPress={() => createTransferToIban()}
             />
             <Button
-              title="Create To Non Existence Beneficiary"
-              onPress={() => createTransferToNonExistenceBeneficiary()}
+              title="Create Transfer To Account Number"
+              onPress={() => createTransferToAccountNumber()}
+            />
+            <Button
+              title="Create Transfer To Receiver ID"
+              onPress={() => createTransferToReceiverID()}
             />
           </View>
         </View>

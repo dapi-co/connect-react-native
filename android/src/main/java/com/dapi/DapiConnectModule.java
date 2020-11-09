@@ -329,15 +329,16 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createTransferToExistingBeneficiary(
-            String senderID,
-            Double amount,
+    public void createTransferToIban(
             String iban,
             String name,
+            String senderID,
+            Double amount,
+            String remark,
             Promise promise
     ) {
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
-        payment.createTransfer(iban, name, senderID, amount, null, transfer -> {
+        payment.createTransfer(iban, name, senderID, amount, remark, transfer -> {
             try {
                 promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transfer)));
             } catch (JSONException e) {
@@ -356,14 +357,43 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createTransferToNonExistenceBeneficiary(
-            String senderID,
+    public void createTransferToReceiverID(
             String receiverID,
+            String senderID,
             Double amount,
+            String remark,
             Promise promise
     ) {
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
-        payment.createTransfer(receiverID, senderID, amount, null, transfer -> {
+        payment.createTransfer(receiverID, senderID, amount, remark, transfer -> {
+            try {
+                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transfer)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }, error -> {
+            JSONObject jsonObject = convertToJSONObject(error);
+            try {
+                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
+    }
+
+    @ReactMethod
+    public void createTransferToAccountNumber(
+            String accountNumber,
+            String name,
+            String senderID,
+            Double amount,
+            String remark,
+            Promise promise
+    ) {
+        DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
+        payment.createTransfer(accountNumber, name, amount, senderID, remark, transfer -> {
             try {
                 promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transfer)));
             } catch (JSONException e) {
