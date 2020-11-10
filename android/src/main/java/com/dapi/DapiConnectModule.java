@@ -688,7 +688,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     createBeneficiary,
                     getBeneficiaries,
                     delinkUser,
-                    getIdentity
+                    resumeJob
             );
         }
 
@@ -732,14 +732,14 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         }
 
         HashMap<String, String> finalExtraHeadersMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraBodyMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : extraHeadersMap.entrySet()) {
             if (entry.getValue() instanceof String) {
                 finalExtraHeadersMap.put(entry.getKey(), (String) entry.getValue());
             }
         }
 
         HashMap<String, String> finalExtraParamsMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraBodyMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : extraParamsMap.entrySet()) {
             if (entry.getValue() instanceof String) {
                 finalExtraParamsMap.put(entry.getKey(), (String) entry.getValue());
             }
