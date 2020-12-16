@@ -15,6 +15,7 @@ import com.dapi.connect.core.callbacks.OnDapiTransferListener;
 import com.dapi.connect.core.base.DapiClient;
 import com.dapi.connect.core.enums.DapiEnvironment;
 import com.dapi.connect.core.enums.DapiTheme;
+import com.dapi.connect.data.endpoint_models.AccountsItem;
 import com.dapi.connect.data.models.DapiBeneficiaryInfo;
 import com.dapi.connect.data.models.DapiConfigurations;
 import com.dapi.connect.data.models.DapiConnection;
@@ -41,6 +42,7 @@ import com.facebook.react.bridge.Arguments;
 
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -70,19 +72,25 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void newClientWithConfigurations(ReadableMap configurationsMap) {
+    public DapiClient newClientWithConfigurations(ReadableMap configurationsMap) {
         DapiConfigurations dapiConfigurations = createDapiConfigurations(configurationsMap);
-        new DapiClient(getCurrentActivity().getApplication(), dapiConfigurations);
+        for (DapiClient client : DapiClient.Companion.getInstances()){
+            if (client.getConfigurations().equals(dapiConfigurations)){
+                return client;
+            }
+        }
+        return new DapiClient(getCurrentActivity().getApplication(), dapiConfigurations);
     }
 
     @ReactMethod
-    public void setUserID(String userID) {
-        DapiClient.Companion.getInstance().setUserID(userID);
+    public void setUserID(String userID, ReadableMap configurationsMap) {
+        DapiClient client = getOrCreateDapiClient(configurationsMap);
+        client.setUserID(userID);
     }
 
     @ReactMethod
-    public void userID(Callback callback) {
-        String userID = DapiClient.Companion.getInstance().getUserID();
+    public void userID(ReadableMap configurationsMap, Callback callback) {
+        String userID = getOrCreateDapiClient(configurationsMap).getUserID();
         if (userID == null) {
             sendErrorCallback("UserID is not set", callback);
         } else {
@@ -91,13 +99,14 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void setClientUserID(String clientUserID) {
-        DapiClient.Companion.getInstance().setClientUserID(clientUserID);
+    public void setClientUserID(String clientUserID, ReadableMap configurationsMap) {
+        DapiClient client = getOrCreateDapiClient(configurationsMap);
+        client.setClientUserID(clientUserID);
     }
 
     @ReactMethod
-    public void clientUserID(Callback callback) {
-        String clientUserID = DapiClient.Companion.getInstance().getClientUserID();
+    public void clientUserID(ReadableMap configurationsMap, Callback callback) {
+        String clientUserID = getOrCreateDapiClient(configurationsMap).getClientUserID();
         if (clientUserID == null) {
             sendErrorCallback("ClientUserID is not set", callback);
         } else {
@@ -106,34 +115,52 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void presentConnect(String beneficiaryInfo) {
-        DapiClient dapiClient = DapiClient.Companion.getInstance();
-        dapiClient.getConnect().present();
-        addConnectListener(beneficiaryInfo);
+    public void presentConnect(String beneficiaryInfo, ReadableMap configurationsMap) {
+        DapiClient client = getOrCreateDapiClient(configurationsMap);
+        client.getConnect().present();
+        addConnectListener(beneficiaryInfo, client);
     }
 
     @ReactMethod
-    public void dismissConnect() {
-        DapiClient dapiClient = DapiClient.Companion.getInstance();
-        dapiClient.getConnect().dismiss();
+    public void dismissConnect(ReadableMap configurationsMap) {
+        DapiClient client = getOrCreateDapiClient(configurationsMap);
+        client.getConnect().dismiss();
     }
 
     @ReactMethod
-    public void getConnections(final Callback callback) {
-        DapiClient dapiClient = DapiClient.Companion.getInstance();
-        dapiClient.getConnect().getConnections(connections -> {
+    public void getConnections(ReadableMap configurationsMap, final Callback callback) {
+        DapiClient client = getOrCreateDapiClient(configurationsMap);
+        client.getConnect().getConnections(connections -> {
             WritableArray writableArray = new WritableNativeArray();
             for (DapiConnection connection : connections) {
                 try {
+                    WritableArray resultAccountMapArray = new WritableNativeArray();
+                    for (AccountsItem account : connection.getSubAccounts()){
+                        WritableMap currencyMap = new WritableNativeMap();
+                        currencyMap.putString("code", account.getCurrency().getCode());
+                        currencyMap.putString("name", account.getCurrency().getName());
+
+                        WritableMap accountMap = new WritableNativeMap();
+                        accountMap.putString("iban", account.getIban());
+                        accountMap.putString("number", account.getNumber());
+                        accountMap.putMap("currency", currencyMap);
+                        accountMap.putString("type", account.getType());
+                        accountMap.putString("name", account.getName());
+                        accountMap.putString("id", account.getId());
+                        accountMap.putBoolean("isFavourite", account.isFavourite());
+                        resultAccountMapArray.pushMap(accountMap);
+                    }
+
                     WritableMap writableMap = new WritableNativeMap();
                     writableMap.putString("userID", connection.getUserID());
                     writableMap.putString("clientUserID", connection.getClientUserID());
                     writableMap.putString("bankID", connection.getBankID());
                     writableMap.putString("bankName", connection.getShortBankName());
-                    JSONObject jsonObject = convertToJSONObject(connection.getCoolDownPeriod());
-                    writableMap.putMap("beneficiaryCoolDownPeriod", JsonConvert.jsonToReact(jsonObject));
+                    JSONObject coolDownPeriodJsonObject = convertToJSONObject(connection.getCoolDownPeriod());
+                    writableMap.putMap("beneficiaryCoolDownPeriod", JsonConvert.jsonToReact(coolDownPeriodJsonObject));
                     writableMap.putString("countryName", connection.getCountry());
                     writableMap.putBoolean("isCreateBeneficiaryEndpointRequired", connection.isCreateBeneficiaryRequired());
+                    writableMap.putArray("accounts", resultAccountMapArray);
                     writableArray.pushMap(writableMap);
                 } catch (Exception e) {
                     sendErrorCallback(e.getMessage(), callback);
@@ -154,21 +181,22 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void presentAutoFlow(String beneficiaryInfo) {
-        DapiClient dapiClient = DapiClient.Companion.getInstance();
-        dapiClient.getAutoFlow().present(null, 0);
-        addAutoFlowListener(beneficiaryInfo);
+    public void presentAutoFlow(String beneficiaryInfo, ReadableMap configurationsMap) {
+        DapiClient client = getOrCreateDapiClient(configurationsMap);
+        client.getAutoFlow().present(null, 0);
+        addAutoFlowListener(beneficiaryInfo, client);
     }
 
     @ReactMethod
-    public void dismissAutoFlow() {
+    public void dismissAutoFlow(ReadableMap configurationsMap) {
         DapiClient dapiClient = DapiClient.Companion.getInstance();
         dapiClient.getAutoFlow().dismiss();
     }
 
     @ReactMethod
-    public void getIdentity(Promise promise) {
-        DapiDataClient data = DapiClient.Companion.getInstance().getData();
+    public void getIdentity(ReadableMap configurationsMap,
+                            Promise promise) {
+        DapiDataClient data = getOrCreateDapiClient(configurationsMap).getData();
         data.getIdentity(identity -> {
             resolve(identity, promise);
             return null;
@@ -179,8 +207,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAccounts(Promise promise) {
-        DapiDataClient data = DapiClient.Companion.getInstance().getData();
+    public void getAccounts(ReadableMap configurationsMap,
+                            Promise promise) {
+        DapiDataClient data = getOrCreateDapiClient(configurationsMap).getData();
         data.getAccounts(accounts -> {
             resolve(accounts, promise);
             return null;
@@ -191,8 +220,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getBalance(String accountID, Promise promise) {
-        DapiDataClient data = DapiClient.Companion.getInstance().getData();
+    public void getBalance(String accountID, ReadableMap configurationsMap,
+                           Promise promise) {
+        DapiDataClient data = getOrCreateDapiClient(configurationsMap).getData();
         data.getBalance(accountID, balance -> {
             resolve(balance, promise);
             return null;
@@ -206,8 +236,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getTransactions(String accountID,
                                 Dynamic startDate,
                                 Dynamic endDate,
+                                ReadableMap configurationsMap,
                                 Promise promise) {
-        DapiDataClient data = DapiClient.Companion.getInstance().getData();
+        DapiDataClient data = getOrCreateDapiClient(configurationsMap).getData();
 
         long startDateAsLong = (long) startDate.asDouble();
         long endDateAsLong = (long) endDate.asDouble();
@@ -225,8 +256,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAccountsMetadata(Promise promise) {
-        DapiMetaDataClient metadata = DapiClient.Companion.getInstance().getMetadata();
+    public void getAccountsMetadata(ReadableMap configurationsMap,
+                                    Promise promise) {
+        DapiMetaDataClient metadata = getOrCreateDapiClient(configurationsMap).getMetadata();
         metadata.getAccountMetaData(accountMetaData -> {
             resolve(accountMetaData, promise);
             return null;
@@ -237,8 +269,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void delinkUser(Promise promise) {
-        DapiAuthClient auth = DapiClient.Companion.getInstance().getAuth();
+    public void delinkUser(ReadableMap configurationsMap,
+                           Promise promise) {
+        DapiAuthClient auth = getOrCreateDapiClient(configurationsMap).getAuth();
         auth.delink(delinkUser -> {
             resolve(delinkUser, promise);
             return null;
@@ -249,8 +282,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getBeneficiaries(Promise promise) {
-        DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
+    public void getBeneficiaries(ReadableMap configurationsMap,
+                                 Promise promise) {
+        DapiPaymentClient payment = getOrCreateDapiClient(configurationsMap).getPayment();
         payment.getBeneficiaries(beneficiaries -> {
             resolve(beneficiaries, promise);
             return null;
@@ -267,9 +301,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String senderID,
             Double amount,
             String remark,
+            ReadableMap configurationsMap,
             Promise promise
     ) {
-        DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
+        DapiPaymentClient payment = getOrCreateDapiClient(configurationsMap).getPayment();
         payment.createTransfer(iban, name, senderID, amount, remark, transfer -> {
             resolve(transfer, promise);
             return null;
@@ -285,9 +320,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String senderID,
             Double amount,
             String remark,
+            ReadableMap configurationsMap,
             Promise promise
     ) {
-        DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
+        DapiPaymentClient payment = getOrCreateDapiClient(configurationsMap).getPayment();
         payment.createTransfer(receiverID, senderID, amount, remark, transfer -> {
             resolve(transfer, promise);
             return null;
@@ -304,9 +340,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String senderID,
             Double amount,
             String remark,
+            ReadableMap configurationsMap,
             Promise promise
     ) {
-        DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
+        DapiPaymentClient payment = getOrCreateDapiClient(configurationsMap).getPayment();
         payment.createTransfer(accountNumber, name, amount, senderID, remark, transfer -> {
             resolve(transfer, promise);
             return null;
@@ -319,10 +356,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     private void createBeneficiary(
             ReadableMap beneficiaryInfoMap,
+            ReadableMap configurationsMap,
             Promise promise
     ) {
 
-        DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
+        DapiPaymentClient payment = getOrCreateDapiClient(configurationsMap).getPayment();
 
         DapiBeneficiaryInfo dapiBeneficiaryInfo = createDapiBeneficiaryInfo(beneficiaryInfoMap.toHashMap());
         payment.createBeneficiary(dapiBeneficiaryInfo, beneficiary -> {
@@ -369,6 +407,23 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         reactContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(eventName, params);
+    }
+
+    private DapiClient getOrCreateDapiClient(ReadableMap configurationsMap) {
+        DapiConfigurations dapiConfigurations = createDapiConfigurations(configurationsMap);
+        DapiClient client = null;
+        for (DapiClient dapiClient : DapiClient.Companion.getInstances()) {
+            if (dapiClient.getConfigurations().equals(dapiConfigurations)) {
+                client = dapiClient;
+                break;
+            }
+        }
+
+        if (client == null) {
+            client = newClientWithConfigurations(configurationsMap);
+        }
+
+        return client;
     }
 
     private DapiBeneficiaryInfo createDapiBeneficiaryInfo(Map<String, Object> dapiBeneficiaryInfo) {
@@ -643,10 +698,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         );
     }
 
-    private void addConnectListener(String beneficiaryInfo) {
-        DapiClient dapiClient = DapiClient.Companion.getInstance();
+    private void addConnectListener(String beneficiaryInfo, DapiClient client) {
         AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
-        dapiClient.getConnect().setOnConnectListener(new OnDapiConnectListener() {
+        client.getConnect().setOnConnectListener(new OnDapiConnectListener() {
             @Override
             public void onConnectionSuccessful(@NotNull String userID, @NotNull String bankID) {
                 WritableMap params = Arguments.createMap();
@@ -694,10 +748,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     }
 
-    private void addAutoFlowListener(String beneficiaryInfo) {
-        DapiClient dapiClient = DapiClient.Companion.getInstance();
+    private void addAutoFlowListener(String beneficiaryInfo, DapiClient client) {
         AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
-        dapiClient.getAutoFlow().setOnTransferListener(new OnDapiTransferListener() {
+        client.getAutoFlow().setOnTransferListener(new OnDapiTransferListener() {
             @Override
             public void onAutoFlowSuccessful(double amount, @Nullable String senderAccountID, @Nullable String recipientAccountID, @NotNull String jobID) {
                 WritableMap params = Arguments.createMap();
