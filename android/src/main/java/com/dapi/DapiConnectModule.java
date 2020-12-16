@@ -501,7 +501,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String createBeneficiary;
             String getBeneficiaries;
             String delinkUser;
-            String resumeJob;
 
             if (endpointsMap.get("getIdentity") == null) {
                 getIdentity = DapiEndpoints.GET_IDENTITY_ENDPOINT;
@@ -557,12 +556,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 delinkUser = (String) endpointsMap.get("delinkUser");
             }
 
-            if (endpointsMap.get("resumeJob") == null) {
-                resumeJob = DapiEndpoints.RESUME_JOB_ENDPOINT;
-            } else {
-                resumeJob = (String) endpointsMap.get("resumeJob");
-            }
-
             endpoints = new DapiEndpoints(
                     getIdentity,
                     getAccounts,
@@ -572,8 +565,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     createTransfer,
                     createBeneficiary,
                     getBeneficiaries,
-                    delinkUser,
-                    resumeJob
+                    delinkUser
             );
         }
 
