@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = '1.4.0'
+    ext.kotlin_version = '1.4.21'
     repositories {
         google()
         jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:4.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
     }
@@ -61,9 +61,9 @@ repositories {
 }
 
 dependencies {
+    //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
-
-    implementation "com.dapi.connect:dapi:0.3.0"
+    implementation "com.dapi.connect:dapi:0.3.3"
     implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.6'

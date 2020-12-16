@@ -1,10 +1,8 @@
 package com.dapi;
 
 
-import android.app.Application;
 import android.util.Log;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -25,7 +23,6 @@ import com.dapi.connect.data.models.DapiError;
 import com.dapi.connect.data.models.LinesAddress;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Dynamic;
-import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -40,12 +37,10 @@ import com.facebook.react.module.annotations.ReactModule;
 import com.google.gson.Gson;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -75,38 +70,38 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void newClientWithConfigurations(ReadableMap configurations) {
-        DapiConfigurations dapiConfigurations = extractConfigurations(configurations);
+    public void newClientWithConfigurations(ReadableMap configurationsMap) {
+        DapiConfigurations dapiConfigurations = createDapiConfigurations(configurationsMap);
         new DapiClient(getCurrentActivity().getApplication(), dapiConfigurations);
     }
 
     @ReactMethod
-    public void setUserID(String userID){
+    public void setUserID(String userID) {
         DapiClient.Companion.getInstance().setUserID(userID);
     }
 
     @ReactMethod
     public void userID(Callback callback) {
         String userID = DapiClient.Companion.getInstance().getUserID();
-        if (userID == null){
-            callback.invoke("UserID is not set", null);
-        }else {
-            callback.invoke(null, userID);
+        if (userID == null) {
+            sendErrorCallback("UserID is not set", callback);
+        } else {
+            sendSuccessCallback(userID, callback);
         }
     }
 
     @ReactMethod
-    public void setClientUserID(String clientUserID){
+    public void setClientUserID(String clientUserID) {
         DapiClient.Companion.getInstance().setClientUserID(clientUserID);
     }
 
     @ReactMethod
-    public void clientUserID(Callback callback){
+    public void clientUserID(Callback callback) {
         String clientUserID = DapiClient.Companion.getInstance().getClientUserID();
-        if (clientUserID == null){
-            callback.invoke("ClientUserID is not set", null);
-        }else {
-            callback.invoke(null, clientUserID);
+        if (clientUserID == null) {
+            sendErrorCallback("ClientUserID is not set", callback);
+        } else {
+            sendSuccessCallback(clientUserID, callback);
         }
     }
 
@@ -126,9 +121,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getConnections(final Callback callback) {
         DapiClient dapiClient = DapiClient.Companion.getInstance();
-        dapiClient.getConnect().getConnections(dapiConnections -> {
+        dapiClient.getConnect().getConnections(connections -> {
             WritableArray writableArray = new WritableNativeArray();
-            for (DapiConnection connection : dapiConnections) {
+            for (DapiConnection connection : connections) {
                 try {
                     WritableMap writableMap = new WritableNativeMap();
                     writableMap.putString("userID", connection.getUserID());
@@ -141,18 +136,18 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     writableMap.putBoolean("isCreateBeneficiaryEndpointRequired", connection.isCreateBeneficiaryRequired());
                     writableArray.pushMap(writableMap);
                 } catch (Exception e) {
-                    callback.invoke(e.getMessage(), null);
+                    sendErrorCallback(e.getMessage(), callback);
                 }
 
             }
-            callback.invoke(null, writableArray);
+            sendSuccessCallback(writableArray, callback);
             return null;
         }, error -> {
             JSONObject jsonObject = convertToJSONObject(error);
             try {
-                callback.invoke(JsonConvert.jsonToReact(jsonObject), null);
+                sendErrorCallback(JsonConvert.jsonToReact(jsonObject), callback);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
             return null;
         });
@@ -175,19 +170,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getIdentity(Promise promise) {
         DapiDataClient data = DapiClient.Companion.getInstance().getData();
         data.getIdentity(identity -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(identity)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(identity, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -196,19 +182,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getAccounts(Promise promise) {
         DapiDataClient data = DapiClient.Companion.getInstance().getData();
         data.getAccounts(accounts -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(accounts)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(accounts, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -217,19 +194,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getBalance(String accountID, Promise promise) {
         DapiDataClient data = DapiClient.Companion.getInstance().getData();
         data.getBalance(accountID, balance -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(balance)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(balance, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -248,19 +216,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Date endDateObject = new Date(endDateAsLong);
 
         data.getTransactions(accountID, startDateObject, endDateObject, transactions -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transactions)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(transactions, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -269,19 +228,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getAccountsMetadata(Promise promise) {
         DapiMetaDataClient metadata = DapiClient.Companion.getInstance().getMetadata();
         metadata.getAccountMetaData(accountMetaData -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(accountMetaData)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(accountMetaData, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -290,19 +240,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void delinkUser(Promise promise) {
         DapiAuthClient auth = DapiClient.Companion.getInstance().getAuth();
         auth.delink(delinkUser -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(delinkUser)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(delinkUser, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -311,19 +252,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getBeneficiaries(Promise promise) {
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
         payment.getBeneficiaries(beneficiaries -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(beneficiaries)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(beneficiaries, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -339,19 +271,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     ) {
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
         payment.createTransfer(iban, name, senderID, amount, remark, transfer -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transfer)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(transfer, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -366,19 +289,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     ) {
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
         payment.createTransfer(receiverID, senderID, amount, remark, transfer -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transfer)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(transfer, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -394,124 +308,59 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     ) {
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
         payment.createTransfer(accountNumber, name, amount, senderID, remark, transfer -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(transfer)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            resolve(transfer, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
 
     @ReactMethod
     private void createBeneficiary(
-            ReadableMap dapiBeneficiaryInfo,
+            ReadableMap beneficiaryInfoMap,
             Promise promise
     ) {
 
         DapiPaymentClient payment = DapiClient.Companion.getInstance().getPayment();
 
-        DapiBeneficiaryInfo info = extractBeneficiaryInfo(dapiBeneficiaryInfo.toHashMap());
-        payment.createBeneficiary(info, beneficiary -> {
-            try {
-                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(beneficiary)));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        DapiBeneficiaryInfo dapiBeneficiaryInfo = createDapiBeneficiaryInfo(beneficiaryInfoMap.toHashMap());
+        payment.createBeneficiary(dapiBeneficiaryInfo, beneficiary -> {
+            resolve(beneficiary, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
 
-    private DapiBeneficiaryInfo extractBeneficiaryInfo(String beneficiaryInfo) {
-        Gson gson = new Gson();
-        Map<String, Object> dapiBeneficiaryInfo =
-                gson.fromJson(beneficiaryInfo, Map.class);
+    /**
+     * ************ HELPER FUNCTIONS ************
+     */
 
-        Map<String, String> linesMap = (Map<String, String>) dapiBeneficiaryInfo.get("address");
-        String line1 = linesMap.get("line1");
-        String line2 = linesMap.get("line2");
-        String line3 = linesMap.get("line3");
-        LinesAddress linesAddress = new LinesAddress(
-                line1,
-                line2,
-                line3
-        );
-        String accountNumber = (String) dapiBeneficiaryInfo.get("accountNumber");
-        String name = (String) dapiBeneficiaryInfo.get("name");
-        String bankName = (String) dapiBeneficiaryInfo.get("bankName");
-        String swiftCode = (String) dapiBeneficiaryInfo.get("swiftCode");
-        String iban = (String) dapiBeneficiaryInfo.get("iban");
-        String phoneNumber = (String) dapiBeneficiaryInfo.get("phoneNumber");
-        String country = (String) dapiBeneficiaryInfo.get("country");
-        String branchAddress = (String) dapiBeneficiaryInfo.get("branchAddress");
-        String branchName = (String) dapiBeneficiaryInfo.get("branchName");
-
-        DapiBeneficiaryInfo info = new DapiBeneficiaryInfo(
-                linesAddress,
-                accountNumber,
-                name,
-                bankName,
-                swiftCode,
-                iban,
-                country,
-                branchAddress,
-                branchName,
-                phoneNumber
-        );
-
-        return info;
+    private <T> void resolve(T data, Promise promise) {
+        try {
+            promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(data)));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    private DapiBeneficiaryInfo extractBeneficiaryInfo(Map<String, Object> dapiBeneficiaryInfo) {
-        Map<String, String> linesMap = (Map<String, String>) dapiBeneficiaryInfo.get("address");
-        String line1 = linesMap.get("line1");
-        String line2 = linesMap.get("line2");
-        String line3 = linesMap.get("line3");
-        LinesAddress linesAddress = new LinesAddress(
-                line1,
-                line2,
-                line3
-        );
-        String accountNumber = (String) dapiBeneficiaryInfo.get("accountNumber");
-        String name = (String) dapiBeneficiaryInfo.get("name");
-        String bankName = (String) dapiBeneficiaryInfo.get("bankName");
-        String swiftCode = (String) dapiBeneficiaryInfo.get("swiftCode");
-        String iban = (String) dapiBeneficiaryInfo.get("iban");
-        String phoneNumber = (String) dapiBeneficiaryInfo.get("phoneNumber");
-        String country = (String) dapiBeneficiaryInfo.get("country");
-        String branchAddress = (String) dapiBeneficiaryInfo.get("branchAddress");
-        String branchName = (String) dapiBeneficiaryInfo.get("branchName");
+    private <T> void reject(T error, Promise promise) {
+        JSONObject jsonObject = convertToJSONObject(error);
+        try {
+            promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-        DapiBeneficiaryInfo info = new DapiBeneficiaryInfo(
-                linesAddress,
-                accountNumber,
-                name,
-                bankName,
-                swiftCode,
-                iban,
-                country,
-                branchAddress,
-                branchName,
-                phoneNumber
-        );
+    private <T> void sendSuccessCallback(T data, Callback callback) {
+        callback.invoke(null, data);
+    }
 
-        return info;
+    private <T> void sendErrorCallback(T error, Callback callback) {
+        callback.invoke(error, null);
     }
 
     private void sendEvent(ReactContext reactContext,
@@ -522,7 +371,43 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 .emit(eventName, params);
     }
 
-    private DapiConfigurations extractConfigurations(ReadableMap configurations) {
+    private DapiBeneficiaryInfo createDapiBeneficiaryInfo(Map<String, Object> dapiBeneficiaryInfo) {
+        Map<String, String> linesMap = (Map<String, String>) dapiBeneficiaryInfo.get("address");
+        String line1 = linesMap.get("line1");
+        String line2 = linesMap.get("line2");
+        String line3 = linesMap.get("line3");
+        LinesAddress linesAddress = new LinesAddress(
+                line1,
+                line2,
+                line3
+        );
+        String accountNumber = (String) dapiBeneficiaryInfo.get("accountNumber");
+        String name = (String) dapiBeneficiaryInfo.get("name");
+        String bankName = (String) dapiBeneficiaryInfo.get("bankName");
+        String swiftCode = (String) dapiBeneficiaryInfo.get("swiftCode");
+        String iban = (String) dapiBeneficiaryInfo.get("iban");
+        String phoneNumber = (String) dapiBeneficiaryInfo.get("phoneNumber");
+        String country = (String) dapiBeneficiaryInfo.get("country");
+        String branchAddress = (String) dapiBeneficiaryInfo.get("branchAddress");
+        String branchName = (String) dapiBeneficiaryInfo.get("branchName");
+
+        DapiBeneficiaryInfo info = new DapiBeneficiaryInfo(
+                linesAddress,
+                accountNumber,
+                name,
+                bankName,
+                swiftCode,
+                iban,
+                country,
+                branchAddress,
+                branchName,
+                phoneNumber
+        );
+
+        return info;
+    }
+
+    private DapiConfigurations createDapiConfigurations(ReadableMap configurations) {
         String appKey = null;
         String clientUserID = null;
         String userID = null;
@@ -709,39 +594,39 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             theme = DapiTheme.GENERAL;
         }
 
-        HashMap<String, Object> extraBodyMap =
+        HashMap<String, Object> extraBodyMapOfObjects =
                 (extraBody instanceof HashMap)
                         ? (HashMap) extraBody
                         : new HashMap<String, Object>(extraBody);
 
-        HashMap<String, Object> extraHeadersMap =
+        HashMap<String, Object> extraHeadersMapOfObjects =
                 (extraHeaders instanceof HashMap)
                         ? (HashMap) extraHeaders
                         : new HashMap<String, Object>(extraHeaders);
 
-        HashMap<String, Object> extraParamsMap =
+        HashMap<String, Object> extraParamsMapOfObjects =
                 (extraParams instanceof HashMap)
                         ? (HashMap) extraParams
                         : new HashMap<String, Object>(extraParams);
 
-        HashMap<String, String> finalExtraBodyMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraBodyMap.entrySet()) {
+        HashMap<String, String> extraBodyMapOfStrings = new HashMap<>();
+        for (Map.Entry<String, Object> entry : extraBodyMapOfObjects.entrySet()) {
             if (entry.getValue() instanceof String) {
-                finalExtraBodyMap.put(entry.getKey(), (String) entry.getValue());
+                extraBodyMapOfStrings.put(entry.getKey(), (String) entry.getValue());
             }
         }
 
-        HashMap<String, String> finalExtraHeadersMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraHeadersMap.entrySet()) {
+        HashMap<String, String> extraHeadersMapOfStrings = new HashMap<>();
+        for (Map.Entry<String, Object> entry : extraHeadersMapOfObjects.entrySet()) {
             if (entry.getValue() instanceof String) {
-                finalExtraHeadersMap.put(entry.getKey(), (String) entry.getValue());
+                extraHeadersMapOfStrings.put(entry.getKey(), (String) entry.getValue());
             }
         }
 
-        HashMap<String, String> finalExtraParamsMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraParamsMap.entrySet()) {
+        HashMap<String, String> extraParamsMapOfStrings = new HashMap<>();
+        for (Map.Entry<String, Object> entry : extraParamsMapOfObjects.entrySet()) {
             if (entry.getValue() instanceof String) {
-                finalExtraParamsMap.put(entry.getKey(), (String) entry.getValue());
+                extraParamsMapOfStrings.put(entry.getKey(), (String) entry.getValue());
             }
         }
 
@@ -759,9 +644,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 userID,
                 isExperimental,
                 theme,
-                finalExtraHeadersMap,
-                finalExtraParamsMap,
-                finalExtraBodyMap,
+                extraHeadersMapOfStrings,
+                extraParamsMapOfStrings,
+                extraBodyMapOfStrings,
                 endpoints
         );
     }
@@ -795,18 +680,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             public void onProceed(@NotNull String userID, @NotNull String bankID) {
                 String fullFunction = String.format(beneficiaryInfo + "(`%s`)", bankID);
                 ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                executor.execute(() -> {
-                    getCurrentActivity().runOnUiThread(new Runnable() {
-                        public void run() {
-                            WebView webView = new WebView(getReactApplicationContext());
-                            webView.getSettings().setJavaScriptEnabled(true);
+                executor.execute(() -> getCurrentActivity().runOnUiThread(() -> {
+                    WebView webView = new WebView(getReactApplicationContext());
+                    webView.getSettings().setJavaScriptEnabled(true);
 
-                            webView.evaluateJavascript(fullFunction, response -> {
-                                stringBeneficiaryInfo.set(response);
-                            });
-                        }
-                    });
-                });
+                    webView.evaluateJavascript(fullFunction, stringBeneficiaryInfo::set);
+                }));
 
                 executor.shutdown();
             }
@@ -814,7 +693,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             @Nullable
             @Override
             public DapiBeneficiaryInfo setBeneficiaryInfoOnConnect(@NotNull String bankID) {
-                return extractBeneficiaryInfo(stringBeneficiaryInfo.get());
+                Gson gson = new Gson();
+                Map<String, Object> beneficiaryInfoMap =
+                        gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
+                return createDapiBeneficiaryInfo(beneficiaryInfoMap);
             }
         });
 
@@ -853,18 +735,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             public void onPaymentStarted(@NotNull String bankID) {
                 String fullFunction = String.format(beneficiaryInfo + "(`%s`)", bankID);
                 ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                executor.execute(() -> {
-                    getCurrentActivity().runOnUiThread(new Runnable() {
-                        public void run() {
-                            WebView webView = new WebView(getReactApplicationContext());
-                            webView.getSettings().setJavaScriptEnabled(true);
+                executor.execute(() -> getCurrentActivity().runOnUiThread(() -> {
+                    WebView webView = new WebView(getReactApplicationContext());
+                    webView.getSettings().setJavaScriptEnabled(true);
 
-                            webView.evaluateJavascript(fullFunction, response -> {
-                                stringBeneficiaryInfo.set(response);
-                            });
-                        }
-                    });
-                });
+                    webView.evaluateJavascript(fullFunction, stringBeneficiaryInfo::set);
+                }));
 
                 executor.shutdown();
             }
@@ -872,7 +748,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             @NotNull
             @Override
             public DapiBeneficiaryInfo setBeneficiaryInfoOnAutoFlow(@NotNull String bankID) {
-                return extractBeneficiaryInfo(stringBeneficiaryInfo.get());
+                Gson gson = new Gson();
+                Map<String, Object> beneficiaryInfoMap =
+                        gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
+                return createDapiBeneficiaryInfo(beneficiaryInfoMap);
             }
         });
     }
