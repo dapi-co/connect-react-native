@@ -1,5 +1,5 @@
 {
-  "name": "@dapi-co/connect-react-native",
+  "name": "connect-react-native",
   "version": "1.0.0",
   "description": "Financial APIs to connect users' bank accounts",
   "react-native": "src/index.ts",
@@ -37,7 +37,6 @@
     "fintech",
     "banking"
   ],
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/runtime": "^7.4.5",

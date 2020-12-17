@@ -21,10 +21,15 @@ import {
 } from './internal/types';
 
 class DapiConnect {
+  private _client : DapiClient;
+
+  constructor(client : DapiClient){
+    this._client = client;
+  }
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
     const isFunction = typeof beneficiaryInfo === 'function';
     if (beneficiaryInfo && isFunction) {
-      NativeInterface.presentConnect(`(${beneficiaryInfo.toString()})`);
+      NativeInterface.presentConnect(`(${beneficiaryInfo.toString()})`, this._client.configurations);
     } else if (!beneficiaryInfo) {
       throw Error('Missing required param: beneficiaryInfo');
     } else if (!isFunction) {
@@ -37,19 +42,24 @@ class DapiConnect {
   }
 
   dismiss(): void {
-    NativeInterface.dismissConnect();
+    NativeInterface.dismissConnect(this._client.configurations);
   }
 
   getConnections(callback: any): void {
-    NativeInterface.getConnections(callback);
+    NativeInterface.getConnections(this._client.configurations, callback);
   }
 }
 
 class DapiAutoFlow {
+  private _client : DapiClient;
+
+  constructor(client : DapiClient){
+    this._client = client;
+  }
   present(beneficiaryInfo: BeneficiaryInfoCallback): void {
     const isFunction = typeof beneficiaryInfo === 'function';
     if (beneficiaryInfo && isFunction) {
-      NativeInterface.presentAutoFlow(`(${beneficiaryInfo.toString()})`);
+      NativeInterface.presentAutoFlow(`(${beneficiaryInfo.toString()})`, this._client.configurations);
     } else if (!beneficiaryInfo) {
       throw Error('Missing required param: beneficiaryInfo');
     } else if (!isFunction) {
@@ -62,21 +72,26 @@ class DapiAutoFlow {
   }
 
   dismiss(): void {
-    NativeInterface.dismissAutoFlow();
+    NativeInterface.dismissAutoFlow(this._client.configurations);
   }
 }
 
 class DapiData {
+  private _client : DapiClient;
+
+  constructor(client : DapiClient){
+    this._client = client;
+  }
   getIdentity(): Promise<IIdentity> {
-    return NativeInterface.getIdentity();
+    return NativeInterface.getIdentity(this._client.configurations);
   }
 
   getAccounts(): Promise<IAccount[]> {
-    return NativeInterface.getAccounts();
+    return NativeInterface.getAccounts(this._client.configurations);
   }
 
   getBalance(accountID: string): Promise<IBalance> {
-    return NativeInterface.getBalance(accountID);
+    return NativeInterface.getBalance(accountID, this._client.configurations);
   }
 
   getTransactions(
@@ -88,31 +103,47 @@ class DapiData {
       accountID,
       startDate.getTime(),
       endDate.getTime(),
+      this._client.configurations
     );
   }
 }
 
 class DapiAuth {
+  private _client : DapiClient;
+
+  constructor(client : DapiClient){
+    this._client = client;
+  }
   delinkUser(): Promise<any> {
-    return NativeInterface.delinkUser();
+    return NativeInterface.delinkUser(this._client.configurations);
   }
 }
 
 class DapiMetadata {
+  private _client : DapiClient;
+
+  constructor(client : DapiClient){
+    this._client = client;
+  }
   getAccountsMetadata(): Promise<IAccountsMetadata> {
-    return NativeInterface.getAccountsMetadata();
+    return NativeInterface.getAccountsMetadata(this._client.configurations);
   }
 }
 
 class DapiPayment {
+  private _client : DapiClient;
+
+  constructor(client : DapiClient){
+    this._client = client;
+  }
   getBeneficiaries(): Promise<IBeneficiary[]> {
-    return NativeInterface.getBeneficiaries();
+    return NativeInterface.getBeneficiaries(this._client.configurations);
   }
 
   createBeneficiary(
     beneficiaryRequestData: ICreateBeneficiaryRequestData,
   ): Promise<IBeneficiary> {
-    return NativeInterface.createBeneficiary(beneficiaryRequestData);
+    return NativeInterface.createBeneficiary(beneficiaryRequestData, this._client.configurations);
   }
 
   createTransferToIban(
@@ -128,6 +159,7 @@ class DapiPayment {
       senderID,
       amount,
       remark,
+      this._client.configurations
     );
   }
   createTransferToReceiverID(
@@ -141,6 +173,7 @@ class DapiPayment {
       senderID,
       amount,
       remark,
+      this._client.configurations
     );
   }
 
@@ -157,23 +190,18 @@ class DapiPayment {
       senderID,
       amount,
       remark,
+      this._client.configurations
     );
   }
 }
 
 class DapiClient {
-  private static _allConfigurations: IDapiConfigurations[] = [];
-
-  static get allConfigurations() {
-    return DapiClient._allConfigurations;
-  }
-
-  private _connect = new DapiConnect();
-  private _autoFlow = new DapiAutoFlow();
-  private _data = new DapiData();
-  private _auth = new DapiAuth();
-  private _metadata = new DapiMetadata();
-  private _payment = new DapiPayment();
+  private _connect = new DapiConnect(this);
+  private _autoFlow = new DapiAutoFlow(this);
+  private _data = new DapiData(this);
+  private _auth = new DapiAuth(this);
+  private _metadata = new DapiMetadata(this);
+  private _payment = new DapiPayment(this);
   private _configurations: IDapiConfigurations;
 
   get connect() {
@@ -205,7 +233,6 @@ class DapiClient {
     }
     this._configurations = configurations;
     NativeInterface.newClientWithConfigurations(configurations);
-    DapiClient._allConfigurations.push(configurations);
   }
 
   _validateConfigurations(configurations: IDapiConfigurations): boolean {
@@ -233,19 +260,19 @@ class DapiClient {
   }
 
   setUserID(userID: string): void {
-    NativeInterface.setUserID(userID);
+    NativeInterface.setUserID(userID, this._configurations);
   }
 
   userID(callback: any): void {
-    NativeInterface.userID(callback);
+    NativeInterface.userID(this._configurations, callback);
   }
 
   setClientUserID(clientUserID: string): void {
-    NativeInterface.setClientUserID(clientUserID);
+    NativeInterface.setClientUserID(clientUserID, this._configurations);
   }
 
   clientUserID(callback: any): void {
-    NativeInterface.clientUserID(callback);
+    NativeInterface.clientUserID(this._configurations, callback);
   }
 }
 

@@ -20,34 +20,36 @@ import {
 
 export interface DapiConnectNativeModule {
   newClientWithConfigurations(configs: IDapiConfigurations): void;
-  setUserID(userID: string): void;
-  userID(callback: any): void;
-  setClientUserID(clientUserID: string): void;
-  clientUserID(callback: any): void;
+  setUserID(userID: string, configs: IDapiConfigurations): void;
+  userID(configs: IDapiConfigurations, callback: any): void;
+  setClientUserID(clientUserID: string, configs: IDapiConfigurations): void;
+  clientUserID(configs: IDapiConfigurations, callback: any): void;
   // connect
-  presentConnect(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
-  dismissConnect(): void;
-  getConnections(callback: any): void;
+  presentConnect(beneficiaryInfo: string, configs: IDapiConfigurations): void; // caller needs to convert the callback function to string, so we can pass it to native components
+  dismissConnect(configs: IDapiConfigurations): void;
+  getConnections(configs: IDapiConfigurations, callback: any): void;
   // autoflow
-  presentAutoFlow(beneficiaryInfo: string): void; // caller needs to convert the callback function to string, so we can pass it to native components
-  dismissAutoFlow(): void;
+  presentAutoFlow(beneficiaryInfo: string, configs: IDapiConfigurations): void; // caller needs to convert the callback function to string, so we can pass it to native components
+  dismissAutoFlow(configs: IDapiConfigurations): void;
   // data
-  getIdentity(): Promise<IIdentity>;
-  getAccounts(): Promise<IAccount[]>;
-  getBalance(accountID: string): Promise<IBalance>;
+  getIdentity(configs: IDapiConfigurations): Promise<IIdentity>;
+  getAccounts(configs: IDapiConfigurations): Promise<IAccount[]>;
+  getBalance(accountID: string, configs: IDapiConfigurations): Promise<IBalance>;
   getTransactions(
     accountID: string,
     startDateMilliseconds: number,
     endDateMilliseconds: number,
+    configs: IDapiConfigurations
   ): Promise<ITransaction[]>;
   // auth
-  delinkUser(): Promise<any>;
+  delinkUser(configs: IDapiConfigurations): Promise<any>;
   // metadata
-  getAccountsMetadata(): Promise<IAccountsMetadata>;
+  getAccountsMetadata(configs: IDapiConfigurations): Promise<IAccountsMetadata>;
   // payment
-  getBeneficiaries(): Promise<IBeneficiary[]>;
+  getBeneficiaries(configs: IDapiConfigurations): Promise<IBeneficiary[]>;
   createBeneficiary(
     beneficiaryRequestData: ICreateBeneficiaryRequestData,
+    configs: IDapiConfigurations
   ): Promise<IBeneficiary>;
   createTransferToIban(
     iban: string,
@@ -55,12 +57,14 @@ export interface DapiConnectNativeModule {
     senderID: string,
     amount: number,
     remark: string,
+    configs: IDapiConfigurations
   ): Promise<any>;
   createTransferToReceiverID(
     receiverID: string,
     senderID: string,
     amount: number,
     remark: string,
+    configs: IDapiConfigurations
   ): Promise<any>;
 
   createTransferToAccountNumber(
@@ -69,5 +73,6 @@ export interface DapiConnectNativeModule {
     senderID: string,
     amount: number,
     remark: string,
+    configs: IDapiConfigurations
   ): Promise<any>;
 }
