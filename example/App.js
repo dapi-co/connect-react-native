@@ -40,8 +40,8 @@ let firstAccountID;
 
 function intiClient() {
   const configs = {
-    appKey: 'appKey',
-    baseURL: 'yourBaseURL',
+    appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
+    baseURL: 'http://10.0.2.2:4561',
     countries: ['AE'],
     clientUserID: 'yourUserID',
     environment: 'sandbox',
@@ -59,7 +59,7 @@ function presentConnect() {
     };
 
     const info = {
-      address: lineAddress,
+      linesAddress: lineAddress,
       accountNumber: '1234',
       name: 'Ennabah',
       bankName: 'ADCB',
@@ -119,7 +119,7 @@ function presentAutoFlow() {
     };
 
     const info = {
-      address: lineAddress,
+      linesAddress: lineAddress,
       accountNumber: '1234',
       name: 'Ennabah',
       bankName: 'ADCB',
