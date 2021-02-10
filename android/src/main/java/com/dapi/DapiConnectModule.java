@@ -56,6 +56,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 @ReactModule(name = DapiConnectModule.NAME)
 public class DapiConnectModule extends ReactContextBaseJavaModule {
 
@@ -182,6 +185,13 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void presentAutoFlow(String beneficiaryInfo, ReadableMap configurationsMap) {
+        if (beneficiaryInfo == null || beneficiaryInfo.isEmpty()) {
+            WritableMap params = Arguments.createMap();
+            params.putString("error", "Missing beneficiaryInfoCallback");
+            params.putString("bankID", null);
+            sendEvent(getReactApplicationContext(), "EventAutoFlowFailure", params);
+
+        }
         DapiClient client = getOrCreateDapiClient(configurationsMap);
         client.getAutoFlow().present(null, 0);
         addAutoFlowListener(beneficiaryInfo, client);
@@ -691,8 +701,28 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private void addConnectListener(String beneficiaryInfo, DapiClient client) {
-        AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
+
         client.getConnect().setOnConnectListener(new OnDapiConnectListener() {
+            @Override
+            public void setBeneficiaryInfoOnConnect(@NotNull String bankID, @NotNull Function1<? super DapiBeneficiaryInfo, Unit> infoCallback) {
+                String fullFunction = String.format(beneficiaryInfo + "(`%s`)", bankID);
+                ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+                executor.execute(() -> getCurrentActivity().runOnUiThread(() -> {
+                    WebView webView = new WebView(getReactApplicationContext());
+                    webView.getSettings().setJavaScriptEnabled(true);
+
+                    AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
+                    webView.evaluateJavascript(fullFunction, stringBeneficiaryInfo::set);
+
+                    Gson gson = new Gson();
+                    Map<String, Object> beneficiaryInfoMap =  gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
+                    DapiBeneficiaryInfo beneficiaryInfo = createDapiBeneficiaryInfo(beneficiaryInfoMap);
+                    infoCallback.invoke(beneficiaryInfo);
+                }));
+
+                executor.shutdown();
+            }
+
             @Override
             public void onConnectionSuccessful(@NotNull String userID, @NotNull String bankID) {
                 WritableMap params = Arguments.createMap();
@@ -705,78 +735,56 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             public void onConnectionFailure(@NotNull DapiError error, @NotNull String bankID) {
                 WritableMap params = Arguments.createMap();
                 params.putString("bankID", bankID);
-                try {
-                    params.putMap("error", JsonConvert.jsonToReact(convertToJSONObject(error)));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                params.putString("error", error.getMsg());
                 sendEvent(getReactApplicationContext(), "EventConnectFailure", params);
-
-            }
-
-            @Override
-            public void onProceed(@NotNull String userID, @NotNull String bankID) {
-                String fullFunction = String.format(beneficiaryInfo + "(`%s`)", bankID);
-                ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                executor.execute(() -> getCurrentActivity().runOnUiThread(() -> {
-                    WebView webView = new WebView(getReactApplicationContext());
-                    webView.getSettings().setJavaScriptEnabled(true);
-
-                    webView.evaluateJavascript(fullFunction, stringBeneficiaryInfo::set);
-                }));
-
-                executor.shutdown();
-            }
-
-            @Nullable
-            @Override
-            public DapiBeneficiaryInfo setBeneficiaryInfoOnConnect(@NotNull String bankID) {
-                Gson gson = new Gson();
-                Map<String, Object> beneficiaryInfoMap =
-                        gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
-                return createDapiBeneficiaryInfo(beneficiaryInfoMap);
             }
         });
 
     }
 
     private void addAutoFlowListener(String beneficiaryInfo, DapiClient client) {
-        AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
+
         client.getAutoFlow().setOnTransferListener(new OnDapiTransferListener() {
             @Override
-            public void preAutoFlowTransfer(double amount, @NotNull AccountsItem accountsItem) {
+            public void preAutoFlowTransfer(double v, @NotNull AccountsItem accountsItem) {
 
             }
 
             @Override
-            public void onAutoFlowFailure(@NotNull DapiError dapiError, @NotNull AccountsItem accountsItem, @org.jetbrains.annotations.Nullable String s) {
-
+            public void onAutoFlowSuccessful(double amount, @NotNull AccountsItem accountsItem, @org.jetbrains.annotations.Nullable String recipientAccountID, @NotNull String jobID) {
+                WritableMap params = Arguments.createMap();
+                params.putDouble("amount", amount);
+                params.putString("senderAccountID", accountsItem.getId());
+                params.putString("receiverID", recipientAccountID);
+                sendEvent(getReactApplicationContext(), "EventAutoFlowSuccessful", params);
             }
 
             @Override
-            public void onAutoFlowSuccessful(double v, @NotNull AccountsItem accountsItem, @org.jetbrains.annotations.Nullable String s, @NotNull String s1) {
-
+            public void onAutoFlowFailure(@NotNull DapiError dapiError, @NotNull AccountsItem accountsItem, @org.jetbrains.annotations.Nullable String recipientAccountID) {
+                WritableMap params = Arguments.createMap();
+                params.putString("error", dapiError.getMsg());
+                params.putString("senderID", accountsItem.getId());
+                params.putString("receiverID", recipientAccountID);
+                sendEvent(getReactApplicationContext(), "EventAutoFlowFailure", params);
             }
 
-
-            @NotNull
             @Override
-            public DapiBeneficiaryInfo setBeneficiaryInfoOnAutoFlow(@NotNull String bankID) {
+            public void setBeneficiaryInfoOnAutoFlow(@NotNull String bankID, @NotNull Function1<? super DapiBeneficiaryInfo, Unit> infoCallback) {
                 String fullFunction = String.format(beneficiaryInfo + "(`%s`)", bankID);
                 ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                 executor.execute(() -> getCurrentActivity().runOnUiThread(() -> {
                     WebView webView = new WebView(getReactApplicationContext());
                     webView.getSettings().setJavaScriptEnabled(true);
-
+                    AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
                     webView.evaluateJavascript(fullFunction, stringBeneficiaryInfo::set);
+
+                    Gson gson = new Gson();
+                    Map<String, Object> beneficiaryInfoMap = gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
+                    DapiBeneficiaryInfo beneficiaryInfo = createDapiBeneficiaryInfo(beneficiaryInfoMap);
+                    infoCallback.invoke(beneficiaryInfo);
                 }));
 
                 executor.shutdown();
-
-                Gson gson = new Gson();
-                Map<String, Object> beneficiaryInfoMap =
-                        gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
-                return createDapiBeneficiaryInfo(beneficiaryInfoMap);
             }
         });
     }
