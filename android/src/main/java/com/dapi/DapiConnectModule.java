@@ -465,7 +465,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     private DapiConfigurations createDapiConfigurations(ReadableMap configurations) {
         String appKey = null;
         String clientUserID = null;
-        String userID = null;
         String colorScheme = null;
         String environment = null;
         boolean isExperimental = false;
@@ -487,12 +486,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             Log.e("DapiError", "Invalid clientUserID argument");
         } else {
             clientUserID = (String) configurations.getString("clientUserID");
-        }
-
-        if (!configurations.hasKey("userID")) {
-            userID = null;
-        } else {
-            userID = (String) configurations.getString("userID");
         }
 
         if (!configurations.hasKey("colorScheme")) {
@@ -688,7 +681,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 dapiEnvironment,
                 finalCountries,
                 clientUserID,
-                userID,
                 isExperimental,
                 theme,
                 extraHeadersMapOfStrings,
@@ -752,32 +744,24 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         AtomicReference<String> stringBeneficiaryInfo = new AtomicReference<>();
         client.getAutoFlow().setOnTransferListener(new OnDapiTransferListener() {
             @Override
-            public void onAutoFlowSuccessful(double amount, @Nullable String senderAccountID, @Nullable String recipientAccountID, @NotNull String jobID) {
-                WritableMap params = Arguments.createMap();
-                params.putDouble("amount", amount);
-                params.putString("senderID", senderAccountID);
-                params.putString("receiverID", recipientAccountID);
-                params.putString("jobID", jobID);
-                sendEvent(getReactApplicationContext(), "EventAutoFlowSuccessful", params);
+            public void preAutoFlowTransfer(double amount, @NotNull AccountsItem accountsItem) {
 
             }
 
             @Override
-            public void onAutoFlowFailure(@NotNull DapiError error, @Nullable String senderAccountID, @Nullable String recipientAccountID) {
-                WritableMap params = Arguments.createMap();
-                try {
-                    params.putMap("error", JsonConvert.jsonToReact(convertToJSONObject(error)));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                params.putString("senderID", senderAccountID);
-                params.putString("receiverID", recipientAccountID);
-                sendEvent(getReactApplicationContext(), "EventAutoFlowFailure", params);
+            public void onAutoFlowFailure(@NotNull DapiError dapiError, @NotNull AccountsItem accountsItem, @org.jetbrains.annotations.Nullable String s) {
 
             }
 
             @Override
-            public void onPaymentStarted(@NotNull String bankID) {
+            public void onAutoFlowSuccessful(double v, @NotNull AccountsItem accountsItem, @org.jetbrains.annotations.Nullable String s, @NotNull String s1) {
+
+            }
+
+
+            @NotNull
+            @Override
+            public DapiBeneficiaryInfo setBeneficiaryInfoOnAutoFlow(@NotNull String bankID) {
                 String fullFunction = String.format(beneficiaryInfo + "(`%s`)", bankID);
                 ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
                 executor.execute(() -> getCurrentActivity().runOnUiThread(() -> {
@@ -788,11 +772,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 }));
 
                 executor.shutdown();
-            }
 
-            @NotNull
-            @Override
-            public DapiBeneficiaryInfo setBeneficiaryInfoOnAutoFlow(@NotNull String bankID) {
                 Gson gson = new Gson();
                 Map<String, Object> beneficiaryInfoMap =
                         gson.fromJson(stringBeneficiaryInfo.get(), Map.class);
