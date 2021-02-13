@@ -8,13 +8,6 @@
  */
 
 export interface IDapiConfigurations {
-  appKey: string;
-  baseURL: string;
-  countries: string[];
-  clientUserID: string;
-  environment: 'sandbox' | 'production';
-  colorScheme?: 'general' | 'bw' | 'neon';
-  isExperimental?: boolean;
   endpoints?: Map<DapiEndpoint, string>;
   endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]>;
   endPointExtraHeaderFields?: Map<DapiEndpoint, Map<string, string>>;
@@ -26,12 +19,8 @@ export enum DapiEndpoint {
   getIdentity,
   getAccounts,
   getAccountMetadata,
-  getBalance,
   getTransactions,
-  getBeneficiaries,
-  createBeneficiary,
   createTransfer,
-  resumeJob,
   delinkUser,
 }
 
@@ -75,6 +64,7 @@ interface IPair {
 }
 
 export interface IAccount {
+  balance : IBalance,
   iban: string | null;
   number: string | null;
   currency: IPair;

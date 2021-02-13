@@ -220,6 +220,7 @@ async function getBeneficiaries() {
 }
 
 async function createBeneficiary() {
+  
   const beneficiaryRequestData = {
     address: {
       line1: 'line1',
