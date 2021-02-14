@@ -14,11 +14,15 @@ import {
   ITransaction,
   IAccountsMetadata,
   IBeneficiary,
-  IDapiConnection
+  IDapiConnection,
 } from './types';
 
 export interface DapiConnectNativeModule {
-  start(appKey: string, clientUserID: string, configurations: IDapiConfigurations): Promise<void>;
+  start(
+    appKey: string,
+    clientUserID: string,
+    configurations: IDapiConfigurations,
+  ): Promise<void>;
   presentConnect(): void;
   setClientUserID(clientUserID: string): void;
   clientUserID(): Promise<string>;
@@ -27,8 +31,19 @@ export interface DapiConnectNativeModule {
 
   getIdentity(userID: string): Promise<IIdentity>;
   getAccounts(userID: string): Promise<IAccount[]>;
-  getTransactions(userID: string, accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): Promise<ITransaction[]>;
+  getTransactions(
+    userID: string,
+    accountID: string,
+    startDateMilliseconds: number,
+    endDateMilliseconds: number,
+  ): Promise<ITransaction[]>;
   delete(userID: string): Promise<any>;
   getAccountsMetadata(userID: string): Promise<IAccountsMetadata>;
-  createTransfer(userID: string, accountID: string, toBeneficiary: IBeneficiary, amount: number, remark: string): Promise<IAccount>
+  createTransfer(
+    userID: string,
+    accountID: string,
+    toBeneficiary: IBeneficiary,
+    amount: number,
+    remark: string,
+  ): Promise<IAccount>;
 }

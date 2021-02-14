@@ -53,7 +53,7 @@ interface IPair {
 }
 
 export interface IAccount {
-  balance: number,
+  balance: number;
   iban: string | null;
   number: string | null;
   currency: IPair;
@@ -163,10 +163,19 @@ export interface IDapiConnection {
 
   getIdentity(): Promise<IIdentity>;
   getAccounts(): Promise<IAccount[]>;
-  getTransactions(account: IAccount, startDate: Date, endDate: Date): Promise<ITransaction[]>;
+  getTransactions(
+    account: IAccount,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ITransaction[]>;
   getAccountsMetadata(): Promise<IAccountsMetadata>;
   delete(): Promise<void>;
-  createTransfer(fromAccount: IAccount, toBeneficiary: IBeneficiary, amount: number, remark: string): Promise<IAccount>;
+  createTransfer(
+    fromAccount: IAccount,
+    toBeneficiary: IBeneficiary,
+    amount: number,
+    remark: string,
+  ): Promise<IAccount>;
 }
 
 export type IAddress = IAddressGeneral;

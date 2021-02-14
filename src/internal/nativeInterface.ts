@@ -7,8 +7,8 @@
  * @format
  */
 
-import { NativeModules } from 'react-native';
-import { DapiConnectNativeModule } from './privateTypes';
+import {NativeModules} from 'react-native';
+import {DapiConnectNativeModule} from './privateTypes';
 
 const DapiConnectManager: DapiConnectNativeModule | undefined =
   NativeModules.DapiConnectManager;
