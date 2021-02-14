@@ -2,10 +2,10 @@ PODS:
   - boost-for-react-native (1.63.0)
   - CocoaAsyncSocket (7.6.5)
   - CocoaLibEvent (1.0.0)
-  - connect-react-native (1.0.1):
-    - DapiConnect (= 1.0.7)
+  - connect-react-native (1.0.2):
+    - DapiSDK (= 2.0.0)
     - React
-  - DapiConnect (1.0.7)
+  - DapiSDK (2.0.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.63.2)
   - FBReactNativeSpec (0.63.2):
@@ -359,7 +359,7 @@ SPEC REPOS:
     - boost-for-react-native
     - CocoaAsyncSocket
     - CocoaLibEvent
-    - DapiConnect
+    - DapiSDK
     - Flipper
     - Flipper-DoubleConversion
     - Flipper-Folly
@@ -430,8 +430,8 @@ SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
-  connect-react-native: c3d5e1ede8b482aee4e9f46ba0aa94fd9fc239f8
-  DapiConnect: 089225a344276254874d92e72d2963f939233ce4
+  connect-react-native: 882b48f64e50011d9c1fb807d63c19fa8e36a1e0
+  DapiSDK: 96317fe84f9e039d38be3cc29947a52aef49fd65
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   FBLazyVector: 3ef4a7f62e7db01092f9d517d2ebc0d0677c4a37
   FBReactNativeSpec: dc7fa9088f0f2a998503a352b0554d69a4391c5a
@@ -470,4 +470,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 08011a109c2c403964b063e3d5ca9bf870d106ed
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1
