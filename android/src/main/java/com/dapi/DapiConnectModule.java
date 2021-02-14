@@ -33,7 +33,11 @@ import org.json.JSONObject;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.annotation.Nonnull;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 @ReactModule(name = DapiConnectModule.NAME)
 public class DapiConnectModule extends ReactContextBaseJavaModule {
@@ -70,6 +74,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void presentConnect() {
         Dapi.presentConnect();
+        addConnectListener();
     }
 
     @ReactMethod
@@ -96,7 +101,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                         accountMap.putString("type", account.getType());
                         accountMap.putString("name", account.getName());
                         accountMap.putString("id", account.getId());
-                        accountMap.putMap("balance", JsonConvert.jsonToReact(convertToJSONObject(account.getBalance())));
+                        accountMap.putDouble("balance", account.getBalance().getAmount());
                         resultAccountMapArray.pushMap(accountMap);
                     }
 
@@ -143,9 +148,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getIdentity(Promise promise) {
-        Dapi.getConnections(connections -> {
-            connections.get(0).getIdentity(identity -> {
+    public void getIdentity(String userID, Promise promise) {
+        getOperatingConnection(userID, connection -> {
+            connection.getIdentity(identity -> {
                 resolve(identity, promise);
                 return null;
             }, error -> {
@@ -160,9 +165,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAccounts(Promise promise) {
-        Dapi.getConnections(connections -> {
-            connections.get(0).getAccounts(identity -> {
+    public void getAccounts(String userID, Promise promise) {
+
+        getOperatingConnection(userID, connection -> {
+            connection.getAccounts(identity -> {
                 resolve(identity, promise);
                 return null;
             }, error -> {
@@ -177,10 +183,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getTransactions(String accountID,
-                                Dynamic startDate,
-                                Dynamic endDate,
-                                Promise promise) {
+    public void getTransactions(
+            String userID,
+            String accountID,
+            Dynamic startDate,
+            Dynamic endDate,
+            Promise promise) {
 
         long startDateAsLong = (long) startDate.asDouble();
         long endDateAsLong = (long) endDate.asDouble();
@@ -188,8 +196,8 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Date startDateObject = new Date(startDateAsLong);
         Date endDateObject = new Date(endDateAsLong);
 
-        Dapi.getConnections(connections -> {
-            connections.get(0).getTransactions(accountID, startDateObject, endDateObject, transactions -> {
+        getOperatingConnection(userID, connection -> {
+            connection.getTransactions(accountID, startDateObject, endDateObject, transactions -> {
                 resolve(transactions, promise);
                 return null;
             }, error -> {
@@ -204,9 +212,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getAccountsMetadata(Promise promise) {
-        Dapi.getConnections(connections -> {
-            connections.get(0).getAccountsMetaData(accountsMetaData -> {
+    public void getAccountsMetadata(String userID, Promise promise) {
+        getOperatingConnection(userID, connection -> {
+            connection.getAccountsMetaData(accountsMetaData -> {
                 resolve(accountsMetaData, promise);
                 return null;
             }, error -> {
@@ -221,10 +229,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void delinkUser(ReadableMap configurationsMap,
-                           Promise promise) {
-        Dapi.getConnections(connections -> {
-            connections.get(0).delink(delink -> {
+    public void delinkUser(
+            String userID,
+            Promise promise
+    ) {
+        getOperatingConnection(userID, connection -> {
+            connection.delink(delink -> {
                 resolve(delink, promise);
                 return null;
             }, error -> {
@@ -393,6 +403,21 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         );
     }
 
+    private void getOperatingConnection(String userID, Function1<? super DapiConnection, Unit> onSuccess, Function1<? super DapiError, Unit> onFailure) {
+        Dapi.getConnections(connections -> {
+            for (DapiConnection connection : connections) {
+                if (connection.getUserID().equals(userID)) {
+                    onSuccess.invoke(connection);
+                    break;
+                }
+            }
+            return null;
+        }, error -> {
+            onFailure.invoke(error);
+            return null;
+        });
+    }
+
     private void addConnectListener() {
         Dapi.INSTANCE.setConnectListener(new OnDapiConnectListener() {
             @Override
@@ -413,7 +438,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     }
 
-    private void addAutoFlowListener() {
+    private void addTransferListener() {
         Dapi.INSTANCE.setTransferListener((amount, account) -> {
 
         });
