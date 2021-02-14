@@ -8,7 +8,6 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
@@ -19,61 +18,23 @@ import {
   NativeModules,
 } from 'react-native';
 
-import DapiClient, {
-  DapiConnectNativeModule,
-  IDapiConfigurations,
-} from 'connect-react-native';
+import Dapi from 'connect-react-native';
 
 import {
   Header,
-  LearnMoreLinks,
   Colors,
-  DebugInstructions,
-  ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
 const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
-let globalClient;
-let firstAccountID;
-
-function intiClient() {
-  const configs = {
-    appKey: '8900eff4837592670c08558c7a6467337b5155145856d693f1e8275455889f7f',
-    baseURL: 'http://10.0.2.2:4561',
-    countries: ['AE'],
-    clientUserID: 'yourUserID',
-    environment: 'sandbox',
-  };
-  const client = new DapiClient(configs);
-  globalClient = client;
+function startDapi() {
+  await Dapi.instance.start("11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874", "JohnDoe", null);
+  Dapi.instance.start("11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874", "JohnDoe", null, )
 }
 
 function presentConnect() {
-  globalClient.connect.present(bankID => {
-    const lineAddress = {
-      line1: '1',
-      line2: '2',
-      line3: '3',
-    };
-
-    const info = {
-      linesAddress: lineAddress,
-      accountNumber: '1234',
-      name: 'Ennabah',
-      bankName: 'ADCB',
-      swiftCode: 'ADCBXXX',
-      iban: 'ACB000001234',
-      phoneNumber: '0581243',
-      country: 'United Arab Emirates',
-      branchAddress: 'FUTI',
-      branchName: 'ITUF',
-    };
-
-    return info;
-  });
-
+  Dapi.instance.presentConnect();
   dapiConnectManagerEmitter.addListener(
     'EventConnectSuccessful',
     connectResult => console.log(connectResult),
@@ -83,218 +44,16 @@ function presentConnect() {
   );
 }
 
-function getConnections() {
-  globalClient.connect.getConnections((error, connections) => {
-    if (error) {
-      console.error(error);
-    } else {
-      console.log(connections);
-      globalClient.setUserID(connections[0].userID);
-      // globalClient.setClientUserID(connections[0].userID);
-      // globalClient.userID((error, userID) => {
-      //   if (error) {
-      //     console.error(error);
-      //   } else {
-      //     console.log(userID);
-      //   }
-      // });
-
-      // globalClient.clientUserID((error, clientUserID) => {
-      //   if (error) {
-      //     console.error(error);
-      //   } else {
-      //     console.log(clientUserID);
-      //   }
-      // });
-    }
-  });
-}
-
-function presentAutoFlow() {
-  globalClient.autoFlow.present(bankID => {
-    const lineAddress = {
-      line1: '1',
-      line2: '2',
-      line3: '3',
-    };
-
-    const info = {
-      linesAddress: lineAddress,
-      accountNumber: '1234',
-      name: 'Ennabah',
-      bankName: 'ADCB',
-      swiftCode: 'ADCBXXX',
-      iban: 'ACB000001234',
-      phoneNumber: '0581243',
-      country: 'United Arab Emirates',
-      branchAddress: 'FUTI',
-      branchName: 'ITUF',
-    };
-
-    return info;
-  });
-
-  dapiConnectManagerEmitter.addListener(
-    'EventConnectSuccessful',
-    connectResult => console.log(connectResult),
-  );
-  dapiConnectManagerEmitter.addListener('EventConnectFailure', connectResult =>
-    console.log(connectResult),
-  );
-  dapiConnectManagerEmitter.addListener(
-    'EventAutoFlowSuccessful',
-    connectResult => console.log(connectResult),
-  );
-  dapiConnectManagerEmitter.addListener('EventAutoFlowFailure', connectResult =>
-    console.log(connectResult),
-  );
+async function getConnections() {
+  var connections = await Dapi.instance.getConnections();
+  console.log(connections);
 }
 
 async function getIdentity() {
-  try {
-    const id = await globalClient.data.getIdentity();
-    console.log(id);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function getAccounts() {
-  try {
-    const response = await globalClient.data.getAccounts();
-    console.log(response);
-    firstAccountID = response.accounts[0].id;
-    console.log(firstAccountID);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function getBalance() {
-  try {
-    const balance = await globalClient.data.getBalance(firstAccountID);
-    console.log(balance);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function getTransactions() {
-  try {
-    const transactions = await globalClient.data.getTransactions(
-      firstAccountID,
-      new Date(2020, 7, 1),
-      new Date(),
-    );
-    console.log(transactions);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function delinkUser() {
-  try {
-    const transactions = await globalClient.auth.delinkUser();
-    console.log(transactions);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function getAccountsMetadata() {
-  try {
-    const metadata = await globalClient.metadata.getAccountsMetadata();
-    console.log(metadata);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function getBeneficiaries() {
-  try {
-    const beneficiaries = await globalClient.payment.getBeneficiaries();
-    console.log(beneficiaries);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function createBeneficiary() {
-  
-  const beneficiaryRequestData = {
-    address: {
-      line1: 'line1',
-      line2: 'line2',
-      line3: 'line3',
-    },
-    country: 'United Arab Emirates',
-    branchAddress: 'United Arab Emirates',
-    branchName: 'Dubai Branch',
-    phoneNumber: '0123456789',
-    iban: 'AE654400000122845198002',
-    swiftCode: 'DBXXXX',
-    bankName: 'Dubai Bank',
-    name: 'John Doe',
-    accountNumber: '122845198002',
-  };
-
-  try {
-    const beneficiary = await globalClient.payment.createBeneficiary(
-      beneficiaryRequestData,
-    );
-    console.log(beneficiary);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-//Send money to an existing beneficiary
-//You can get a receiverID from getBeneficiaries call
-async function createTransferToReceiverID() {
-  try {
-    const transfer = await globalClient.payment.createTransferToReceiverID(
-      'receiverID',
-      firstAccountID,
-      5,
-      'remark',
-    );
-    console.log(transfer);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-//Send money from Liv as well as from an HSBC account to another local account
-//https://docs.dapi.co/docs/exceptions
-async function createTransferToIban() {
-  try {
-    const transfer = await globalClient.payment.createTransferToIban(
-      'iban',
-      'name',
-      firstAccountID,
-      5,
-      'remark',
-    );
-    console.log(transfer);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-//Send money from one HSBC account to another HSBC account
-//https://docs.dapi.co/docs/exceptions
-async function createTransferToAccountNumber() {
-  try {
-    const transfer = await globalClient.payment.createTransferToAccountNumber(
-      'accountNumber',
-      'name',
-      firstAccountID,
-      5,
-      'remark',
-    );
-    console.log(transfer);
-  } catch (e) {
-    console.log(e);
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var identity = await connections[0].getIdentity();
+    console.log(identity);
   }
 }
 
@@ -313,11 +72,10 @@ const App: () => React$Node = () => {
         )}
         <View style={styles.body}>
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Start Client</Text>
+            <Text style={styles.sectionTitle}>Start Dapi</Text>
             <Button
-              title="Init Client"
-              onPress={() => intiClient()}
-              disabled={this.globalClient === null}
+              title="Start Dapi"
+              onPress={() => startDapi()}
             />
           </View>
           <View style={styles.sectionContainer}>
@@ -325,60 +83,36 @@ const App: () => React$Node = () => {
             <Button title="Present Connect" onPress={() => presentConnect()} />
             <Button title="Get Connections" onPress={() => getConnections()} />
           </View>
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>AutoFlow</Text>
-            <Button title="Present" onPress={() => presentAutoFlow()} />
-          </View>
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Auth</Text>
-            <Button title="Delink User" onPress={() => delinkUser()} />
+            {/* <Button title="Delink User" onPress={() => delinkUser()} /> */}
           </View>
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
-            <Button title="Accounts" onPress={() => getAccounts()} />
-            <Button
-              title="Balance (first account)"
-              onPress={() => getBalance()}
-            />
-            <Button
+            {/* <Button title="Accounts" onPress={() => getAccounts()} /> */}
+            {/* <Button
               title="Transactions (first account)"
               onPress={() => getTransactions()}
-            />
+            /> */}
           </View>
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Metadata</Text>
-            <Button
+            {/* <Button
               title="Accounts Metadata"
               onPress={() => getAccountsMetadata()}
-            />
+            /> */}
           </View>
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Payment</Text>
-            <Button
-              title="Get Beneficiaries"
-              onPress={() => getBeneficiaries()}
-            />
-            <Button
-              title="Create Beneficiary"
-              onPress={() => createBeneficiary()}
-            />
-            <Button
-              title="Create Transfer To IBAN"
-              onPress={() => createTransferToIban()}
-            />
-            <Button
-              title="Create Transfer To Account Number"
-              onPress={() => createTransferToAccountNumber()}
-            />
-            <Button
-              title="Create Transfer To Receiver ID"
+            {/* <Button
+              title="Create Transfer"
               onPress={() => createTransferToReceiverID()}
-            />
+            /> */}
           </View>
         </View>
       </ScrollView>

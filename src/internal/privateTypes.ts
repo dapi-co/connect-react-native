@@ -11,30 +11,24 @@ import {
   IDapiConfigurations,
   IIdentity,
   IAccount,
-  IBalance,
   ITransaction,
   IAccountsMetadata,
   IBeneficiary,
-  ICreateBeneficiaryRequestData,
+  IDapiConnection
 } from './types';
 
 export interface DapiConnectNativeModule {
-  start(appKey : string, clientUserID : string, configurations : IDapiConfigurations, callback : any) : void;
-  presentConnect(): void; // caller needs to convert the callback function to string, so we can pass it to native components
+  start(appKey: string, clientUserID: string, configurations: IDapiConfigurations): Promise<void>;
+  presentConnect(): void;
   setClientUserID(clientUserID: string): void;
-  clientUserID(callback: any): void;
+  clientUserID(): Promise<string>;
   dismissConnect(): void;
-  getConnections(callback: any): void;
-  
-  getIdentity(userID : string): Promise<IIdentity>;
-  getAccounts(userID : string): Promise<IAccount[]>;
-  getTransactions(
-    userID : string,
-    accountID: string,
-    startDateMilliseconds: number,
-    endDateMilliseconds: number
-  ): Promise<ITransaction[]>;
-  delete(userID : string): Promise<any>;
-  getAccountsMetadata(userID : string): Promise<IAccountsMetadata>;
-  createTransfer(userID : string, fromAccount : IAccount, toBeneficiary : IBeneficiary, amount : number, remark : string): Promise<any>
+  getConnections(): Promise<IDapiConnection[]>;
+
+  getIdentity(userID: string): Promise<IIdentity>;
+  getAccounts(userID: string): Promise<IAccount[]>;
+  getTransactions(userID: string, accountID: string, startDateMilliseconds: number, endDateMilliseconds: number): Promise<ITransaction[]>;
+  delete(userID: string): Promise<any>;
+  getAccountsMetadata(userID: string): Promise<IAccountsMetadata>;
+  createTransfer(userID: string, accountID: string, toBeneficiary: IBeneficiary, amount: number, remark: string): Promise<IAccount>
 }

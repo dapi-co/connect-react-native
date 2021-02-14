@@ -15,9 +15,10 @@ import {
   ITransaction,
   IAccountsMetadata,
   IBeneficiary,
+  IDapiConnection,
 } from './internal/types';
 
-class DapiConnection {
+export class DapiConnection implements IDapiConnection {
   private _clientUserID: string;
   private _userID: string;
   private _bankID: string;
@@ -79,43 +80,32 @@ class DapiConnection {
     return NativeInterface.getAccounts(this.userID);
   }
 
-  getTransactions(
-    accountID: string,
-    startDate: Date,
-    endDate: Date,
-  ): Promise<ITransaction[]> {
-    return NativeInterface.getTransactions(
-      this.userID,
-      accountID,
-      startDate.getTime(),
-      endDate.getTime()
-    );
+  getTransactions(account: IAccount, startDate: Date, endDate: Date): Promise<ITransaction[]> {
+    return NativeInterface.getTransactions(this.userID, account.id, startDate.getTime(), endDate.getTime());
   }
 
   getAccountsMetadata(): Promise<IAccountsMetadata> {
     return NativeInterface.getAccountsMetadata(this.userID);
   }
 
-  delete(): Promise<any> {
+  delete(): Promise<void> {
     return NativeInterface.delete(this.userID);
   }
 
-  createTransfer(fromAccount : IAccount, toBeneficiary : IBeneficiary, amount : number, remark : string): Promise<any> {
-    return NativeInterface.createTransfer(this.userID, fromAccount, toBeneficiary, amount, remark)
+  createTransfer(fromAccount: IAccount, toBeneficiary: IBeneficiary, amount: number, remark: string): Promise<IAccount> {
+    return NativeInterface.createTransfer(this.userID, fromAccount.id, toBeneficiary, amount, remark);
   }
-
 }
 
-
-class Dapi {
+export default class Dapi {
   private static _instance = new Dapi()
-  public static get instance() : Dapi{
+  public static get instance(): Dapi {
     return this._instance
   }
-  private constructor(){}
+  private constructor() { }
 
-  start(appKey: string, clientUserID: string, configurations : IDapiConfigurations, callback : any): void {
-    NativeInterface.start(appKey, clientUserID, configurations, callback);
+  start(appKey: string, clientUserID: string, configurations: IDapiConfigurations): Promise<void> {
+    return NativeInterface.start(appKey, clientUserID, configurations);
   }
 
   presentConnect(): void {
@@ -126,16 +116,16 @@ class Dapi {
     NativeInterface.setClientUserID(clientUserID);
   }
 
-  clientUserID(callback: any): void {
-    NativeInterface.clientUserID(callback);
+  clientUserID(): Promise<string> {
+    return NativeInterface.clientUserID();
   }
 
   dismissConnect(): void {
     NativeInterface.dismissConnect()
   }
 
-  getConnections(callback: any): void {
-    NativeInterface.getConnections(callback)
+  getConnections(): Promise<IDapiConnection[]> {
+    return NativeInterface.getConnections();
   }
 
 }

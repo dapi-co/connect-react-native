@@ -34,7 +34,7 @@ interface ILineAddress {
   line3: string;
 }
 
-export interface IBeneficiaryInfo {
+export interface IBeneficiary {
   linesAddress: ILineAddress;
   accountNumber: string;
   name: string;
@@ -47,53 +47,30 @@ export interface IBeneficiaryInfo {
   branchName: string;
 }
 
-enum AccountType {
-  CURRENT = 'current',
-  CHECKING = 'checking',
-  SAVINGS = 'savings',
-  LOAN = 'loan',
-  CREDIT = 'credit',
-  DEPOSIT = 'deposit',
-  OTHER = 'other',
-}
-
 interface IPair {
   code: string;
   name: string;
 }
 
 export interface IAccount {
-  balance : number,
+  balance: number,
   iban: string | null;
   number: string | null;
   currency: IPair;
-  type: AccountType;
+  type: string;
   id: string;
   isFavourite: boolean | null;
   name: string;
 }
 
-enum IDType {
-  PASSPORT = 'passport',
-  NATIONALID = 'national_id',
-  VISANUMBER = 'visa_number',
-}
-
 interface IIdentification {
-  type: IDType;
+  type: string;
   value: string;
 }
 
-enum PhoneNumberType {
-  MOBILE = 'mobile',
-  HOME = 'home',
-  OFFICE = 'office',
-  FAX = 'fax',
-}
-
 interface IPhoneNumber {
-  type: PhoneNumberType;
-  value: string; //Change to Mobile Value string ie IPhoneNumberValue
+  type: string;
+  value: string;
 }
 
 interface IAddressGeneral {
@@ -172,39 +149,24 @@ export interface IAccountsMetadata {
   country: IPair;
   isCreateBeneficiaryEndpointRequired: boolean;
   willNewlyAddedBeneficiaryExistBeforeCoolDownPeriod: boolean;
-  routingNumber?: string; // for US
 }
 
-export enum BeneficiaryStatus {
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  CANCELLED = 'cancelled',
-  PENDING = 'waiting_for_confirmation',
-  MODIFIED = 'modified_for_pending_approval',
-}
+export interface IDapiConnection {
+  readonly clientUserID: string;
+  readonly userID: string;
+  readonly bankID: string;
+  readonly swiftCode: string;
+  readonly country: string;
+  readonly bankShortName: string;
+  readonly bankFullName: string;
+  readonly accounts: IAccount[];
 
-export interface IBeneficiary {
-  name: string;
-  iban: string;
-  accountNumber: string;
-  status: BeneficiaryStatus;
-  type: BeneficiaryType;
-  id: string;
-}
-
-export interface ICreateBeneficiaryRequestData {
-  address: ILineAddress;
-  country: string;
-  branchAddress: string;
-  branchName: string;
-  phoneNumber: string;
-  iban: string;
-  swiftCode: string;
-  bankName: string;
-  name: string;
-  accountNumber: string;
+  getIdentity(): Promise<IIdentity>;
+  getAccounts(): Promise<IAccount[]>;
+  getTransactions(account: IAccount, startDate: Date, endDate: Date): Promise<ITransaction[]>;
+  getAccountsMetadata(): Promise<IAccountsMetadata>;
+  delete(): Promise<void>;
+  createTransfer(fromAccount: IAccount, toBeneficiary: IBeneficiary, amount: number, remark: string): Promise<IAccount>;
 }
 
 export type IAddress = IAddressGeneral;
-
-export type BeneficiaryInfoCallback = (bankID: string) => IBeneficiaryInfo;
