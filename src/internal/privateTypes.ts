@@ -19,7 +19,7 @@ import {
 } from './types';
 
 export interface DapiConnectNativeModule {
-  start(appKey : string, clientUserID : string, configurations : IDapiConfigurations) : void;
+  start(appKey : string, clientUserID : string, configurations : IDapiConfigurations, callback : any) : void;
   presentConnect(): void; // caller needs to convert the callback function to string, so we can pass it to native components
   setClientUserID(clientUserID: string): void;
   clientUserID(callback: any): void;
@@ -34,7 +34,7 @@ export interface DapiConnectNativeModule {
     startDateMilliseconds: number,
     endDateMilliseconds: number
   ): Promise<ITransaction[]>;
-  delinkUser(userID : string): Promise<any>;
+  delete(userID : string): Promise<any>;
   getAccountsMetadata(userID : string): Promise<IAccountsMetadata>;
- 
+  createTransfer(userID : string, fromAccount : IAccount, toBeneficiary : IBeneficiary, amount : number, remark : string): Promise<any>
 }

@@ -15,13 +15,12 @@ export interface IDapiConfigurations {
 }
 
 export enum DapiEndpoint {
-  exchangeToken,
   getIdentity,
   getAccounts,
   getAccountMetadata,
   getTransactions,
   createTransfer,
-  delinkUser,
+  delete,
 }
 
 interface IDapiQueryParameter {
@@ -64,7 +63,7 @@ interface IPair {
 }
 
 export interface IAccount {
-  balance : IBalance,
+  balance : number,
   iban: string | null;
   number: string | null;
   currency: IPair;

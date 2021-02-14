@@ -10,14 +10,11 @@
 import NativeInterface from './internal/nativeInterface';
 import {
   IDapiConfigurations,
-  BeneficiaryInfoCallback,
   IIdentity,
   IAccount,
-  IBalance,
   ITransaction,
   IAccountsMetadata,
   IBeneficiary,
-  ICreateBeneficiaryRequestData,
 } from './internal/types';
 
 class DapiConnection {
@@ -33,50 +30,26 @@ class DapiConnection {
   public get clientUserID(): string {
     return this._clientUserID;
   }
-  private setClientUserID(value: string) {
-    this._clientUserID = value;
-  }
   public get userID(): string {
     return this._userID;
-  }
-  private setUserID(value: string) {
-    this._userID = value;
   }
   public get bankID(): string {
     return this._bankID;
   }
-  private setBankID(value: string) {
-    this._bankID = value;
-  }
   public get swiftCode(): string {
     return this._swiftCode;
-  }
-  private setSwiftCode(value: string) {
-    this._swiftCode = value;
   }
   public get country(): string {
     return this._country;
   }
-  private setCountry(value: string) {
-    this._country = value;
-  }
   public get bankShortName(): string {
     return this._bankShortName;
-  }
-  private setBankShortName(value: string) {
-    this._bankShortName = value;
   }
   public get bankFullName(): string {
     return this._bankFullName;
   }
-  private setBankFullName(value: string) {
-    this._bankFullName = value;
-  }
   public get accounts(): Array<IAccount> {
     return this._accounts;
-  }
-  private setAccounts(value: Array<IAccount>) {
-    this._accounts = value;
   }
   constructor(
     clientUserID: string,
@@ -123,8 +96,12 @@ class DapiConnection {
     return NativeInterface.getAccountsMetadata(this.userID);
   }
 
-  delink(): Promise<any> {
-    return NativeInterface.delinkUser(this.userID);
+  delete(): Promise<any> {
+    return NativeInterface.delete(this.userID);
+  }
+
+  createTransfer(fromAccount : IAccount, toBeneficiary : IBeneficiary, amount : number, remark : string): Promise<any> {
+    return NativeInterface.createTransfer(this.userID, fromAccount, toBeneficiary, amount, remark)
   }
 
 }
@@ -137,8 +114,8 @@ class Dapi {
   }
   private constructor(){}
 
-  start(appKey: string, clientUserID: string, configurations : IDapiConfigurations): void {
-    NativeInterface.start(appKey, clientUserID, configurations);
+  start(appKey: string, clientUserID: string, configurations : IDapiConfigurations, callback : any): void {
+    NativeInterface.start(appKey, clientUserID, configurations, callback);
   }
 
   presentConnect(): void {

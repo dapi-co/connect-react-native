@@ -5,10 +5,12 @@ import androidx.annotation.Nullable;
 import com.dapi.connect.core.base.Dapi;
 import com.dapi.connect.core.callbacks.OnDapiConnectListener;
 import com.dapi.connect.data.endpoint_models.Accounts;
+import com.dapi.connect.data.models.DapiBeneficiary;
 import com.dapi.connect.data.models.DapiConfigurations;
 import com.dapi.connect.data.models.DapiConnection;
 import com.dapi.connect.data.models.DapiEndpoints;
 import com.dapi.connect.data.models.DapiError;
+import com.dapi.connect.data.models.LinesAddress;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -60,7 +62,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 getCurrentActivity().getApplication(),
                 appKey,
                 clientUserID,
-                createDapiConfigurations(configurationMap), () -> {
+                getConfigurations(configurationMap), () -> {
                     sendSuccessCallback(null, callback);
                     return null;
                 }, error -> {
@@ -74,7 +76,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void presentConnect() {
         Dapi.presentConnect();
-        addConnectListener();
+        setConnectListener();
     }
 
     @ReactMethod
@@ -229,7 +231,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void delinkUser(
+    public void delete(
             String userID,
             Promise promise
     ) {
@@ -246,6 +248,36 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             reject(error, promise);
             return null;
         });
+    }
+
+    @ReactMethod
+    public void createTransfer(
+            String userID,
+            String accountID,
+            ReadableMap beneficiaryMap,
+            int amount,
+            String remark,
+            Promise promise
+    ) {
+        getOperatingConnection(userID, connection -> {
+            Accounts.DapiAccount account = getDapiAccount(accountID, connection);
+            DapiBeneficiary beneficiary = getBeneficiary(beneficiaryMap);
+            connection.createTransfer(account, beneficiary, amount, remark, (senderAccount, sentAmount) -> {
+                HashMap<String, Object> successfulTransferMap = new HashMap<>();
+                successfulTransferMap.put("account", convertToJSONObject(senderAccount));
+                successfulTransferMap.put("amount", sentAmount);
+                resolve(successfulTransferMap, promise);
+                return null;
+            }, (failedAccount, error) -> {
+                reject(error, promise);
+                return null;
+            });
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+        setTransferListener();
     }
 
 
@@ -286,7 +318,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 .emit(eventName, params);
     }
 
-    private DapiConfigurations createDapiConfigurations(ReadableMap configurations) {
+    private DapiConfigurations getConfigurations(ReadableMap configurations) {
         Map<String, Object> extraQueryParameters;
         Map<String, Object> extraHeaderFields;
         Map<String, Object> extraBody;
@@ -403,6 +435,51 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         );
     }
 
+    private DapiBeneficiary getBeneficiary(ReadableMap beneficiaryMap) {
+        ReadableMap linesMap =  beneficiaryMap.getMap("address");
+        String line1 = linesMap.getString("line1");
+        String line2 = linesMap.getString("line2");
+        String line3 = linesMap.getString("line3");
+        LinesAddress linesAddress = new LinesAddress(
+                line1,
+                line2,
+                line3
+        );
+        String accountNumber = beneficiaryMap.getString("accountNumber");
+        String name = beneficiaryMap.getString("name");
+        String bankName = beneficiaryMap.getString("bankName");
+        String swiftCode = beneficiaryMap.getString("swiftCode");
+        String iban = beneficiaryMap.getString("iban");
+        String phoneNumber = beneficiaryMap.getString("phoneNumber");
+        String country = beneficiaryMap.getString("country");
+        String branchAddress = beneficiaryMap.getString("branchAddress");
+        String branchName = beneficiaryMap.getString("branchName");
+
+        DapiBeneficiary beneficiary = new DapiBeneficiary(
+                linesAddress,
+                accountNumber,
+                name,
+                bankName,
+                swiftCode,
+                iban,
+                country,
+                branchAddress,
+                branchName,
+                phoneNumber
+        );
+
+        return beneficiary;
+    }
+
+    public Accounts.DapiAccount getDapiAccount(String accountID, DapiConnection connection) {
+        for (Accounts.DapiAccount account : connection.getAccounts()){
+            if (account.getId().equals(accountID)){
+                return account;
+            }
+        }
+        return null;
+    }
+
     private void getOperatingConnection(String userID, Function1<? super DapiConnection, Unit> onSuccess, Function1<? super DapiError, Unit> onFailure) {
         Dapi.getConnections(connections -> {
             for (DapiConnection connection : connections) {
@@ -418,12 +495,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         });
     }
 
-    private void addConnectListener() {
+    private void setConnectListener() {
         Dapi.INSTANCE.setConnectListener(new OnDapiConnectListener() {
             @Override
             public void onConnectionSuccessful(@NotNull DapiConnection connection) {
                 WritableMap params = Arguments.createMap();
-                params.putString("bankID", JsonConvert.jsonToReact(convertToJSONObject(connection)));
+                params.putMap("connection", JsonConvert.jsonToReact(convertToJSONObject(connection)));
                 sendEvent(getReactApplicationContext(), "EventConnectSuccessful", params);
             }
 
@@ -438,9 +515,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     }
 
-    private void addTransferListener() {
+    private void setTransferListener() {
         Dapi.INSTANCE.setTransferListener((amount, account) -> {
-
+            WritableMap params = Arguments.createMap();
+            params.putInt("amount", amount);
+            params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(account)));
+            sendEvent(getReactApplicationContext(), "EventDapiUIWillTransfer", params);
         });
     }
 
