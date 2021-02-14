@@ -15,9 +15,10 @@ import {
   ITransaction,
   IAccountsMetadata,
   IBeneficiary,
+  IDapiConnection,
 } from './internal/types';
 
-class DapiConnection {
+export class DapiConnection implements IDapiConnection {
   private _clientUserID: string;
   private _userID: string;
   private _bankID: string;
@@ -25,7 +26,7 @@ class DapiConnection {
   private _country: string;
   private _bankShortName: string;
   private _bankFullName: string;
-  private _accounts: Array<IAccount>;
+  private _accounts: IAccount[];
 
   public get clientUserID(): string {
     return this._clientUserID;
@@ -48,7 +49,7 @@ class DapiConnection {
   public get bankFullName(): string {
     return this._bankFullName;
   }
-  public get accounts(): Array<IAccount> {
+  public get accounts(): IAccount[] {
     return this._accounts;
   }
   constructor(
@@ -59,7 +60,7 @@ class DapiConnection {
     country: string,
     bankShortName: string,
     bankFullName: string,
-    accounts: Array<IAccount>,
+    accounts: IAccount[],
   ) {
     this._clientUserID = clientUserID;
     this._userID = userID;
@@ -80,15 +81,15 @@ class DapiConnection {
   }
 
   getTransactions(
-    accountID: string,
+    account: IAccount,
     startDate: Date,
     endDate: Date,
   ): Promise<ITransaction[]> {
     return NativeInterface.getTransactions(
       this.userID,
-      accountID,
+      account.id,
       startDate.getTime(),
-      endDate.getTime()
+      endDate.getTime(),
     );
   }
 
@@ -96,48 +97,60 @@ class DapiConnection {
     return NativeInterface.getAccountsMetadata(this.userID);
   }
 
-  delete(): Promise<any> {
+  delete(): Promise<void> {
     return NativeInterface.delete(this.userID);
   }
 
-  createTransfer(fromAccount : IAccount, toBeneficiary : IBeneficiary, amount : number, remark : string): Promise<any> {
-    return NativeInterface.createTransfer(this.userID, fromAccount, toBeneficiary, amount, remark)
+  createTransfer(
+    fromAccount: IAccount,
+    toBeneficiary: IBeneficiary,
+    amount: number,
+    remark: string,
+  ): Promise<IAccount> {
+    return NativeInterface.createTransfer(
+      this.userID,
+      fromAccount.id,
+      toBeneficiary,
+      amount,
+      remark,
+    );
   }
-
 }
 
-
-class Dapi {
-  private static _instance = new Dapi()
-  public static get instance() : Dapi{
-    return this._instance
+export default class Dapi {
+  private static _instance = new Dapi();
+  public static get instance(): Dapi {
+    return this._instance;
   }
-  private constructor(){}
+  private constructor() {}
 
-  start(appKey: string, clientUserID: string, configurations : IDapiConfigurations, callback : any): void {
-    NativeInterface.start(appKey, clientUserID, configurations, callback);
+  start(
+    appKey: string,
+    clientUserID: string,
+    configurations: IDapiConfigurations,
+  ): Promise<void> {
+    return NativeInterface.start(appKey, clientUserID, configurations);
   }
 
   presentConnect(): void {
-    NativeInterface.presentConnect()
+    NativeInterface.presentConnect();
   }
 
   setClientUserID(clientUserID: string): void {
     NativeInterface.setClientUserID(clientUserID);
   }
 
-  clientUserID(callback: any): void {
-    NativeInterface.clientUserID(callback);
+  clientUserID(): Promise<string> {
+    return NativeInterface.clientUserID();
   }
 
   dismissConnect(): void {
-    NativeInterface.dismissConnect()
+    NativeInterface.dismissConnect();
   }
 
-  getConnections(callback: any): void {
-    NativeInterface.getConnections(callback)
+  getConnections(): Promise<IDapiConnection[]> {
+    return NativeInterface.getConnections();
   }
-
 }
 
 export * from './internal/types';

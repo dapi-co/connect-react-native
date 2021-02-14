@@ -1,6 +1,6 @@
 {
-  "name": "connect-react-native",
-  "version": "1.0.2",
+  "name": "dapi-connect-react-native",
+  "version": "2.0.0",
   "description": "Financial APIs to connect users' bank accounts",
   "react-native": "src/index.ts",
   "private": false,
