@@ -59,11 +59,15 @@ RCT_EXPORT_METHOD(start:(NSString *)appKey clientUserID:(NSString *)clientUserID
 }
 
 RCT_EXPORT_METHOD(presentConnect) {
-    [Dapi.sharedInstance presentConnect:self];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [Dapi.sharedInstance presentConnect:self];
+    });
 }
 
 RCT_EXPORT_METHOD(dismissConnect) {
-    [Dapi.sharedInstance dismissConnect];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [Dapi.sharedInstance dismissConnect];
+    });
 }
 
 RCT_EXPORT_METHOD(setClientUserID:(NSString *)clientUserID) {
