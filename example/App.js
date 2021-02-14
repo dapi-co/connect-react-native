@@ -20,17 +20,22 @@ import {
 
 import Dapi from 'connect-react-native';
 
-import {
-  Header,
-  Colors,
-} from 'react-native/Libraries/NewAppScreen';
+import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 
 const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 async function startDapi() {
-  await Dapi.instance.start("11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874", "JohnDoe", null);
-  Dapi.instance.start("11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874", "JohnDoe", null, )
+  await Dapi.instance.start(
+    '11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874',
+    'JohnDoe',
+    null,
+  );
+  Dapi.instance.start(
+    '11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874',
+    'JohnDoe',
+    null,
+  );
 }
 
 function presentConnect() {
@@ -57,6 +62,36 @@ async function getIdentity() {
   }
 }
 
+async function transfer() {
+  var beneficiary = {
+    address: {
+      line1: 'baniyas road',
+      line2: 'baniyas road',
+      line3: 'baniyas road',
+    },
+    accountNumber: '123456789',
+    bankName: 'Emirates NBD Bank PJSC',
+    swiftCode: 'EBILAEAD',
+    iban: 'AE123456789',
+    country: 'UNITED ARAB EMIRATES',
+    branchAddress: 'Baniyas Road Deira PO Box 777 Dubai UAE',
+    branchName: 'Emirates NBD Bank PJSC',
+    phoneNumber: '0123456789',
+    name: 'John Doe',
+  };
+
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var identity = await connections[0].createTransfer(
+      null,
+      beneficiary,
+      null,
+      null,
+    );
+    console.log(identity);
+  }
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -73,10 +108,7 @@ const App: () => React$Node = () => {
         <View style={styles.body}>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Start Dapi</Text>
-            <Button
-              title="Start Dapi"
-              onPress={() => startDapi()}
-            />
+            <Button title="Start Dapi" onPress={() => startDapi()} />
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Connect</Text>
@@ -109,10 +141,7 @@ const App: () => React$Node = () => {
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Payment</Text>
-            {/* <Button
-              title="Create Transfer"
-              onPress={() => createTransferToReceiverID()}
-            /> */}
+            <Button title="Create Transfer" onPress={() => transfer()} />
           </View>
         </View>
       </ScrollView>
