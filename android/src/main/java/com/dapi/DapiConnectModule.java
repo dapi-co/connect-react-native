@@ -57,16 +57,16 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void start(String appKey, String clientUserID, ReadableMap configurationMap, Callback callback) {
+    public void start(String appKey, String clientUserID, ReadableMap configurationMap, Promise promise) {
         Dapi.start(
                 getCurrentActivity().getApplication(),
                 appKey,
                 clientUserID,
                 getConfigurations(configurationMap), () -> {
-                    sendSuccessCallback(null, callback);
+                    resolve(null, promise);
                     return null;
                 }, error -> {
-                    sendErrorCallback(error, callback);
+                    reject(error, promise);
                     return null;
                 }
 
@@ -85,7 +85,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getConnections(final Callback callback) {
+    public void getConnections(Promise promise) {
         Dapi.getConnections(connections -> {
             WritableArray connectionsArray = new WritableNativeArray();
             for (DapiConnection connection : connections) {
@@ -116,16 +116,16 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     connectionMap.putArray("accounts", resultAccountMapArray);
                     connectionsArray.pushMap(connectionMap);
                 } catch (Exception e) {
-                    sendErrorCallback(e.getMessage(), callback);
+                    reject(e.getMessage(), promise);
                 }
 
             }
-            sendSuccessCallback(connectionsArray, callback);
+            resolve(connectionsArray, promise);
             return null;
         }, error -> {
             JSONObject jsonObject = convertToJSONObject(error);
             try {
-                sendErrorCallback(JsonConvert.jsonToReact(jsonObject), callback);
+                reject(JsonConvert.jsonToReact(jsonObject), promise);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -136,16 +136,16 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setClientUserID(String clientUserID) {
-        Dapi.INSTANCE.setClientUserID(clientUserID);
+        Dapi.setClientUserID(clientUserID);
     }
 
     @ReactMethod
-    public void clientUserID(Callback callback) {
-        String clientUserID = Dapi.INSTANCE.getClientUserID();
+    public void clientUserID(Promise promise) {
+        String clientUserID = Dapi.getClientUserID();
         if (clientUserID == null) {
-            sendErrorCallback("ClientUserID is not set", callback);
+            reject("ClientUserID is not set", promise);
         } else {
-            sendSuccessCallback(clientUserID, callback);
+            resolve(clientUserID, promise);
         }
     }
 
@@ -199,7 +199,8 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Date endDateObject = new Date(endDateAsLong);
 
         getOperatingConnection(userID, connection -> {
-            connection.getTransactions(accountID, startDateObject, endDateObject, transactions -> {
+            Accounts.DapiAccount account = getDapiAccount(accountID, connection);
+            connection.getTransactions(account, startDateObject, endDateObject, transactions -> {
                 resolve(transactions, promise);
                 return null;
             }, error -> {
@@ -236,7 +237,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             Promise promise
     ) {
         getOperatingConnection(userID, connection -> {
-            connection.delink(delink -> {
+            connection.delete(delink -> {
                 resolve(delink, promise);
                 return null;
             }, error -> {
@@ -350,7 +351,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String getAccounts;
             String getTransactions;
             String accountMetaData;
-            String delinkUser;
+            String delete;
 
             if (endpointsMap.get("getIdentity") == null) {
                 getIdentity = DapiEndpoints.GET_IDENTITY_ENDPOINT;
@@ -372,15 +373,15 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             }
 
             if (endpointsMap.get("getAccountMetadata") == null) {
-                accountMetaData = DapiEndpoints.ACCOUNT_META_DATA_ENDPOINT;
+                accountMetaData = DapiEndpoints.ACCOUNTS_META_DATA_ENDPOINT;
             } else {
                 accountMetaData = (String) endpointsMap.get("getAccountMetadata");
             }
 
-            if (endpointsMap.get("delinkUser") == null) {
-                delinkUser = DapiEndpoints.DELINK_USER_ENDPOINT;
+            if (endpointsMap.get("delete") == null) {
+                delete = DapiEndpoints.DELETE_CONNECTION_ENDPOINT;
             } else {
-                delinkUser = (String) endpointsMap.get("delinkUser");
+                delete = (String) endpointsMap.get("delete");
             }
 
             endpoints = new DapiEndpoints(
@@ -388,7 +389,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     getAccounts,
                     getTransactions,
                     accountMetaData,
-                    delinkUser
+                    delete
             );
         }
 
@@ -496,7 +497,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private void setConnectListener() {
-        Dapi.INSTANCE.setConnectListener(new OnDapiConnectListener() {
+        Dapi.setConnectListener(new OnDapiConnectListener() {
             @Override
             public void onConnectionSuccessful(@NotNull DapiConnection connection) {
                 WritableMap params = Arguments.createMap();
@@ -516,7 +517,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private void setTransferListener() {
-        Dapi.INSTANCE.setTransferListener((amount, account) -> {
+        Dapi.setTransferListener((amount, account) -> {
             WritableMap params = Arguments.createMap();
             params.putInt("amount", amount);
             params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(account)));
