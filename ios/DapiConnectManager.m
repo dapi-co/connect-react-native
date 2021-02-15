@@ -173,14 +173,10 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
         [self sendEventWithName:self.supportedEvents[1] body:body];
 }
 
-- (void)connectDidProceedWithBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
-    
-}
-
-- (void)connectDidSuccessfullyConnectToBankID:(nonnull NSString *)bankID userID:(nonnull NSString *)userID {
-    id body = @{
+- (void)connectDidSuccessfullyConnectToBankID:(nonnull NSString *)bankID connection:(nonnull DPCBankConnection *)connection {
+        id body = @{
         @"bankID": bankID,
-        @"userID": userID
+        @"userID": connection.userID
     };
     if (self.hasListeners)
         [self sendEventWithName:self.supportedEvents[0] body:body];
