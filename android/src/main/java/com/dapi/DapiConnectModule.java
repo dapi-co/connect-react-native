@@ -22,6 +22,8 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.bridge.Dynamic;
 import com.google.gson.Gson;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -123,12 +125,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             resolve(connectionsArray, promise);
             return null;
         }, error -> {
-            JSONObject jsonObject = convertToJSONObject(error);
-            try {
-                reject(JsonConvert.jsonToReact(jsonObject), promise);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            reject(error, promise);
             return null;
         });
     }
@@ -168,7 +165,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getAccounts(String userID, Promise promise) {
-
         getOperatingConnection(userID, connection -> {
             connection.getAccounts(identity -> {
                 resolve(identity, promise);
@@ -320,6 +316,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private DapiConfigurations getConfigurations(ReadableMap configurations) {
+        if (configurations == null) {
+            return null;
+        }
         Map<String, Object> extraQueryParameters;
         Map<String, Object> extraHeaderFields;
         Map<String, Object> extraBody;
@@ -437,7 +436,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private DapiBeneficiary getBeneficiary(ReadableMap beneficiaryMap) {
-        ReadableMap linesMap =  beneficiaryMap.getMap("address");
+        ReadableMap linesMap = beneficiaryMap.getMap("address");
         String line1 = linesMap.getString("line1");
         String line2 = linesMap.getString("line2");
         String line3 = linesMap.getString("line3");
@@ -473,8 +472,8 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     public Accounts.DapiAccount getDapiAccount(String accountID, DapiConnection connection) {
-        for (Accounts.DapiAccount account : connection.getAccounts()){
-            if (account.getId().equals(accountID)){
+        for (Accounts.DapiAccount account : connection.getAccounts()) {
+            if (account.getId().equals(accountID)) {
                 return account;
             }
         }
@@ -501,7 +500,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             @Override
             public void onConnectionSuccessful(@NotNull DapiConnection connection) {
                 WritableMap params = Arguments.createMap();
-                params.putMap("connection", JsonConvert.jsonToReact(convertToJSONObject(connection)));
+                try {
+                    params.putMap("connection", JsonConvert.jsonToReact(convertToJSONObject(connection)));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 sendEvent(getReactApplicationContext(), "EventConnectSuccessful", params);
             }
 
@@ -520,7 +523,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Dapi.setTransferListener((amount, account) -> {
             WritableMap params = Arguments.createMap();
             params.putInt("amount", amount);
-            params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(account)));
+            try {
+                params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(account)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             sendEvent(getReactApplicationContext(), "EventDapiUIWillTransfer", params);
         });
     }

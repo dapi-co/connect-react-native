@@ -1,4 +1,4 @@
-package com.example;
+package com.dapi.app;
 
 import com.facebook.react.ReactActivity;
 import android.os.Bundle;

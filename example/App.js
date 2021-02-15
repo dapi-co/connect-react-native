@@ -31,11 +31,6 @@ async function startDapi() {
     'JohnDoe',
     null,
   );
-  Dapi.instance.start(
-    '11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874',
-    'JohnDoe',
-    null,
-  );
 }
 
 function presentConnect() {
