@@ -27,7 +27,7 @@ const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 async function startDapi() {
   await Dapi.instance.start(
-    '11cb4377e3e76d07dba070de48f0b60511b8d2b1f849975b5059c9fe60ca2874',
+    'UfcdO2yOM-6mvKG_YIpgFBU2_cjSjyrL7ftwEzgGOJA=',
     'JohnDoe',
     null,
   );
