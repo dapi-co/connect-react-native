@@ -10,10 +10,9 @@ Financial APIs to connect users' bank accounts
 
 ## Getting Started
 
-### iOS
-
 #### Requirements
 
+- Android: `minSdkVersion 21`
 - Xcode 10.3
 - react-native >= 0.60.0
 - CocoaPods >= 1.9.3
@@ -22,12 +21,10 @@ Financial APIs to connect users' bank accounts
 
 Let's create a simple app that integrates DapiConnect and uses the `dapiconnect-reactnative` module.
 
-1. Make sure `react-native-cli` is installed: `yarn global add react-native-cli`
-2. Create the app with `react-native init YourApp`
-3. Step into your newly created app folder: `cd YourApp`
-4. Install `dapiconnect-reactnative` from GitHub: `yarn add github:dapi-co/DapiConnect-ReactNative`
-5. Install all the dependencies for the project: `yarn install`. (Because of a [bug](https://github.com/yarnpkg/yarn/issues/2165) you may need to clean `yarn`'s cache with `yarn cache clean` before.)
-6. Open `ios/Podile` in a text editor: `vim ios/Podfile`, update the platform to iOS 10.3:
+1. Step into your app directory: `cd YourApp`
+2. Install the library: `yarn install connect-react-native`
+3. Install all the dependencies for the project: `yarn install`. (Because of a [bug](https://github.com/yarnpkg/yarn/issues/2165) you may need to clean `yarn`'s cache with `yarn cache clean` before.)
+4. Open `ios/Podile` in a text editor: `vim ios/Podfile`, update the platform to iOS 10.3:
 
 ```diff
 require_relative '../node_modules/react-native/scripts/react_native_pods'
@@ -57,4 +54,4 @@ target 'example' do
 end
 ```
 
-7. `npx pod-install` or `cd ios` and then `pod install`.
+5. `npx pod-install` or `cd ios` and then `pod install`.
