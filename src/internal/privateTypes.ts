@@ -1,20 +1,12 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @format
- */
-
 import {
   IDapiConfigurations,
-  IIdentity,
   IAccount,
-  ITransaction,
-  IAccountsMetadata,
   IBeneficiary,
   IDapiConnection,
+  IAccountResponse,
+  IIdentityResponse,
+  IAccountsMetadataResponse,
+  ITransactionResponse,
 } from './types';
 
 export interface DapiConnectNativeModule {
@@ -29,16 +21,16 @@ export interface DapiConnectNativeModule {
   dismissConnect(): void;
   getConnections(): Promise<IDapiConnection[]>;
 
-  getIdentity(userID: string): Promise<IIdentity>;
-  getAccounts(userID: string): Promise<IAccount[]>;
+  getIdentity(userID: string): Promise<IIdentityResponse>;
+  getAccounts(userID: string): Promise<IAccountResponse>;
   getTransactions(
     userID: string,
     accountID: string,
     startDateMilliseconds: number,
     endDateMilliseconds: number,
-  ): Promise<ITransaction[]>;
+  ): Promise<ITransactionResponse>;
   delete(userID: string): Promise<any>;
-  getAccountsMetadata(userID: string): Promise<IAccountsMetadata>;
+  getAccountsMetadata(userID: string): Promise<IAccountsMetadataResponse>;
   createTransfer(
     userID: string,
     accountID: string | null,

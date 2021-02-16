@@ -37,10 +37,11 @@ function presentConnect() {
   Dapi.instance.presentConnect();
   dapiConnectManagerEmitter.addListener(
     'EventConnectSuccessful',
-    connectResult => console.log(connectResult),
+    successConnectResult => console.log(successConnectResult),
   );
-  dapiConnectManagerEmitter.addListener('EventConnectFailure', connectResult =>
-    console.log(connectResult),
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectFailure',
+    failureConnectResult => console.log(failureConnectResult),
   );
 }
 
@@ -53,7 +54,26 @@ async function getIdentity() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
     var identity = await connections[0].getIdentity();
-    console.log(identity);
+
+    console.log(identity.identity.emailAddress);
+  }
+}
+
+async function getAccounts() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var accountsResponse = await connections[0].getAccounts();
+
+    console.log(accountsResponse.accounts);
+  }
+}
+
+async function getMetadata() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var metadata = await connections[0].getAccountsMetadata();
+
+    console.log(metadata.accountsMetadata.swiftCode);
   }
 }
 
@@ -77,13 +97,13 @@ async function transfer() {
 
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var identity = await connections[0].createTransfer(
+    var transferingAccount = await connections[0].createTransfer(
       null,
       beneficiary,
       0,
       null,
     );
-    console.log(identity);
+    console.log(transferingAccount);
   }
 }
 
@@ -112,26 +132,14 @@ const App: () => React$Node = () => {
           </View>
 
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Auth</Text>
-            {/* <Button title="Delink User" onPress={() => delinkUser()} /> */}
-          </View>
-
-          <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
-            {/* <Button title="Accounts" onPress={() => getAccounts()} /> */}
-            {/* <Button
-              title="Transactions (first account)"
-              onPress={() => getTransactions()}
-            /> */}
+            <Button title="Accounts" onPress={() => getAccounts()} />
           </View>
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Metadata</Text>
-            {/* <Button
-              title="Accounts Metadata"
-              onPress={() => getAccountsMetadata()}
-            /> */}
+            <Button title="Accounts Metadata" onPress={() => getMetadata()} />
           </View>
 
           <View style={styles.sectionContainer}>

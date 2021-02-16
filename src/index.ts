@@ -1,22 +1,14 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @format
- */
-
 import NativeInterface from './internal/nativeInterface';
 import {
   IDapiConfigurations,
-  IIdentity,
   IAccount,
-  ITransaction,
-  IAccountsMetadata,
   IBeneficiary,
   IDapiConnection,
   IPair,
+  IAccountResponse,
+  IIdentityResponse,
+  ITransactionResponse,
+  IAccountsMetadataResponse,
 } from './internal/types';
 
 export class DapiConnection implements IDapiConnection {
@@ -73,11 +65,11 @@ export class DapiConnection implements IDapiConnection {
     this._accounts = accounts;
   }
 
-  getIdentity(): Promise<IIdentity> {
+  getIdentity(): Promise<IIdentityResponse> {
     return NativeInterface.getIdentity(this.userID);
   }
 
-  getAccounts(): Promise<IAccount[]> {
+  getAccounts(): Promise<IAccountResponse> {
     return NativeInterface.getAccounts(this.userID);
   }
 
@@ -85,7 +77,7 @@ export class DapiConnection implements IDapiConnection {
     account: IAccount,
     startDate: Date,
     endDate: Date,
-  ): Promise<ITransaction[]> {
+  ): Promise<ITransactionResponse> {
     return NativeInterface.getTransactions(
       this.userID,
       account.id,
@@ -94,7 +86,7 @@ export class DapiConnection implements IDapiConnection {
     );
   }
 
-  getAccountsMetadata(): Promise<IAccountsMetadata> {
+  getAccountsMetadata(): Promise<IAccountsMetadataResponse> {
     return NativeInterface.getAccountsMetadata(this.userID);
   }
 

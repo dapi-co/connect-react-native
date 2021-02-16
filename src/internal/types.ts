@@ -1,12 +1,3 @@
-/**
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @format
- */
-
 export interface IDapiConfigurations {
   endpoints?: Map<DapiEndpoint, string>;
   endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]>;
@@ -52,14 +43,20 @@ export interface IPair {
   name: string;
 }
 
+export interface IAccountResponse {
+  readonly operationID: string;
+  readonly success: boolean;
+  readonly accounts: IAccount[];
+}
+
 export interface IAccount {
-  balance: number;
-  iban: string | null;
-  number: string | null;
-  currency: IPair;
-  type: string;
-  id: string;
-  name: string;
+  readonly balance: number;
+  readonly iban: string | null;
+  readonly number: string | null;
+  readonly currency: IPair;
+  readonly type: string;
+  readonly id: string;
+  readonly name: string;
 }
 
 interface IIdentification {
@@ -83,14 +80,20 @@ interface IAddressGeneral {
   country: string;
 }
 
+export interface IIdentityResponse {
+  readonly operationID: string;
+  readonly success: boolean;
+  readonly identity: IIdentity;
+}
+
 export interface IIdentity {
-  nationality: string;
-  dateOfBirth: Date;
-  numbers: IPhoneNumber[];
-  emailAddress: string;
-  name: string;
-  address: IAddress;
-  identification: IIdentification[];
+  readonly nationality: string;
+  readonly dateOfBirth: Date;
+  readonly numbers: IPhoneNumber[];
+  readonly emailAddress: string;
+  readonly name: string;
+  readonly address: IAddress;
+  readonly identification: IIdentification[];
 }
 
 export interface IBalance {
@@ -104,16 +107,22 @@ enum TransactionType {
   DEBIT = 'debit',
 }
 
+export interface ITransactionResponse {
+  readonly operationID: string;
+  readonly success: boolean;
+  readonly transactions: ITransaction[];
+}
+
 export interface ITransaction {
-  amount: number;
-  date: Date;
-  type: TransactionType;
-  description: string | null;
-  details: string | null;
-  currency: IPair;
-  beforeAmount: number | null;
-  afterAmount: number | null;
-  reference?: string | null;
+  readonly amount: number;
+  readonly date: Date;
+  readonly type: TransactionType;
+  readonly description: string | null;
+  readonly details: string | null;
+  readonly currency: IPair;
+  readonly beforeAmount: number | null;
+  readonly afterAmount: number | null;
+  readonly reference?: string | null;
 }
 
 export enum BeneficiaryType {
@@ -129,25 +138,31 @@ interface ITransferBounds {
   type: BeneficiaryType;
 }
 
+export interface IAccountsMetadataResponse {
+  readonly operationID: string;
+  readonly success: boolean;
+  readonly accountsMetadata: IAccountsMetadata;
+}
+
 export interface IAccountsMetadata {
-  swiftCode: string;
-  sortCode: string | null;
-  bankName: string;
-  branchName: string;
-  branchAddress: string;
-  address: ILineAddress;
-  transferBounds: ITransferBounds[];
-  beneficiaryCoolDownPeriod: {
-    value: number;
-    unit: 'hrs';
+  readonly swiftCode: string;
+  readonly sortCode: string | null;
+  readonly bankName: string;
+  readonly branchName: string;
+  readonly branchAddress: string;
+  readonly address: ILineAddress;
+  readonly transferBounds: ITransferBounds[];
+  readonly beneficiaryCoolDownPeriod: {
+    readonly value: number;
+    readonly unit: 'hrs';
   };
-  transactionRange: {
-    unit: 'days';
-    value: number;
+  readonly transactionRange: {
+    readonly unit: 'days';
+    readonly value: number;
   };
-  country: IPair;
-  isCreateBeneficiaryEndpointRequired: boolean;
-  willNewlyAddedBeneficiaryExistBeforeCoolDownPeriod: boolean;
+  readonly country: IPair;
+  readonly isCreateBeneficiaryEndpointRequired: boolean;
+  readonly willNewlyAddedBeneficiaryExistBeforeCoolDownPeriod: boolean;
 }
 
 export interface IDapiConnection {
@@ -160,14 +175,14 @@ export interface IDapiConnection {
   readonly bankFullName: string;
   readonly accounts: IAccount[];
 
-  getIdentity(): Promise<IIdentity>;
-  getAccounts(): Promise<IAccount[]>;
+  getIdentity(): Promise<IIdentityResponse>;
+  getAccounts(): Promise<IAccountResponse>;
   getTransactions(
     account: IAccount,
     startDate: Date,
     endDate: Date,
-  ): Promise<ITransaction[]>;
-  getAccountsMetadata(): Promise<IAccountsMetadata>;
+  ): Promise<ITransactionResponse>;
+  getAccountsMetadata(): Promise<IAccountsMetadataResponse>;
   delete(): Promise<void>;
   createTransfer(
     fromAccount: IAccount,
