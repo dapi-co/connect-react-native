@@ -41,9 +41,9 @@ export interface DapiConnectNativeModule {
   getAccountsMetadata(userID: string): Promise<IAccountsMetadata>;
   createTransfer(
     userID: string,
-    accountID: string,
-    toBeneficiary: IBeneficiary,
+    accountID: string | null,
+    toBeneficiary: IBeneficiary | null,
     amount: number,
-    remark: string,
+    remark: string | null,
   ): Promise<IAccount>;
 }

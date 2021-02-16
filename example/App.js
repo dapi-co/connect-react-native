@@ -80,7 +80,7 @@ async function transfer() {
     var identity = await connections[0].createTransfer(
       null,
       beneficiary,
-      null,
+      0,
       null,
     );
     console.log(identity);

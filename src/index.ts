@@ -103,14 +103,14 @@ export class DapiConnection implements IDapiConnection {
   }
 
   createTransfer(
-    fromAccount: IAccount,
-    toBeneficiary: IBeneficiary,
+    fromAccount: IAccount | null,
+    toBeneficiary: IBeneficiary | null,
     amount: number,
-    remark: string,
+    remark: string | null,
   ): Promise<IAccount> {
     return NativeInterface.createTransfer(
       this.userID,
-      fromAccount.id,
+      fromAccount ? fromAccount.id : null,
       toBeneficiary,
       amount,
       remark,
@@ -191,7 +191,7 @@ export default class Dapi {
     let jsonConnections = await NativeInterface.getConnections();
     let connections: IDapiConnection[] = [];
     for (let i = 0; i < jsonConnections.length; i++) {
-      let currentConnection = connections[i];
+      let currentConnection = jsonConnections[i];
       let accounts: IAccount[] = [];
       for (let j = 0; j < currentConnection.accounts.length; j++) {
         let currentAccount = currentConnection.accounts[j];
