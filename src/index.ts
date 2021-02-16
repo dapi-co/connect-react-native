@@ -16,6 +16,7 @@ import {
   IAccountsMetadata,
   IBeneficiary,
   IDapiConnection,
+  IPair,
 } from './internal/types';
 
 export class DapiConnection implements IDapiConnection {
@@ -117,6 +118,44 @@ export class DapiConnection implements IDapiConnection {
   }
 }
 
+export class DapiPair implements IPair {
+  code: string;
+  name: string;
+
+  constructor(code: string, name: string) {
+    this.code = code;
+    this.name = name;
+  }
+}
+
+export class DapiAccount implements IAccount {
+  balance: number;
+  iban: string | null;
+  number: string | null;
+  currency: IPair;
+  type: string;
+  id: string;
+  name: string;
+
+  constructor(
+    balance: number,
+    iban: string | null,
+    number: string | null,
+    currency: IPair,
+    type: string,
+    id: string,
+    name: string,
+  ) {
+    this.balance = balance;
+    this.iban = iban;
+    this.number = number;
+    this.currency = currency;
+    this.type = type;
+    this.id = id;
+    this.name = name;
+  }
+}
+
 export default class Dapi {
   private static _instance = new Dapi();
   public static get instance(): Dapi {
@@ -148,8 +187,41 @@ export default class Dapi {
     NativeInterface.dismissConnect();
   }
 
-  getConnections(): Promise<IDapiConnection[]> {
-    return NativeInterface.getConnections();
+  async getConnections(): Promise<IDapiConnection[]> {
+    let jsonConnections = await NativeInterface.getConnections();
+    let connections: IDapiConnection[] = [];
+    for (let i = 0; i < jsonConnections.length; i++) {
+      let currentConnection = connections[i];
+      let accounts: IAccount[] = [];
+      for (let j = 0; j < currentConnection.accounts.length; j++) {
+        let currentAccount = currentConnection.accounts[j];
+        let account = new DapiAccount(
+          currentAccount.balance,
+          currentAccount.iban,
+          currentAccount.number,
+          new DapiPair(
+            currentAccount.currency.code,
+            currentAccount.currency.name,
+          ),
+          currentAccount.type,
+          currentAccount.id,
+          currentAccount.name,
+        );
+        accounts.push(account);
+      }
+      let connection = new DapiConnection(
+        currentConnection.clientUserID,
+        currentConnection.userID,
+        currentConnection.bankID,
+        currentConnection.swiftCode,
+        currentConnection.country,
+        currentConnection.bankShortName,
+        currentConnection.bankFullName,
+        accounts,
+      );
+      connections.push(connection);
+    }
+    return connections;
   }
 }
 

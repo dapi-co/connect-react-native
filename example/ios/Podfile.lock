@@ -1,9 +1,9 @@
 PODS:
   - boost-for-react-native (1.63.0)
-  - connect-react-native (2.0.0):
-    - DapiSDK (= 2.0.0)
+  - connect-react-native (2.1.0):
+    - DapiSDK (= 2.0.1)
     - React
-  - DapiSDK (2.0.0)
+  - DapiSDK (2.0.1)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.63.2)
   - FBReactNativeSpec (0.63.2):
@@ -345,8 +345,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
-  connect-react-native: 05a7443d8be0b4afc32e5e9e87b4e685f3554f57
-  DapiSDK: 96317fe84f9e039d38be3cc29947a52aef49fd65
+  connect-react-native: b7f43f4e2ad2cb12833224a77f44f1fe77946f40
+  DapiSDK: dbfed69cd2db48fb028ad570fed0fea08e61faae
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   FBLazyVector: 3ef4a7f62e7db01092f9d517d2ebc0d0677c4a37
   FBReactNativeSpec: dc7fa9088f0f2a998503a352b0554d69a4391c5a

@@ -47,7 +47,7 @@ export interface IBeneficiary {
   branchName: string;
 }
 
-interface IPair {
+export interface IPair {
   code: string;
   name: string;
 }
@@ -59,7 +59,6 @@ export interface IAccount {
   currency: IPair;
   type: string;
   id: string;
-  isFavourite: boolean | null;
   name: string;
 }
 

@@ -27,7 +27,7 @@ const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 async function startDapi() {
   await Dapi.instance.start(
-    'UfcdO2yOM-6mvKG_YIpgFBU2_cjSjyrL7ftwEzgGOJA=',
+    'ae473ebe572718081692256b62589c29d83ad6d1167dadaa7822482da965723d',
     'JohnDoe',
     null,
   );
@@ -68,7 +68,7 @@ async function transfer() {
     bankName: 'Emirates NBD Bank PJSC',
     swiftCode: 'EBILAEAD',
     iban: 'AE123456789',
-    country: 'UNITED ARAB EMIRATES',
+    country: 'AE',
     branchAddress: 'Baniyas Road Deira PO Box 777 Dubai UAE',
     branchName: 'Emirates NBD Bank PJSC',
     phoneNumber: '0123456789',
