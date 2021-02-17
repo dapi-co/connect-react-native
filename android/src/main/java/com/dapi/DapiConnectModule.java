@@ -1,5 +1,7 @@
 package com.dapi;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import com.dapi.connect.core.base.Dapi;
@@ -65,9 +67,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 appKey,
                 clientUserID,
                 getConfigurations(configurationMap), () -> {
+                    Log.i("DapiSDK", "Started");
                     resolve(null, promise);
                     return null;
                 }, error -> {
+                    
                     reject(error, promise);
                     return null;
                 }
@@ -79,11 +83,13 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void presentConnect() {
         Dapi.presentConnect();
         setConnectListener();
+        Log.i("DapiSDK", "Connect is presented");
     }
 
     @ReactMethod
     public void dismissConnect() {
         Dapi.dismissConnect();
+        Log.i("DapiSDK", "Connect is dismissed");
     }
 
     @ReactMethod
@@ -118,10 +124,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     connectionMap.putArray("accounts", resultAccountMapArray);
                     connectionsArray.pushMap(connectionMap);
                 } catch (Exception e) {
+                    Log.e("DapiSDK", e.toString());
                     reject(e.getMessage(), promise);
                 }
 
             }
+            Log.i("DapiSDK", String.valueOf(connectionsArray.size()));
             resolve(connectionsArray, promise);
             return null;
         }, error -> {
@@ -150,6 +158,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getIdentity(String userID, Promise promise) {
         getOperatingConnection(userID, connection -> {
             connection.getIdentity(identity -> {
+                Log.i("DapiSDK", "getIdentity call success");
                 resolve(identity, promise);
                 return null;
             }, error -> {
@@ -167,6 +176,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getAccounts(String userID, Promise promise) {
         getOperatingConnection(userID, connection -> {
             connection.getAccounts(identity -> {
+                Log.i("DapiSDK", "getAccounts call success");
                 resolve(identity, promise);
                 return null;
             }, error -> {
@@ -197,6 +207,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         getOperatingConnection(userID, connection -> {
             Accounts.DapiAccount account = getDapiAccount(accountID, connection);
             connection.getTransactions(account, startDateObject, endDateObject, transactions -> {
+                Log.i("DapiSDK", "getTransactions call success");
                 resolve(transactions, promise);
                 return null;
             }, error -> {
@@ -214,6 +225,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     public void getAccountsMetadata(String userID, Promise promise) {
         getOperatingConnection(userID, connection -> {
             connection.getAccountsMetaData(accountsMetaData -> {
+                Log.i("DapiSDK", "getAccountsMetadata call success");
                 resolve(accountsMetaData, promise);
                 return null;
             }, error -> {
@@ -234,6 +246,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     ) {
         getOperatingConnection(userID, connection -> {
             connection.delete(delink -> {
+                Log.i("DapiSDK", "delete call success");
                 resolve(delink, promise);
                 return null;
             }, error -> {
@@ -263,14 +276,17 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 HashMap<String, Object> successfulTransferMap = new HashMap<>();
                 successfulTransferMap.put("account", convertToJSONObject(senderAccount));
                 successfulTransferMap.put("amount", sentAmount);
+                Log.i("DapiSDK", "createTransfer call success");
                 resolve(successfulTransferMap, promise);
                 return null;
             }, (failedAccount, error) -> {
+                
                 reject(error, promise);
                 return null;
             });
             return null;
         }, error -> {
+            
             reject(error, promise);
             return null;
         });
@@ -291,6 +307,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private <T> void reject(T error, Promise promise) {
+        
         JSONObject jsonObject = convertToJSONObject(error);
         try {
             promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
