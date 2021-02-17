@@ -300,7 +300,12 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     private <T> void resolve(T data, Promise promise) {
         try {
-            promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(data)));
+            if (data instanceof WritableArray || data instanceof WritableMap){
+                promise.resolve(data);
+            }else {
+                promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(data)));
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
