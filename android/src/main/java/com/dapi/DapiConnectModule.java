@@ -280,13 +280,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 resolve(successfulTransferMap, promise);
                 return null;
             }, (failedAccount, error) -> {
-                
                 reject(error, promise);
                 return null;
             });
             return null;
         }, error -> {
-            
             reject(error, promise);
             return null;
         });
@@ -312,7 +310,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     private <T> void reject(T error, Promise promise) {
-        
+        Log.e("DapiSDK", error.toString());
         JSONObject jsonObject = convertToJSONObject(error);
         try {
             promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
