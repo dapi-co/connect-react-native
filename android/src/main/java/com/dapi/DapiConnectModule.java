@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 
 import com.dapi.connect.core.base.Dapi;
 import com.dapi.connect.core.callbacks.OnDapiConnectListener;
+import com.dapi.connect.core.callbacks.OnDapiTransferListener;
 import com.dapi.connect.data.endpoint_models.Accounts;
 import com.dapi.connect.data.models.DapiBeneficiary;
 import com.dapi.connect.data.models.DapiConfigurations;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,8 +121,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     connectionMap.putString("userID", connection.getUserID());
                     connectionMap.putString("clientUserID", connection.getClientUserID());
                     connectionMap.putString("bankID", connection.getBankID());
-                    connectionMap.putString("bankName", connection.getBankShortName());
-                    connectionMap.putString("countryName", connection.getCountry());
+                    connectionMap.putString("swiftCode", connection.getSwiftCode());
+                    connectionMap.putString("bankShortName", connection.getBankShortName());
+                    connectionMap.putString("bankFullName", connection.getBankFullName());
+                    connectionMap.putString("country", connection.getCountry());
                     connectionMap.putArray("accounts", resultAccountMapArray);
                     connectionsArray.pushMap(connectionMap);
                 } catch (Exception e) {
@@ -269,28 +273,17 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String remark,
             Promise promise
     ) {
+        setTransferListener(promise);
         getOperatingConnection(userID, connection -> {
             Accounts.DapiAccount account = getDapiAccount(accountID, connection);
             DapiBeneficiary beneficiary = getBeneficiary(beneficiaryMap);
-            connection.createTransfer(account, beneficiary, amount, remark, (senderAccount, sentAmount) -> {
-                HashMap<String, Object> successfulTransferMap = new HashMap<>();
-                successfulTransferMap.put("account", convertToJSONObject(senderAccount));
-                successfulTransferMap.put("amount", sentAmount);
-                Log.i("DapiSDK", "createTransfer call success");
-                resolve(successfulTransferMap, promise);
-                return null;
-            }, (failedAccount, error) -> {
-                reject(error, promise);
-                return null;
-            });
+            connection.createTransfer(account, beneficiary, amount, remark);
             return null;
         }, error -> {
             reject(error, promise);
             return null;
         });
-        setTransferListener();
     }
-
 
     /**
      * ************ HELPER FUNCTIONS ************
@@ -539,18 +532,36 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     }
 
-    private void setTransferListener() {
-        Dapi.setTransferListener((amount, account) -> {
-            WritableMap params = Arguments.createMap();
-            params.putInt("amount", amount);
-            try {
-                params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(account)));
-            } catch (JSONException e) {
-                e.printStackTrace();
+    private void setTransferListener(Promise promise) {
+        Dapi.setTransferListener(new OnDapiTransferListener() {
+            @Override
+            public void willTransferAmount(int sentAmount, @NotNull Accounts.DapiAccount senderAccount) {
+                WritableMap params = Arguments.createMap();
+                params.putInt("amount", sentAmount);
+                try {
+                    params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(senderAccount)));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                sendEvent(getReactApplicationContext(), "EventDapiUIWillTransfer", params);
             }
-            sendEvent(getReactApplicationContext(), "EventDapiUIWillTransfer", params);
+
+            @Override
+            public void onTransferSuccess(@NotNull Accounts.DapiAccount senderAccount, int sentAmount) {
+                HashMap<String, Object> successfulTransferMap = new HashMap<>();
+                successfulTransferMap.put("account", convertToJSONObject(senderAccount));
+                successfulTransferMap.put("amount", sentAmount);
+                Log.i("DapiSDK", "createTransfer call success");
+                resolve(successfulTransferMap, promise);
+            }
+
+            @Override
+            public void onTransferFailure(@org.jetbrains.annotations.Nullable Accounts.DapiAccount dapiAccount, @NotNull DapiError error) {
+                reject(error, promise);
+            }
         });
     }
+
 
     private JSONObject convertToJSONObject(Object object) {
         Gson gson = new Gson();
