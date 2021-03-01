@@ -73,7 +73,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     resolve(null, promise);
                     return null;
                 }, error -> {
-                    
                     reject(error, promise);
                     return null;
                 }

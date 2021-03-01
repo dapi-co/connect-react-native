@@ -81,18 +81,18 @@ async function transfer() {
   var beneficiary = {
     address: {
       line1: 'baniyas road',
-      line2: 'baniyas road',
-      line3: 'baniyas road',
+      line2: 'dubai',
+      line3: 'united arab emirates',
     },
-    accountNumber: '123456789',
-    bankName: 'Emirates NBD Bank PJSC',
-    swiftCode: 'EBILAEAD',
-    iban: 'AE123456789',
+    accountNumber: '11352348001',
+    bankName: 'Sharjah Islamic Bank',
+    swiftCode: 'NBSHAEAS',
+    iban: 'AE270410000011352348001',
     country: 'AE',
-    branchAddress: 'Baniyas Road Deira PO Box 777 Dubai UAE',
-    branchName: 'Emirates NBD Bank PJSC',
-    phoneNumber: '0123456789',
-    name: 'John Doe',
+    branchAddress: 'Sheikh Zayed Road',
+    branchName: 'Sheikh Zayed Road Branch',
+    phoneNumber: '+971501977498',
+    name: 'Kamil Abid Kamili',
   };
 
   var connections = await Dapi.instance.getConnections();
