@@ -163,6 +163,10 @@ export default class Dapi {
     return NativeInterface.start(appKey, clientUserID, configurations);
   }
 
+  isStarted() : Promise<boolean> {
+    return NativeInterface.isStarted();
+  }
+
   presentConnect(): void {
     NativeInterface.presentConnect();
   }

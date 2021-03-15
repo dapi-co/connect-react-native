@@ -81,6 +81,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void isStarted(Promise promise){
+        resolve(Dapi.isStarted(), promise);
+    }
+
+    @ReactMethod
     public void presentConnect() {
         Dapi.presentConnect();
         setConnectListener();
@@ -290,7 +295,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     private <T> void resolve(T data, Promise promise) {
         try {
-            if (data instanceof WritableArray || data instanceof WritableMap){
+            if (data instanceof WritableArray || data instanceof WritableMap || data instanceof Boolean){
                 promise.resolve(data);
             }else {
                 promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(data)));
@@ -303,10 +308,17 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     private <T> void reject(T error, Promise promise) {
         Log.e("DapiSDK", error.toString());
-        JSONObject jsonObject = convertToJSONObject(error);
         try {
-            promise.reject("1015", JsonConvert.jsonToReact(jsonObject));
-        } catch (JSONException e) {
+            if (error instanceof DapiError){
+                Throwable throwable = new Throwable(((DapiError)error).getMsg());
+                JSONObject jsonObject = convertToJSONObject(error);
+                promise.reject("1015", throwable, JsonConvert.jsonToReact(jsonObject));
+            }else {
+                promise.reject("1015", error.toString());
+            }
+
+        } catch (Exception e) {
+            promise.reject("1015", e);
             e.printStackTrace();
         }
     }

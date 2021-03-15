@@ -38,4 +38,6 @@ export interface DapiConnectNativeModule {
     amount: number,
     remark: string | null,
   ): Promise<IAccount>;
+
+  isStarted() : Promise<boolean>
 }
