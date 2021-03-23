@@ -43,6 +43,9 @@ function presentConnect() {
     'EventConnectFailure',
     failureConnectResult => console.log(failureConnectResult),
   );
+  dapiConnectManagerEmitter.addListener('EventConnectDismissed', _ => {
+    console.log('Connect is dismissed');
+  });
 }
 
 async function getConnections() {
@@ -98,11 +101,12 @@ async function transfer() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
     try {
+      var accountsResponse = await connections[0].getAccounts();
       var transferingAccount = await connections[0].createTransfer(
-        null,
+        accountsResponse.accounts[0],
         beneficiary,
-        0,
-        null,
+        1,
+        'test',
       );
       console.log(transferingAccount);
     } catch (e) {
@@ -136,7 +140,7 @@ const App: () => React$Node = () => {
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Start Dapi</Text>
-            <Button title="isStarted" onPress={() => isStarted()} />
+            <Button title="Is started" onPress={() => isStarted()} />
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Connect</Text>

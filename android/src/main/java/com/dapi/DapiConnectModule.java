@@ -522,6 +522,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     private void setConnectListener() {
         Dapi.setConnectListener(new OnDapiConnectListener() {
             @Override
+            public void onDismissed() {
+                sendEvent(getReactApplicationContext(), "EventConnectDismissed", null);
+            }
+
+            @Override
             public void onConnectionSuccessful(@NotNull DapiConnection connection) {
                 WritableMap params = Arguments.createMap();
                 try {
