@@ -100,18 +100,16 @@ async function transfer() {
 
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    try {
-      var accountsResponse = await connections[0].getAccounts();
-      var transferingAccount = await connections[0].createTransfer(
-        accountsResponse.accounts[0],
-        beneficiary,
-        1,
-        'test',
-      );
-      console.log(transferingAccount);
-    } catch (e) {
-      console.error(e);
-    }
+    var accountsResponse = await connections[0].getAccounts();
+    await connections[0]
+      .createTransfer(accountsResponse.accounts[0], beneficiary, 1, 'test')
+      .then(accountsResponse => console.log(accountsResponse))
+      .catch(error => {
+        console.log(error);
+        if (error.message.includes('Beneficiary will be activated')) {
+          console.log('This is a coolDownPeriod error1');
+        }
+      });
   }
 }
 

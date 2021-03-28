@@ -62,7 +62,7 @@ repositories {
 dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
-    implementation "com.dapi.connect:dapi:2.0.0-rc11"
+    implementation "com.dapi.connect:dapi:2.0.0-rc12"
     implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.6'
