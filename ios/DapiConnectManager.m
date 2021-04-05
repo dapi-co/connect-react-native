@@ -24,7 +24,8 @@ RCT_EXPORT_MODULE();
         // connect
         @"EventConnectSuccessful",
         @"EventConnectFailure",
-        @"EventAutoFlowWillTransfer",
+        @"EventDapiUIWillTransfer",
+        @"EventConnectDismissed"
     ];
 }
 
@@ -189,6 +190,11 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
 
     if (self.hasListeners)
         [self sendEventWithName:self.supportedEvents[0] body:body];
+}
+
+- (void)connectDidDismiss {
+    if (self.hasListeners)
+        [self sendEventWithName:self.supportedEvents[3] body:nil];
 }
 
 // MARK: - Helper Methods
