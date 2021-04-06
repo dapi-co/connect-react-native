@@ -7,6 +7,7 @@
 @interface DapiConnectManager () <DPCConnectDelegate>
 
 @property (nonatomic, assign) BOOL hasListeners;
+@property (nonatomic, assign) BOOL isStarted;
 
 @end
 
@@ -52,6 +53,7 @@ RCT_EXPORT_MODULE();
 RCT_EXPORT_METHOD(start:(NSString *)appKey clientUserID:(NSString *)clientUserID configurations:(NSDictionary<NSString *, id> *)configs resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [Dapi startWithAppKey:appKey clientUserID:clientUserID completion:^(Dapi * _Nullable dapi, NSError * _Nullable error) {
         if (dapi) {
+            self.isStarted = YES;
             resolve(nil);
         } else {
             reject(@"3001", error.localizedDescription, error);
@@ -75,8 +77,12 @@ RCT_EXPORT_METHOD(setClientUserID:(NSString *)clientUserID) {
     Dapi.sharedInstance.clientUserID = clientUserID;
 }
 
-RCT_EXPORT_METHOD(clientUserID:(NSString *)clientUserID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(clientUserID:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(Dapi.sharedInstance.clientUserID);
+}
+
+RCT_EXPORT_METHOD(isStarted:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve([NSNumber numberWithBool:self.isStarted]);
 }
 
 RCT_EXPORT_METHOD(getConnections:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
