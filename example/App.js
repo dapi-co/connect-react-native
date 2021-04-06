@@ -118,6 +118,11 @@ async function isStarted() {
   console.log(isStarted);
 }
 
+async function clientUserID() {
+  var clientUserID = await Dapi.instance.clientUserID();
+  console.log(clientUserID);
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -133,12 +138,10 @@ const App: () => React$Node = () => {
         )}
         <View style={styles.body}>
           <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Start Dapi</Text>
+            <Text style={styles.sectionTitle}>Dapi</Text>
             <Button title="Start Dapi" onPress={() => startDapi()} />
-          </View>
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Start Dapi</Text>
             <Button title="Is started" onPress={() => isStarted()} />
+            <Button title="Client User ID" onPress={() => clientUserID()} />
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Connect</Text>
