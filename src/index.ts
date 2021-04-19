@@ -9,7 +9,18 @@ import {
   IIdentityResponse,
   ITransactionResponse,
   IAccountsMetadataResponse,
+  DapiEnvironment,
 } from './internal/types';
+
+export class DapiConfigurations implements IDapiConfigurations {
+  environment?: DapiEnvironment
+  countries?: string[];
+
+  constructor(countries: string[], environment: DapiEnvironment = DapiEnvironment.production) {
+    this.environment = environment;
+    this.countries = countries;
+  }
+}
 
 export class DapiConnection implements IDapiConnection {
   private _clientUserID: string;

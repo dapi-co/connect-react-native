@@ -3,6 +3,16 @@ export interface IDapiConfigurations {
   endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]>;
   endPointExtraHeaderFields?: Map<DapiEndpoint, Map<string, string>>;
   endPointExtraBody?: Map<DapiEndpoint, Map<string, any>>;
+  environment?: DapiEnvironment;
+  /**
+   * Country codes of supported countries. (ISO 3166-2 format)
+   */
+  countries?: string[];
+}
+
+export enum DapiEnvironment {
+  sandbox,
+  production,
 }
 
 export enum DapiEndpoint {
@@ -14,7 +24,7 @@ export enum DapiEndpoint {
   delete,
 }
 
-interface IDapiQueryParameter {
+export interface IDapiQueryParameter {
   name: string;
   value: string;
 }
