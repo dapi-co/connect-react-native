@@ -51,7 +51,12 @@ RCT_EXPORT_MODULE();
 }
 
 RCT_EXPORT_METHOD(start:(NSString *)appKey clientUserID:(NSString *)clientUserID configurations:(NSDictionary<NSString *, id> *)configs resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    [Dapi startWithAppKey:appKey clientUserID:clientUserID completion:^(Dapi * _Nullable dapi, NSError * _Nullable error) {
+    NSArray *countries = [configs objectForKey:@"countries"];
+    NSString *environment = [configs objectForKey:@"environment"];
+    
+    DPCConfigurations *configurations = [[DPCConfigurations alloc] initWithCountries:countries environment:environment];
+    
+    [Dapi startWithAppKey:appKey clientUserID:clientUserID configuration:configurations completion:^(Dapi * _Nullable dapi, NSError * _Nullable error) {
         if (dapi) {
             self.isStarted = YES;
             resolve(nil);
