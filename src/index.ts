@@ -10,6 +10,8 @@ import {
   ITransactionResponse,
   IAccountsMetadataResponse,
   DapiEnvironment,
+  IBankBeneficiaryResponse,
+  IDapiResult,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -75,6 +77,9 @@ export class DapiConnection implements IDapiConnection {
     this._bankFullName = bankFullName;
     this._accounts = accounts;
   }
+  createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult> {
+    return NativeInterface.createBeneficiary(this.userID, beneficiary);
+  }
 
   getIdentity(): Promise<IIdentityResponse> {
     return NativeInterface.getIdentity(this.userID);
@@ -105,6 +110,10 @@ export class DapiConnection implements IDapiConnection {
     return NativeInterface.delete(this.userID);
   }
 
+  getBeneficiaries(): Promise<IBankBeneficiaryResponse> {
+    return NativeInterface.getBeneficiaries(this.userID);
+  }
+
   createTransfer(
     fromAccount: IAccount | null,
     toBeneficiary: IBeneficiary | null,
@@ -115,6 +124,21 @@ export class DapiConnection implements IDapiConnection {
       this.userID,
       fromAccount ? fromAccount.id : null,
       toBeneficiary,
+      amount,
+      remark,
+    );
+  }
+
+  createTransferToExistingBeneficiary(
+    fromAccount: IAccount,
+    toBeneficiaryID: string,
+    amount: number,
+    remark: string | null,
+  ): Promise<IAccount> {
+    return NativeInterface.createTransferToExistingBeneficiary(
+      this.userID,
+      fromAccount.id,
+      toBeneficiaryID,
       amount,
       remark,
     );

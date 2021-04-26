@@ -7,6 +7,8 @@ import {
   IIdentityResponse,
   IAccountsMetadataResponse,
   ITransactionResponse,
+  IBankBeneficiaryResponse,
+  IDapiResult,
 } from './types';
 
 export interface DapiConnectNativeModule {
@@ -20,7 +22,6 @@ export interface DapiConnectNativeModule {
   clientUserID(): Promise<string>;
   dismissConnect(): void;
   getConnections(): Promise<IDapiConnection[]>;
-
   getIdentity(userID: string): Promise<IIdentityResponse>;
   getAccounts(userID: string): Promise<IAccountResponse>;
   getTransactions(
@@ -38,6 +39,17 @@ export interface DapiConnectNativeModule {
     amount: number,
     remark: string | null,
   ): Promise<IAccount>;
+
+  createTransferToExistingBeneficiary(
+    userID: string,
+    accountID: string,
+    toBeneficiaryID: string,
+    amount: number,
+    remark: string | null,
+  ): Promise<IAccount>;
+
+  getBeneficiaries(userID: string): Promise<IBankBeneficiaryResponse>;
+  createBeneficiary(userID: string, beneficiary: IBeneficiary): Promise<IDapiResult>;
 
   isStarted() : Promise<boolean>
 }

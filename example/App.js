@@ -119,6 +119,65 @@ async function transfer() {
   }
 }
 
+async function transferToExistingBeneficiary() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var accountsResponse = await connections[0].getAccounts();
+    var beneficiariesResponse = await connections[0].getBeneficiaries();
+    await connections[0]
+      .createTransferToExistingBeneficiary(
+        accountsResponse.accounts[0],
+        beneficiariesResponse.beneficiaries[0].id,
+        1,
+      )
+      .then(transfer => console.log(transfer))
+      .catch(error => {
+        console.log(error);
+      });
+  }
+}
+
+async function getBeneficiaries() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    await connections[0]
+      .getBeneficiaries()
+      .then(beneficiaries => console.log(beneficiaries))
+      .catch(error => {
+        console.log(error);
+      });
+  }
+}
+
+async function createBeneficiary() {
+  var beneficiary = {
+    address: {
+      line1: 'baniyas road',
+      line2: 'dubai',
+      line3: 'united arab emirates',
+    },
+    accountNumber: '11352348001',
+    bankName: 'Sharjah Islamic Bank',
+    swiftCode: 'NBSHAEAS',
+    iban: 'AE270410000011352348001',
+    country: 'AE',
+    branchAddress: 'Sheikh Zayed Road',
+    branchName: 'Sheikh Zayed Road Branch',
+    phoneNumber: '+971501977498',
+    name: 'Kamil Abid Kamili',
+  };
+
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    await connections[0]
+      .createBeneficiary(beneficiary)
+      .then(beneficiary => console.log(beneficiary))
+      .catch(error => {
+        console.log(error);
+      });
+  }
+}
+
 async function isStarted() {
   var isStarted = await Dapi.instance.isStarted();
   console.log(isStarted);
@@ -169,6 +228,30 @@ const App: () => React$Node = () => {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Payment</Text>
             <Button title="Create Transfer" onPress={() => transfer()} />
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Create Transfer To Existing Beneficiary"
+              onPress={() => transferToExistingBeneficiary()}
+            />
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Get Beneficiaries"
+              onPress={() => getBeneficiaries()}
+            />
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Create Beneficiary"
+              onPress={() => createBeneficiary()}
+            />
           </View>
         </View>
       </ScrollView>

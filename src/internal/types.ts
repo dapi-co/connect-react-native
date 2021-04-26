@@ -59,6 +59,21 @@ export interface IAccountResponse {
   readonly accounts: IAccount[];
 }
 
+export interface IBankBeneficiary {
+  readonly name: string;
+  readonly iban: string | null;
+  readonly accountNumber: string | null;
+  readonly status: string | null;
+  readonly type: string;
+  readonly id: string;
+}
+
+export interface IBankBeneficiaryResponse {
+  readonly operationID: string;
+  readonly success: boolean;
+  readonly beneficiaries: IBankBeneficiary[];
+}
+
 export interface IAccount {
   readonly balance: number;
   readonly iban: string | null;
@@ -135,6 +150,13 @@ export interface ITransaction {
   readonly reference?: string | null;
 }
 
+export interface IDapiResult {
+  readonly operationID: string;
+  readonly status: string;
+  readonly success: boolean;
+  readonly message: string;
+}
+
 export enum BeneficiaryType {
   SAME = 'same',
   LOCAL = 'local',
@@ -142,7 +164,7 @@ export enum BeneficiaryType {
   OWN = 'own',
 }
 
-interface ITransferBounds {
+export interface ITransferBounds {
   minimum: number;
   currency: IPair;
   type: BeneficiaryType;
@@ -194,6 +216,8 @@ export interface IDapiConnection {
   ): Promise<ITransactionResponse>;
   getAccountsMetadata(): Promise<IAccountsMetadataResponse>;
   delete(): Promise<void>;
+  getBeneficiaries(): Promise<IBankBeneficiaryResponse>;
+  createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult>;
   createTransfer(
     fromAccount: IAccount,
     toBeneficiary: IBeneficiary,

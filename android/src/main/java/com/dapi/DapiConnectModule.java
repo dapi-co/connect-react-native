@@ -83,7 +83,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void isStarted(Promise promise){
+    public void isStarted(Promise promise) {
         resolve(Dapi.isStarted(), promise);
     }
 
@@ -140,7 +140,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 }
 
             }
-            Log.i("DapiSDK", String.valueOf(connectionsArray.size()));
+            Log.i("DapiSDK", "Connections: " + connectionsArray.size());
             resolve(connectionsArray, promise);
             return null;
         }, error -> {
@@ -292,15 +292,72 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         });
     }
 
+    @ReactMethod
+    public void createTransferToExistingBeneficiary(
+            String userID,
+            String accountID,
+            String receiverID,
+            int amount,
+            String remark,
+            Promise promise
+    ) {
+        setTransferListener(promise);
+        getOperatingConnection(userID, connection -> {
+            Accounts.DapiAccount account = getDapiAccount(accountID, connection);
+            connection.createTransferToExistingBeneficiary(account, receiverID, amount, remark);
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
+    @ReactMethod
+    public void getBeneficiaries(String userID, Promise promise) {
+        getOperatingConnection(userID, connection -> {
+            connection.getBeneficiaries(beneficiaries -> {
+                Log.i("DapiSDK", "getBeneficiaries call success");
+                resolve(beneficiaries, promise);
+                return null;
+            }, error -> {
+                reject(error, promise);
+                return null;
+            });
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
+    @ReactMethod
+    public void createBeneficiary(String userID, ReadableMap beneficiaryMap, Promise promise) {
+        getOperatingConnection(userID, connection -> {
+            connection.createBeneficiary(getBeneficiary(beneficiaryMap), createBeneficiary -> {
+                Log.i("DapiSDK", "createBeneficiary call success");
+                resolve(createBeneficiary, promise);
+                return null;
+            }, error -> {
+                reject(error, promise);
+                return null;
+            });
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
+
     /**
      * ************ HELPER FUNCTIONS ************
      */
 
     private <T> void resolve(T data, Promise promise) {
         try {
-            if (data instanceof WritableArray || data instanceof WritableMap || data instanceof Boolean){
+            if (data instanceof WritableArray || data instanceof WritableMap || data instanceof Boolean) {
                 promise.resolve(data);
-            }else {
+            } else {
                 promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(data)));
             }
 
@@ -312,11 +369,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     private <T> void reject(T error, Promise promise) {
         Log.e("DapiSDK", error.toString());
         try {
-            if (error instanceof DapiError){
-                Throwable throwable = new Throwable(((DapiError)error).getMsg());
+            if (error instanceof DapiError) {
+                Throwable throwable = new Throwable(((DapiError) error).getMsg());
                 JSONObject jsonObject = convertToJSONObject(error);
                 promise.reject("1015", throwable, JsonConvert.jsonToReact(jsonObject));
-            }else {
+            } else {
                 promise.reject("1015", error.toString());
             }
 
@@ -357,19 +414,19 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         boolean showExperimentalBanks = false;
         boolean showCloseButton = true;
 
-        if (configurations.hasKey("countries")){
+        if (configurations.hasKey("countries")) {
             countries = configurations.getArray("countries");
         }
 
-        if (configurations.hasKey("showLogos")){
+        if (configurations.hasKey("showLogos")) {
             showLogos = configurations.getBoolean("showLogos");
         }
 
-        if (configurations.hasKey("showExperimentalBanks")){
+        if (configurations.hasKey("showExperimentalBanks")) {
             showExperimentalBanks = configurations.getBoolean("showExperimentalBanks");
         }
 
-        if (configurations.hasKey("showCloseButton")){
+        if (configurations.hasKey("showCloseButton")) {
             showCloseButton = configurations.getBoolean("showCloseButton");
         }
 
@@ -391,13 +448,13 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             extraBody = configurations.getMap("endpointExtraBody").toHashMap();
         }
 
-        if (!configurations.hasKey("environment")){
+        if (!configurations.hasKey("environment")) {
             environment = DapiEnvironment.PRODUCTION;
         } else {
             String environmentString = configurations.getString("environment");
             if (environmentString.equals("sandbox")) {
                 environment = DapiEnvironment.SANDBOX;
-            } else  {
+            } else {
                 environment = DapiEnvironment.PRODUCTION;
             }
         }
@@ -491,7 +548,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         String[] countriesArray;
         if (countries != null) {
             countriesArray = toArray(countries.toArrayList(), String.class);
-        }else {
+        } else {
             countriesArray = new String[]{};
         }
 
@@ -509,7 +566,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked", "SameParameterValue"})
-    private <T>  T[] toArray(Collection collection, Class<T> clazz) {
+    private <T> T[] toArray(Collection collection, Class<T> clazz) {
         T[] array = (T[]) Array.newInstance(clazz, collection.size());
         return ((Collection<T>) collection).toArray(array);
     }
@@ -550,7 +607,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         return beneficiary;
     }
 
-    public Accounts.DapiAccount getDapiAccount(String accountID, DapiConnection connection) {
+    private Accounts.DapiAccount getDapiAccount(String accountID, DapiConnection connection) {
         for (Accounts.DapiAccount account : connection.getAccounts()) {
             if (account.getId().equals(accountID)) {
                 return account;
