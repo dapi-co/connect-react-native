@@ -2101,10 +2101,10 @@ concat-stream@^1.6.0:
     typedarray "^0.0.6"
 
 "connect-react-native@file:..":
-  version "2.4.0"
+  version "2.5.0"
 
 "connect-react-native@file:../":
-  version "2.4.0"
+  version "2.5.0"
 
 connect@^3.6.5:
   version "3.7.0"

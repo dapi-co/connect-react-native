@@ -31,9 +31,9 @@ async function startDapi() {
     countries: ['AE'],
   };
   await Dapi.instance.start(
-    '4e68230643d005ecb6cf287531dffb09f0987e073c1c2f0bbb45f8c877aa867f',
+    '3e682f8894d57cc2cd7ceba84e9a380b692ec34186cda5d9e0a53d6cf7d3d000',
     'JohnDoe',
-    configurations,
+    null//configurations,
   );
 }
 
@@ -72,6 +72,15 @@ async function getAccounts() {
     var accountsResponse = await connections[0].getAccounts();
 
     console.log(accountsResponse.accounts);
+  }
+}
+
+async function getBeneficiaries() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var beneficiariesResponse = await connections[0].getBeneficiaries();
+    
+    console.log(beneficiariesResponse.beneficiaries);
   }
 }
 
@@ -157,6 +166,7 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
+            <Button title="Beneficiaries" onPress={() => getBeneficiaries()} />
           </View>
 
           <View style={styles.sectionContainer}>
