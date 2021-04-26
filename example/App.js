@@ -35,17 +35,9 @@ async function startDapi() {
   const configurations = {
     environment: 'sandbox',
     countries: ['AE'],
-    endPointExtraHeaderFields: {
-      getIdentity: {Authorization: 'token'},
-      getAccounts: {Authorization: 'token'},
-      getAccountMetadata: {Authorization: 'token'},
-      getTransactions: {Authorization: 'token'},
-      createTransfer: {Authorization: 'token'},
-      delete: {Authorization: 'token'},
-    },
   };
   await Dapi.instance.start(
-    '3e682f8894d57cc2cd7ceba84e9a380b692ec34186cda5d9e0a53d6cf7d3d000',
+    '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
     'JohnDoe',
     configurations,
   );
@@ -86,15 +78,6 @@ async function getAccounts() {
     var accountsResponse = await connections[0].getAccounts();
 
     console.log(accountsResponse.accounts);
-  }
-}
-
-async function getBeneficiaries() {
-  var connections = await Dapi.instance.getConnections();
-  if (connections.length > 0) {
-    var beneficiariesResponse = await connections[0].getBeneficiaries();
-
-    console.log(beneficiariesResponse.beneficiaries);
   }
 }
 
@@ -140,6 +123,36 @@ async function transfer() {
   }
 }
 
+async function transferToExistingBeneficiary() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var accountsResponse = await connections[0].getAccounts();
+    var beneficiariesResponse = await connections[0].getBeneficiaries();
+    await connections[0]
+      .createTransferToExistingBeneficiary(
+        accountsResponse.accounts[0],
+        beneficiariesResponse.beneficiaries[0].id,
+        1,
+      )
+      .then(transfer => console.log(transfer))
+      .catch(error => {
+        console.log(error);
+      });
+  }
+}
+
+async function getBeneficiaries() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    await connections[0]
+      .getBeneficiaries()
+      .then(beneficiaries => console.log(beneficiaries))
+      .catch(error => {
+        console.log(error);
+      });
+  }
+}
+
 async function createBeneficiary() {
   var beneficiary = {
     address: {
@@ -160,10 +173,12 @@ async function createBeneficiary() {
 
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var createBeneficiaryResponse = await connections[0].createBeneficiary(
-      beneficiary,
-    );
-    console.log(createBeneficiaryResponse);
+    await connections[0]
+      .createBeneficiary(beneficiary)
+      .then(beneficiary => console.log(beneficiary))
+      .catch(error => {
+        console.log(error);
+      });
   }
 }
 
@@ -222,6 +237,30 @@ const App: () => React$Node = () => {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Payment</Text>
             <Button title="Create Transfer" onPress={() => transfer()} />
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Create Transfer To Existing Beneficiary"
+              onPress={() => transferToExistingBeneficiary()}
+            />
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Get Beneficiaries"
+              onPress={() => getBeneficiaries()}
+            />
+          </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Create Beneficiary"
+              onPress={() => createBeneficiary()}
+            />
           </View>
         </View>
       </ScrollView>

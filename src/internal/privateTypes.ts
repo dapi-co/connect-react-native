@@ -31,8 +31,6 @@ export interface DapiConnectNativeModule {
     endDateMilliseconds: number,
   ): Promise<ITransactionResponse>;
   delete(userID: string): Promise<any>;
-  getBeneficiaries(userID: string): Promise<IBankBeneficiaryResponse>;
-  createBeneficiary(userID: string, beneficiary: IBeneficiary): Promise<IDapiResult>;
   getAccountsMetadata(userID: string): Promise<IAccountsMetadataResponse>;
   createTransfer(
     userID: string,
@@ -41,6 +39,17 @@ export interface DapiConnectNativeModule {
     amount: number,
     remark: string | null,
   ): Promise<IAccount>;
+
+  createTransferToExistingBeneficiary(
+    userID: string,
+    accountID: string,
+    toBeneficiaryID: string,
+    amount: number,
+    remark: string | null,
+  ): Promise<IAccount>;
+
+  getBeneficiaries(userID: string): Promise<IBankBeneficiaryResponse>;
+  createBeneficiary(userID: string, beneficiary: IBeneficiary): Promise<IDapiResult>;
 
   isStarted() : Promise<boolean>
 }

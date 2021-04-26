@@ -128,6 +128,21 @@ export class DapiConnection implements IDapiConnection {
       remark,
     );
   }
+
+  createTransferToExistingBeneficiary(
+    fromAccount: IAccount,
+    toBeneficiaryID: string,
+    amount: number,
+    remark: string | null,
+  ): Promise<IAccount> {
+    return NativeInterface.createTransferToExistingBeneficiary(
+      this.userID,
+      fromAccount.id,
+      toBeneficiaryID,
+      amount,
+      remark,
+    );
+  }
 }
 
 export class DapiPair implements IPair {
