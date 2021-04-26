@@ -132,6 +132,31 @@ async function transfer() {
   }
 }
 
+async function createBeneficiary() {
+  var beneficiary = {
+    address: {
+      line1: 'baniyas road',
+      line2: 'dubai',
+      line3: 'united arab emirates',
+    },
+    accountNumber: '11352348001',
+    bankName: 'Sharjah Islamic Bank',
+    swiftCode: 'NBSHAEAS',
+    iban: 'AE270410000011352348001',
+    country: 'AE',
+    branchAddress: 'Sheikh Zayed Road',
+    branchName: 'Sheikh Zayed Road Branch',
+    phoneNumber: '+971501977498',
+    name: 'Kamil Abid Kamili',
+  };
+
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var createBeneficiaryResponse = await connections[0].createBeneficiary(beneficiary);
+    console.log(createBeneficiaryResponse);
+  }
+}
+
 async function isStarted() {
   var isStarted = await Dapi.instance.isStarted();
   console.log(isStarted);
@@ -172,6 +197,7 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
+            <Button title="Create Beneficiary" onPress={() => createBeneficiary()} />
             <Button title="Beneficiaries" onPress={() => getBeneficiaries()} />
           </View>
 

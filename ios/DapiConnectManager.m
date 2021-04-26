@@ -149,6 +149,16 @@ RCT_EXPORT_METHOD(getBeneficiaries:(NSString *)userID resolver:(RCTPromiseResolv
     }];
 }
 
+RCT_EXPORT_METHOD(createBeneficiary:(NSString *)userID beneficiary:(NSDictionary<NSString *, id> *)beneficiary resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
+        DPCBeneficiary *nativeBeneficiary = [self nativeBeneficiaryInfoFromDictionary:beneficiary];
+        [bankConnection createBeneficiary:nativeBeneficiary completion:^(DPCResult * _Nullable result, NSError * _Nullable error, NSString * _Nullable operationID) {
+            [self respondForDictionaryRepresentableObject:result error:error resolver:resolve rejecter:reject];
+        }];
+    });
+}
+
 RCT_EXPORT_METHOD(getAccountsMetadata:(NSString *)userID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
     [bankConnection getAccountMetadata:^(DPCBankMetadata * _Nullable accounts, NSError * _Nullable error, NSString * _Nullable operationID) {

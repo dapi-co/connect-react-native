@@ -150,6 +150,13 @@ export interface ITransaction {
   readonly reference?: string | null;
 }
 
+export interface IDapiResult {
+  readonly operationID: string;
+  readonly status: string;
+  readonly success: boolean;
+  readonly message: string;
+}
+
 export enum BeneficiaryType {
   SAME = 'same',
   LOCAL = 'local',
@@ -157,7 +164,7 @@ export enum BeneficiaryType {
   OWN = 'own',
 }
 
-interface ITransferBounds {
+export interface ITransferBounds {
   minimum: number;
   currency: IPair;
   type: BeneficiaryType;
@@ -210,6 +217,7 @@ export interface IDapiConnection {
   getAccountsMetadata(): Promise<IAccountsMetadataResponse>;
   delete(): Promise<void>;
   getBeneficiaries(): Promise<IBankBeneficiaryResponse>;
+  createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult>;
   createTransfer(
     fromAccount: IAccount,
     toBeneficiary: IBeneficiary,

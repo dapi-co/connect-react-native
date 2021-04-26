@@ -11,6 +11,7 @@ import {
   IAccountsMetadataResponse,
   DapiEnvironment,
   IBankBeneficiaryResponse,
+  IDapiResult,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -75,6 +76,9 @@ export class DapiConnection implements IDapiConnection {
     this._bankShortName = bankShortName;
     this._bankFullName = bankFullName;
     this._accounts = accounts;
+  }
+  createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult> {
+    return NativeInterface.createBeneficiary(this.userID, beneficiary);
   }
 
   getIdentity(): Promise<IIdentityResponse> {
