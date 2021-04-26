@@ -56,6 +56,14 @@ RCT_EXPORT_METHOD(start:(NSString *)appKey clientUserID:(NSString *)clientUserID
     
     DPCConfigurations *configurations = [[DPCConfigurations alloc] initWithCountries:countries environment:environment];
     
+    NSDictionary<NSString *, NSDictionary<NSString *, NSString *> *> *endPointExtraHeaderFields = [configs objectForKey:@"endPointExtraHeaderFields"];
+    NSDictionary<NSString *, NSDictionary<NSString *, id> *> *endPointExtraBody = [configs objectForKey:@"endPointExtraBody"];
+    NSDictionary<NSString *, NSString *> *endpoints = [configs objectForKey:@"endpoints"];
+
+    configurations.endPointExtraHeaderFields = endPointExtraHeaderFields;
+    configurations.endPointExtraBody = endPointExtraBody;
+    configurations.endpoints = endpoints;
+
     [Dapi startWithAppKey:appKey clientUserID:clientUserID configuration:configurations completion:^(Dapi * _Nullable dapi, NSError * _Nullable error) {
         if (dapi) {
             self.isStarted = YES;

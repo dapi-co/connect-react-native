@@ -35,11 +35,19 @@ async function startDapi() {
   const configurations = {
     environment: 'sandbox',
     countries: ['AE'],
+    endPointExtraHeaderFields: {
+      getIdentity: {Authorization: 'token'},
+      getAccounts: {Authorization: 'token'},
+      getAccountMetadata: {Authorization: 'token'},
+      getTransactions: {Authorization: 'token'},
+      createTransfer: {Authorization: 'token'},
+      delete: {Authorization: 'token'},
+    },
   };
   await Dapi.instance.start(
     '3e682f8894d57cc2cd7ceba84e9a380b692ec34186cda5d9e0a53d6cf7d3d000',
     'JohnDoe',
-    null//configurations,
+    configurations,
   );
 }
 
@@ -85,7 +93,7 @@ async function getBeneficiaries() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
     var beneficiariesResponse = await connections[0].getBeneficiaries();
-    
+
     console.log(beneficiariesResponse.beneficiaries);
   }
 }
@@ -152,7 +160,9 @@ async function createBeneficiary() {
 
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var createBeneficiaryResponse = await connections[0].createBeneficiary(beneficiary);
+    var createBeneficiaryResponse = await connections[0].createBeneficiary(
+      beneficiary,
+    );
     console.log(createBeneficiaryResponse);
   }
 }
@@ -197,7 +207,10 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
-            <Button title="Create Beneficiary" onPress={() => createBeneficiary()} />
+            <Button
+              title="Create Beneficiary"
+              onPress={() => createBeneficiary()}
+            />
             <Button title="Beneficiaries" onPress={() => getBeneficiaries()} />
           </View>
 
