@@ -10,6 +10,7 @@ import {
   ITransactionResponse,
   IAccountsMetadataResponse,
   DapiEnvironment,
+  IBankBeneficiaryResponse,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -103,6 +104,10 @@ export class DapiConnection implements IDapiConnection {
 
   delete(): Promise<void> {
     return NativeInterface.delete(this.userID);
+  }
+
+  getBeneficiaries(): Promise<IBankBeneficiaryResponse> {
+    return NativeInterface.getBeneficiaries(this.userID);
   }
 
   createTransfer(

@@ -27,11 +27,11 @@ const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 async function startDapi() {
   const configurations = {
-    environment: 'production',
-    countries: ['EG'],
+    environment: 'sandbox',
+    countries: ['AE'],
   };
   await Dapi.instance.start(
-    '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
+    '4e68230643d005ecb6cf287531dffb09f0987e073c1c2f0bbb45f8c877aa867f',
     'JohnDoe',
     configurations,
   );
