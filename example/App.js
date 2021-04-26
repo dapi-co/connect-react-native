@@ -25,6 +25,12 @@ import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
+const configurations = {
+  environment: 'production',
+  countries: ['AE'],
+  showLogos: false,
+};
+
 async function startDapi() {
   const configurations = {
     environment: 'sandbox',
@@ -120,7 +126,7 @@ async function transfer() {
       .catch(error => {
         console.log(error);
         if (error.message.includes('Beneficiary will be activated')) {
-          console.log('This is a coolDownPeriod error1');
+          console.log('This is a coolDownPeriod error');
         }
       });
   }

@@ -12,6 +12,7 @@ import com.dapi.connect.data.models.DapiBeneficiary;
 import com.dapi.connect.data.models.DapiConfigurations;
 import com.dapi.connect.data.models.DapiConnection;
 import com.dapi.connect.data.models.DapiEndpoints;
+import com.dapi.connect.data.models.DapiEnvironment;
 import com.dapi.connect.data.models.DapiError;
 import com.dapi.connect.data.models.LinesAddress;
 import com.facebook.react.bridge.Callback;
@@ -20,6 +21,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -38,6 +40,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -347,6 +352,27 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Map<String, Object> extraHeaderFields;
         Map<String, Object> extraBody;
         DapiEndpoints endpoints;
+        DapiEnvironment environment;
+        ReadableArray countries = null;
+        boolean showLogos = true;
+        boolean showExperimentalBanks = false;
+        boolean showCloseButton = true;
+
+        if (configurations.hasKey("countries")){
+            countries = configurations.getArray("countries");
+        }
+
+        if (configurations.hasKey("showLogos")){
+            showLogos = configurations.getBoolean("showLogos");
+        }
+
+        if (configurations.hasKey("showExperimentalBanks")){
+            showExperimentalBanks = configurations.getBoolean("showExperimentalBanks");
+        }
+
+        if (configurations.hasKey("showCloseButton")){
+            showCloseButton = configurations.getBoolean("showCloseButton");
+        }
 
         if (!configurations.hasKey("endpointExtraQueryItems")) {
             extraQueryParameters = new HashMap<String, Object>();
@@ -364,6 +390,17 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             extraBody = new HashMap<String, Object>();
         } else {
             extraBody = configurations.getMap("endpointExtraBody").toHashMap();
+        }
+
+        if (!configurations.hasKey("environment")){
+            environment = DapiEnvironment.PRODUCTION;
+        } else {
+            String environmentString = configurations.getString("environment");
+            if (environmentString.equals("sandbox")) {
+                environment = DapiEnvironment.SANDBOX;
+            } else  {
+                environment = DapiEnvironment.PRODUCTION;
+            }
         }
 
         if (!configurations.hasKey("endpoints")) {
@@ -451,12 +488,31 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 extraParamsMapOfStrings.put(entry.getKey(), (String) entry.getValue());
             }
         }
+
+        String[] countriesArray;
+        if (countries != null) {
+            countriesArray = toArray(countries.toArrayList(), String.class);
+        }else {
+            countriesArray = new String[]{};
+        }
+
         return new DapiConfigurations(
                 endpoints,
                 extraHeadersMapOfStrings,
                 extraParamsMapOfStrings,
-                extraBodyMapOfStrings
+                extraBodyMapOfStrings,
+                environment,
+                countriesArray,
+                showLogos,
+                showExperimentalBanks,
+                showCloseButton
         );
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked", "SameParameterValue"})
+    private <T>  T[] toArray(Collection collection, Class<T> clazz) {
+        T[] array = (T[]) Array.newInstance(clazz, collection.size());
+        return ((Collection<T>) collection).toArray(array);
     }
 
     private DapiBeneficiary getBeneficiary(ReadableMap beneficiaryMap) {
