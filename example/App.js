@@ -32,10 +32,6 @@ const configurations = {
 };
 
 async function startDapi() {
-  const configurations = {
-    environment: 'production',
-    countries: ['EG'],
-  };
   await Dapi.instance.start(
     '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
     'JohnDoe',

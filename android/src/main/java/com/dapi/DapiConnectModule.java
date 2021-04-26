@@ -15,7 +15,9 @@ import com.dapi.connect.data.models.DapiEndpoints;
 import com.dapi.connect.data.models.DapiEnvironment;
 import com.dapi.connect.data.models.DapiError;
 import com.dapi.connect.data.models.LinesAddress;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -28,24 +30,19 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.module.annotations.ReactModule;
-import com.facebook.react.bridge.Dynamic;
-import com.google.gson.Gson;
-
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.bridge.Arguments;
-
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -70,7 +67,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void start(String appKey, String clientUserID, ReadableMap configurationMap, Promise promise) {
         Dapi.start(
-                getCurrentActivity().getApplication(),
+                Objects.requireNonNull(getCurrentActivity()).getApplication(),
                 appKey,
                 clientUserID,
                 getConfigurations(configurationMap), () -> {
@@ -103,6 +100,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Log.i("DapiSDK", "Connect is dismissed");
     }
 
+    @SuppressWarnings("ConstantConditions")
     @ReactMethod
     public void getConnections(Promise promise) {
         Dapi.getConnections(connections -> {
@@ -344,6 +342,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 .emit(eventName, params);
     }
 
+    @SuppressWarnings({"ConstantConditions", "unchecked", "rawtypes"})
     private DapiConfigurations getConfigurations(ReadableMap configurations) {
         if (configurations == null) {
             return null;
