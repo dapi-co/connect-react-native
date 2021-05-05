@@ -32,15 +32,22 @@ const configurations = {
 };
 
 async function startDapi() {
-  const configurations = {
-    environment: 'sandbox',
-    countries: ['AE'],
-  };
   await Dapi.instance.start(
     '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
     'JohnDoe',
     configurations,
   );
+
+  const newConfigurations = {
+    environment: 'sandbox',
+    countries: ['AE'],
+    showLogos: true,
+  };
+  
+  Dapi.instance.setConfigurations(newConfigurations);
+  var retrievedConfigurations = await Dapi.instance.configurations()
+  console.log(retrievedConfigurations);
+
 }
 
 function presentConnect() {
@@ -56,6 +63,11 @@ function presentConnect() {
   dapiConnectManagerEmitter.addListener('EventConnectDismissed', _ => {
     console.log('Connect is dismissed');
   });
+
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectBankRequest',
+    bankRequestResult => console.log(bankRequestResult),
+  );
 }
 
 async function getConnections() {
@@ -91,6 +103,16 @@ async function getMetadata() {
 }
 
 async function transfer() {
+
+  dapiConnectManagerEmitter.addListener('EventDapiTransferUIDismissed', _ => {
+    console.log('Transfer UI is dismissed');
+  });
+
+  dapiConnectManagerEmitter.addListener(
+    'EventDapiUIWillTransfer',
+    uiWillTransferResult => console.log(uiWillTransferResult),
+  );
+
   var beneficiary = {
     address: {
       line1: 'baniyas road',
@@ -112,7 +134,7 @@ async function transfer() {
   if (connections.length > 0) {
     var accountsResponse = await connections[0].getAccounts();
     await connections[0]
-      .createTransfer(accountsResponse.accounts[0], beneficiary, 1, 'test')
+      .createTransfer(null, beneficiary, 0, 'test')
       .then(accountsResponse => console.log(accountsResponse))
       .catch(error => {
         console.log(error);

@@ -214,6 +214,14 @@ export default class Dapi {
     return NativeInterface.clientUserID();
   }
 
+  setConfigurations(configurations: IDapiConfigurations): void {
+    NativeInterface.setConfigurations(configurations);
+  }
+
+  configurations(): Promise<IDapiConfigurations> {
+    return NativeInterface.configurations();
+  }
+
   dismissConnect(): void {
     NativeInterface.dismissConnect();
   }

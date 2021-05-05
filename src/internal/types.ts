@@ -228,9 +228,9 @@ export interface IDapiConnection {
     amount: number,
     remark: string,
   ): Promise<IAccount>;
+
   createTransferToExistingBeneficiary(
-    userID: string,
-    accountID: string,
+    fromAccount: IAccount,
     toBeneficiaryID: string,
     amount: number,
     remark: string | null,
