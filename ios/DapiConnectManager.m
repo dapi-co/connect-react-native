@@ -328,7 +328,7 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
     configurations.endpoints = endpoints;
     configurations.showCloseButton = [[configs objectForKey:@"showCloseButton"] boolValue];
     configurations.showLogos = [[configs objectForKey:@"showLogos"] boolValue];
-    configurations.showAddAccountButton = [[configs objectForKey:@"showAddAccountButton"] boolValue];
+    configurations.showAddAccountButton = [[configs objectForKey:@"showAddButton"] boolValue];
 
     return configurations;
 }
@@ -343,7 +343,7 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
         @"endPointExtraBody": configs.endPointExtraBody ?: [NSNull null],
         @"showCloseButton": [NSNumber numberWithBool:configs.showCloseButton],
         @"showLogos": [NSNumber numberWithBool:configs.showCloseButton],
-        @"showAddAccountButton": [NSNumber numberWithBool:configs.showAddAccountButton],
+        @"showAddButton": [NSNumber numberWithBool:configs.showAddAccountButton],
     };
 }
 

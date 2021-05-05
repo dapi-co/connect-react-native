@@ -45,6 +45,17 @@ async function startDapi() {
     'JohnDoe',
     configs,
   );
+
+  const newConfigurations = {
+    environment: 'sandbox',
+    countries: ['AE'],
+    showLogos: true,
+  };
+  
+  Dapi.instance.setConfigurations(newConfigurations);
+  var retrievedConfigurations = await Dapi.instance.configurations()
+  console.log(retrievedConfigurations);
+
 }
 
 function generateConfigs(authKey) {
@@ -56,7 +67,7 @@ function generateConfigs(authKey) {
   extraHeaders.set(DapiEndpoint.getIdentity, authHeader);
   extraHeaders.set(DapiEndpoint.getAccounts, authHeader);
   configs.endPointExtraHeaderFields = extraHeaders;
-  configs.showAddAccountButton = false;
+  configs.showAddButton = false;
   
   console.log(configs);
 
@@ -84,6 +95,11 @@ function presentConnect() {
   dapiConnectManagerEmitter.addListener('EventConnectDismissed', _ => {
     console.log('Connect is dismissed');
   });
+
+  dapiConnectManagerEmitter.addListener(
+    'EventConnectBankRequest',
+    bankRequestResult => console.log(bankRequestResult),
+  );
 }
 
 async function getConnections() {
@@ -118,6 +134,16 @@ async function getMetadata() {
 }
 
 async function transfer() {
+
+  dapiConnectManagerEmitter.addListener('EventDapiTransferUIDismissed', _ => {
+    console.log('Transfer UI is dismissed');
+  });
+
+  dapiConnectManagerEmitter.addListener(
+    'EventDapiUIWillTransfer',
+    uiWillTransferResult => console.log(uiWillTransferResult),
+  );
+
   var beneficiary = {
     address: {
       line1: 'baniyas road',

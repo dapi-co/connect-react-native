@@ -23,19 +23,21 @@ export interface IDapiConfigurations {
    * Controls whether bank account connect UI shows the bank logos.
    * The value is true by default.
    */
-  showLogos: boolean;
+  showLogos?: boolean;
 
   /**
    * Controls whether bank account connect UI shows a close button.
    * The value is true by default.
    */
-   showCloseButton: boolean;
+   showCloseButton?: boolean;
 
   /**
    * Controls whether account selection UI shows a add account button.
    * The value is true by default.
    */
-   showAddAccountButton: boolean;
+   showAddButton?: boolean;
+
+   showExperimentalBanks?: boolean;
 }
 
 export enum DapiEnvironment {
@@ -255,6 +257,13 @@ export interface IDapiConnection {
     toBeneficiary: IBeneficiary,
     amount: number,
     remark: string,
+  ): Promise<IAccount>;
+
+  createTransferToExistingBeneficiary(
+    fromAccount: IAccount,
+    toBeneficiaryID: string,
+    amount: number,
+    remark: string | null,
   ): Promise<IAccount>;
 }
 

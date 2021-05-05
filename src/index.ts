@@ -23,17 +23,14 @@ export class DapiConfigurations implements IDapiConfigurations {
   endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]> | undefined;
   endPointExtraHeaderFields?: Map<DapiEndpoint, Map<string, string>> | undefined;
   endPointExtraBody?: Map<DapiEndpoint, Map<string, any>> | undefined;
-  
-  showLogos: boolean;
-  showCloseButton: boolean;
-  showAddAccountButton: boolean;
+  showLogos?: boolean | undefined;
+  showCloseButton?: boolean | undefined;
+  showAddButton?: boolean | undefined;
+  showExperimentalBanks?: boolean;
 
   constructor(countries: string[], environment: DapiEnvironment = DapiEnvironment.production) {
     this.environment = environment;
     this.countries = countries;
-    this.showLogos = true;
-    this.showCloseButton = true;
-    this.showAddAccountButton = true;
   }
 }
 
