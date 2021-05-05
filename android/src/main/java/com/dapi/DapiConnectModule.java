@@ -702,7 +702,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             @Override
             public void onTransferSuccess(@NotNull Accounts.DapiAccount senderAccount, double sentAmount, @org.jetbrains.annotations.Nullable String reference) {
                 HashMap<String, Object> successfulTransferMap = new HashMap<>();
-                successfulTransferMap.put("account", convertToJSONObject(senderAccount));
+                successfulTransferMap.put("account", senderAccount.getId());
                 successfulTransferMap.put("amount", sentAmount);
                 Log.i("DapiSDK", "createTransfer call success");
                 resolve(successfulTransferMap, promise);
