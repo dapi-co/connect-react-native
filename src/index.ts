@@ -14,6 +14,7 @@ import {
   IDapiResult,
   DapiEndpoint,
   IDapiQueryParameter,
+  ITransferResponse,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -31,6 +32,16 @@ export class DapiConfigurations implements IDapiConfigurations {
   constructor(countries: string[], environment: DapiEnvironment = DapiEnvironment.production) {
     this.environment = environment;
     this.countries = countries;
+  }
+}
+
+class TransferResponse implements ITransferResponse {
+  account?: IAccount;
+  amount: number;
+
+  constructor(amount: number, account?: IAccount) {
+    this.account = account;
+    this.amount = amount;
   }
 }
 
@@ -124,34 +135,63 @@ export class DapiConnection implements IDapiConnection {
     return NativeInterface.getBeneficiaries(this.userID);
   }
 
-  createTransfer(
+  async createTransfer(
     fromAccount: IAccount | null,
     toBeneficiary: IBeneficiary | null,
     amount: number,
     remark: string | null,
-  ): Promise<IAccount> {
-    return NativeInterface.createTransfer(
+  ): Promise<ITransferResponse> {
+
+    let transferResponse = await NativeInterface.createTransfer(
       this.userID,
       fromAccount ? fromAccount.id : null,
       toBeneficiary,
       amount,
       remark,
     );
+
+    let accountID = transferResponse['account'];
+    let amnt = transferResponse['amount'];
+
+    let sendingAccount: IAccount = fromAccount ?? this._accounts[0];
+    this._accounts.find((acc, i, accs) => {
+      if (acc.id == accountID) {
+        sendingAccount = acc
+      }
+    })
+
+    return new TransferResponse(amnt, sendingAccount);
+
   }
 
-  createTransferToExistingBeneficiary(
+  async createTransferToExistingBeneficiary(
     fromAccount: IAccount,
     toBeneficiaryID: string,
     amount: number,
     remark: string | null,
-  ): Promise<IAccount> {
-    return NativeInterface.createTransferToExistingBeneficiary(
+  ): Promise<ITransferResponse> {
+
+    
+
+    let transferResponse = await NativeInterface.createTransferToExistingBeneficiary(
       this.userID,
       fromAccount.id,
       toBeneficiaryID,
       amount,
       remark,
     );
+
+    let accountID = transferResponse['account'];
+    let amnt = transferResponse['amount'];
+
+    let sendingAccount: IAccount = fromAccount;
+    this._accounts.find((acc, i, accs) => {
+      if (acc.id == accountID) {
+        sendingAccount = acc
+      }
+    })
+
+    return new TransferResponse(amnt, sendingAccount);
   }
 }
 

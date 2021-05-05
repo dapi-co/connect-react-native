@@ -93,6 +93,11 @@ export interface IAccountResponse {
   readonly accounts: IAccount[];
 }
 
+export interface ITransferResponse {
+  readonly account?: IAccount;
+  readonly amount: number;
+}
+
 export interface IBankBeneficiary {
   readonly name: string;
   readonly iban: string | null;
@@ -257,14 +262,14 @@ export interface IDapiConnection {
     toBeneficiary: IBeneficiary,
     amount: number,
     remark: string,
-  ): Promise<IAccount>;
+  ): Promise<ITransferResponse>;
 
   createTransferToExistingBeneficiary(
     fromAccount: IAccount,
     toBeneficiaryID: string,
     amount: number,
     remark: string | null,
-  ): Promise<IAccount>;
+  ): Promise<ITransferResponse>;
 }
 
 export type IAddress = IAddressGeneral;

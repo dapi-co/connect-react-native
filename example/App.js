@@ -20,23 +20,13 @@ import {
 
 import Dapi, { DapiConfigurations, DapiEndpoint, DapiEnvironment } from 'connect-react-native';
 
-import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
+import { Header, Colors } from 'react-native/Libraries/NewAppScreen';
 
-const {DapiConnectManager} = NativeModules;
+const { DapiConnectManager } = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 async function startDapi() {
-  // const configurations = {
-  //   environment: 'production',
-  //   endPointExtraHeaderFields: {
-  //     getIdentity: { Authorization: 'token' },
-  //     getAccounts: { Authorization: 'token' },
-  //     getAccountMetadata: { Authorization: 'token' },
-  //     getTransactions: { Authorization: 'token' },
-  //     createTransfer: { Authorization: 'token' },
-  //     delete: { Authorization: 'token' },
-  //   },
-  // };
+
 
   let configs = generateConfigs('ABC');
 
@@ -51,7 +41,7 @@ async function startDapi() {
     countries: ['AE'],
     showLogos: true,
   };
-  
+
   Dapi.instance.setConfigurations(newConfigurations);
   var retrievedConfigurations = await Dapi.instance.configurations()
   console.log(retrievedConfigurations);
@@ -59,19 +49,31 @@ async function startDapi() {
 }
 
 function generateConfigs(authKey) {
-  let configs = new DapiConfigurations(["AE"], DapiEnvironment.production);
-  let authHeader = new Map()
-  authHeader.set('Authorization', authKey);
+  // let configs = new DapiConfigurations(["AE"], DapiEnvironment.production);
+  // let authHeader = new Map()
+  // authHeader.set('Authorization', authKey);
 
-  let extraHeaders = new Map()
-  extraHeaders.set(DapiEndpoint.getIdentity, authHeader);
-  extraHeaders.set(DapiEndpoint.getAccounts, authHeader);
-  configs.endPointExtraHeaderFields = extraHeaders;
-  configs.showAddButton = false;
-  
-  console.log(configs);
+  // let extraHeaders = new Map()
+  // extraHeaders.set(DapiEndpoint.getIdentity, authHeader);
+  // extraHeaders.set(DapiEndpoint.getAccounts, authHeader);
+  // configs.endPointExtraHeaderFields = extraHeaders;
+  // configs.showAddButton = false;
 
-  return configs;
+  // console.log(configs);
+
+  const configurations = {
+    environment: 'production',
+    showAddButton: false,
+    endPointExtraHeaderFields: {
+      'data/identity/get': { 'Authorization': authKey },
+      'data/accounts/get': { 'Authorization': authKey },
+      'metadata/accounts/get': { 'Authorization': authKey },
+      'data/transactions/get': { 'Authorization': authKey },
+      'payment/transfer/autoflow': { 'Authorization': authKey },
+    },
+  };
+
+  return configurations;
 }
 
 function resetConfigs() {

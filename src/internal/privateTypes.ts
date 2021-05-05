@@ -9,6 +9,7 @@ import {
   ITransactionResponse,
   IBankBeneficiaryResponse,
   IDapiResult,
+  ITransferResponse,
 } from './types';
 
 export interface DapiConnectNativeModule {
@@ -40,7 +41,7 @@ export interface DapiConnectNativeModule {
     toBeneficiary: IBeneficiary | null,
     amount: number,
     remark: string | null,
-  ): Promise<IAccount>;
+  ): Promise<any>;
 
   createTransferToExistingBeneficiary(
     userID: string,
@@ -48,7 +49,7 @@ export interface DapiConnectNativeModule {
     toBeneficiaryID: string,
     amount: number,
     remark: string | null,
-  ): Promise<IAccount>;
+  ): Promise<any>;
 
   getBeneficiaries(userID: string): Promise<IBankBeneficiaryResponse>;
   createBeneficiary(userID: string, beneficiary: IBeneficiary): Promise<IDapiResult>;
