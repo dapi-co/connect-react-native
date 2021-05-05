@@ -100,6 +100,32 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Log.i("DapiSDK", "Connect is dismissed");
     }
 
+
+    @ReactMethod
+    public void setClientUserID(String clientUserID) {
+        Dapi.setClientUserID(clientUserID);
+    }
+
+    @ReactMethod
+    public void clientUserID(Promise promise) {
+        String clientUserID = Dapi.getClientUserID();
+        if (clientUserID == null) {
+            reject("ClientUserID is not set", promise);
+        } else {
+            resolve(clientUserID, promise);
+        }
+    }
+
+    @ReactMethod
+    public void setConfigurations(ReadableMap configurationMap) {
+        Dapi.setConfigurations(getConfigurations(configurationMap));
+    }
+
+    @ReactMethod
+    public void configurations(Promise promise) {
+        resolve(Dapi.getConfigurations(), promise);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @ReactMethod
     public void getConnections(Promise promise) {
@@ -149,21 +175,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         });
     }
 
-
-    @ReactMethod
-    public void setClientUserID(String clientUserID) {
-        Dapi.setClientUserID(clientUserID);
-    }
-
-    @ReactMethod
-    public void clientUserID(Promise promise) {
-        String clientUserID = Dapi.getClientUserID();
-        if (clientUserID == null) {
-            reject("ClientUserID is not set", promise);
-        } else {
-            resolve(clientUserID, promise);
-        }
-    }
 
     @ReactMethod
     public void getIdentity(String userID, Promise promise) {
@@ -276,7 +287,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String userID,
             String accountID,
             ReadableMap beneficiaryMap,
-            int amount,
+            double amount,
             String remark,
             Promise promise
     ) {
@@ -297,7 +308,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             String userID,
             String accountID,
             String receiverID,
-            int amount,
+            double amount,
             String remark,
             Promise promise
     ) {
@@ -413,6 +424,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         boolean showLogos = true;
         boolean showExperimentalBanks = false;
         boolean showCloseButton = true;
+        boolean showAddButton = true;
 
         if (configurations.hasKey("countries")) {
             countries = configurations.getArray("countries");
@@ -428,6 +440,10 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
         if (configurations.hasKey("showCloseButton")) {
             showCloseButton = configurations.getBoolean("showCloseButton");
+        }
+
+        if (configurations.hasKey("showAddButton")) {
+            showAddButton = configurations.getBoolean("showAddButton");
         }
 
         if (!configurations.hasKey("endpointExtraQueryItems")) {
@@ -561,7 +577,8 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 countriesArray,
                 showLogos,
                 showExperimentalBanks,
-                showCloseButton
+                showCloseButton,
+                showAddButton
         );
     }
 
@@ -634,6 +651,14 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     private void setConnectListener() {
         Dapi.setConnectListener(new OnDapiConnectListener() {
             @Override
+            public void onBankRequest(@NotNull String bankName, @NotNull String iban) {
+                WritableMap params = Arguments.createMap();
+                params.putString("bankName", bankName);
+                params.putString("iban", iban);
+                sendEvent(getReactApplicationContext(), "EventConnectBankRequest", params);
+            }
+
+            @Override
             public void onDismissed() {
                 sendEvent(getReactApplicationContext(), "EventConnectDismissed", null);
             }
@@ -663,9 +688,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     private void setTransferListener(Promise promise) {
         Dapi.setTransferListener(new OnDapiTransferListener() {
             @Override
-            public void willTransferAmount(int sentAmount, @NotNull Accounts.DapiAccount senderAccount) {
+            public void willTransferAmount(double sentAmount, @NotNull Accounts.DapiAccount senderAccount) {
                 WritableMap params = Arguments.createMap();
-                params.putInt("amount", sentAmount);
+                params.putDouble("amount", sentAmount);
                 try {
                     params.putMap("account", JsonConvert.jsonToReact(convertToJSONObject(senderAccount)));
                 } catch (JSONException e) {
@@ -675,7 +700,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onTransferSuccess(@NotNull Accounts.DapiAccount senderAccount, int sentAmount, String reference) {
+            public void onTransferSuccess(@NotNull Accounts.DapiAccount senderAccount, double sentAmount, @org.jetbrains.annotations.Nullable String reference) {
                 HashMap<String, Object> successfulTransferMap = new HashMap<>();
                 successfulTransferMap.put("account", convertToJSONObject(senderAccount));
                 successfulTransferMap.put("amount", sentAmount);
@@ -686,6 +711,11 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             @Override
             public void onTransferFailure(@org.jetbrains.annotations.Nullable Accounts.DapiAccount dapiAccount, @NotNull DapiError error) {
                 reject(error, promise);
+            }
+
+            @Override
+            public void onUiDismissed() {
+                sendEvent(getReactApplicationContext(), "EventDapiTransferUIDismissed", null);
             }
         });
     }
