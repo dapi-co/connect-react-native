@@ -8,6 +8,9 @@ export interface IDapiConfigurations {
    * Country codes of supported countries. (ISO 3166-2 format)
    */
   countries?: string[];
+  showExperimentalBanks?: boolean
+  showCloseButton?: boolean
+  showAddButton?: boolean
 }
 
 export enum DapiEnvironment {
@@ -21,6 +24,7 @@ export enum DapiEndpoint {
   getAccountMetadata,
   getTransactions,
   createTransfer,
+  createTransferToExistingBeneficiary,
   delete,
 }
 
@@ -223,6 +227,13 @@ export interface IDapiConnection {
     toBeneficiary: IBeneficiary,
     amount: number,
     remark: string,
+  ): Promise<IAccount>;
+  createTransferToExistingBeneficiary(
+    userID: string,
+    accountID: string,
+    toBeneficiaryID: string,
+    amount: number,
+    remark: string | null,
   ): Promise<IAccount>;
 }
 
