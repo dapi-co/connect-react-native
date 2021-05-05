@@ -26,7 +26,9 @@ RCT_EXPORT_MODULE();
         @"EventConnectSuccessful",
         @"EventConnectFailure",
         @"EventDapiUIWillTransfer",
-        @"EventConnectDismissed"
+        @"EventConnectDismissed",
+        @"EventConnectBankRequest",
+        @"EventDapiTransferUIDismissed",
     ];
 }
 
@@ -51,18 +53,8 @@ RCT_EXPORT_MODULE();
 }
 
 RCT_EXPORT_METHOD(start:(NSString *)appKey clientUserID:(NSString *)clientUserID configurations:(NSDictionary<NSString *, id> *)configs resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    NSArray *countries = [configs objectForKey:@"countries"];
-    NSString *environment = [configs objectForKey:@"environment"];
     
-    DPCConfigurations *configurations = [[DPCConfigurations alloc] initWithCountries:countries environment:environment];
-    
-    NSDictionary<NSString *, NSDictionary<NSString *, NSString *> *> *endPointExtraHeaderFields = [configs objectForKey:@"endPointExtraHeaderFields"];
-    NSDictionary<NSString *, NSDictionary<NSString *, id> *> *endPointExtraBody = [configs objectForKey:@"endPointExtraBody"];
-    NSDictionary<NSString *, NSString *> *endpoints = [configs objectForKey:@"endpoints"];
-
-    configurations.endPointExtraHeaderFields = endPointExtraHeaderFields;
-    configurations.endPointExtraBody = endPointExtraBody;
-    configurations.endpoints = endpoints;
+    DPCConfigurations *configurations = [self nativeConfigurations:configs];
 
     [Dapi startWithAppKey:appKey clientUserID:clientUserID configuration:configurations completion:^(Dapi * _Nullable dapi, NSError * _Nullable error) {
         if (dapi) {
@@ -92,6 +84,17 @@ RCT_EXPORT_METHOD(setClientUserID:(NSString *)clientUserID) {
 
 RCT_EXPORT_METHOD(clientUserID:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(Dapi.sharedInstance.clientUserID);
+}
+
+RCT_EXPORT_METHOD(setConfigurations:(NSDictionary<NSString *, id> *)configs) {
+    DPCConfigurations *configurations = [self nativeConfigurations:configs];
+    
+    Dapi.sharedInstance.configurations = configurations;
+}
+
+RCT_EXPORT_METHOD(configurations:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    NSDictionary<NSString *, id> *jsConfigurations = [self jsConfigurations:Dapi.sharedInstance.configurations];
+    resolve(jsConfigurations);
 }
 
 RCT_EXPORT_METHOD(isStarted:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -174,7 +177,7 @@ RCT_EXPORT_METHOD(getAccountsMetadata:(NSString *)userID resolver:(RCTPromiseRes
     }];
 }
 
-RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID accountID:(NSString *)accountID receiverID:(NSString *)receiverID amount:(NSUInteger)amount remark:(NSString *)remark resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID accountID:(NSString *)accountID receiverID:(NSString *)receiverID amount:(double)amount remark:(NSString *)remark resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     dispatch_async(dispatch_get_main_queue(), ^{
         DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
         __block DPCAccount *account;
@@ -185,16 +188,17 @@ RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID account
             }
         }];
         
-        [bankConnection createTransferToExistingBeneficiaryFromAccount:account beneficiaryID:receiverID amount:amount remark:remark completion:^(DPCAccount * _Nullable account, NSUInteger amount, NSError * _Nullable error, NSString * _Nullable operationID) {
+        [bankConnection createTransferToExistingBeneficiaryFromAccount:account beneficiaryID:receiverID amount:amount remark:remark completion:^(DPCAccount * _Nullable account, double amount, NSError * _Nullable error, NSString * _Nullable operationID) {
             if (error) {
+                if (@available(iOS 8.0, *)) {
+                    if ([error.description containsString:@"User canceled account selection"]) {
+                        [self emitAccountSelectionCanceledEvent];
+                    }
+                }
                 reject(@"1012", error.localizedDescription, error);
             } else {
-                NSDictionary *accountDictionary;
-                if ([account respondsToSelector:@selector(dictionaryRepresentation)]) {
-                    accountDictionary = [accountDictionary valueForKey:@"dictionaryRepresentation"];
-                }
                 resolve(@{
-                    @"account": accountDictionary ?: [NSNull null],
+                    @"account": account.accountID ?: [NSNull null],
                     @"amount": [NSNumber numberWithUnsignedInteger:amount]
                         });
             }
@@ -203,7 +207,7 @@ RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID account
     });
 }
 
-RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accountID beneficiary:(NSDictionary<NSString *, id> *)beneficiary amount:(NSUInteger)amount remark:(NSString *)remark resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accountID beneficiary:(NSDictionary<NSString *, id> *)beneficiary amount:(double)amount remark:(NSString *)remark resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     dispatch_async(dispatch_get_main_queue(), ^{
         DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
         __block DPCAccount *account;
@@ -214,16 +218,17 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
             }
         }];
         DPCBeneficiary *nativeBeneficiary = [self nativeBeneficiaryInfoFromDictionary:beneficiary];
-        [bankConnection createTransferFromAccount:account toBeneficiary:nativeBeneficiary amount:amount remark:remark completion:^(DPCAccount * _Nullable account, NSUInteger amount, NSError * _Nullable error, NSString * _Nullable operationID) {
+        [bankConnection createTransferFromAccount:account toBeneficiary:nativeBeneficiary amount:amount remark:remark completion:^(DPCAccount * _Nullable account, double amount, NSError * _Nullable error, NSString * _Nullable operationID) {
             if (error) {
+                if (@available(iOS 8.0, *)) {
+                    if ([error.description containsString:@"User canceled account selection"]) {
+                        [self emitAccountSelectionCanceledEvent];
+                    }
+                }
                 reject(@"1012", error.localizedDescription, error);
             } else {
-                NSDictionary *accountDictionary;
-                if ([account respondsToSelector:@selector(dictionaryRepresentation)]) {
-                    accountDictionary = [accountDictionary valueForKey:@"dictionaryRepresentation"];
-                }
                 resolve(@{
-                    @"account": accountDictionary ?: [NSNull null],
+                    @"account": account.accountID ?: [NSNull null],
                     @"amount": [NSNumber numberWithUnsignedInteger:amount]
                         });
             }
@@ -255,6 +260,15 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
 
     if (self.hasListeners)
         [self sendEventWithName:self.supportedEvents[0] body:body];
+}
+
+- (void)connectDidRequestBank:(NSString *)bankName iban:(NSString *)iban {
+    id body = @{
+        @"bankName": bankName ?: [NSNull null],
+        @"iban": iban ?: [NSNull null]
+    };
+    if (self.hasListeners)
+        [self sendEventWithName:self.supportedEvents[4] body:body];
 }
 
 - (void)connectDidDismiss {
@@ -293,6 +307,45 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
 }
 
 // MARK: - Helper Methods
+
+- (void)emitAccountSelectionCanceledEvent {
+    if (self.hasListeners)
+        [self sendEventWithName:self.supportedEvents[5] body:nil];
+}
+
+- (DPCConfigurations *)nativeConfigurations:(NSDictionary<NSString *, id> *)configs {
+    NSArray *countries = [configs objectForKey:@"countries"];
+    NSString *environment = [configs objectForKey:@"environment"];
+    
+    DPCConfigurations *configurations = [[DPCConfigurations alloc] initWithCountries:countries environment:environment];
+    
+    NSDictionary<NSString *, NSDictionary<NSString *, NSString *> *> *endPointExtraHeaderFields = [configs objectForKey:@"endPointExtraHeaderFields"];
+    NSDictionary<NSString *, NSDictionary<NSString *, id> *> *endPointExtraBody = [configs objectForKey:@"endPointExtraBody"];
+    NSDictionary<NSString *, NSString *> *endpoints = [configs objectForKey:@"endpoints"];
+
+    configurations.endPointExtraHeaderFields = endPointExtraHeaderFields;
+    configurations.endPointExtraBody = endPointExtraBody;
+    configurations.endpoints = endpoints;
+    configurations.showCloseButton = [[configs objectForKey:@"showCloseButton"] boolValue];
+    configurations.showLogos = [[configs objectForKey:@"showLogos"] boolValue];
+    configurations.showAddAccountButton = [[configs objectForKey:@"showAddAccountButton"] boolValue];
+
+    return configurations;
+}
+
+- (NSDictionary<NSString *, id> *)jsConfigurations:(DPCConfigurations *)configs {
+    return @{
+        @"countries": configs.countries ?: [NSNull null],
+        @"environment": configs.environment ?: [NSNull null],
+        @"endpoints": configs.endpoints ?: [NSNull null],
+        @"endPointExtraQueryItems": configs.endPointExtraQueryItems ?: [NSNull null],
+        @"endPointExtraHeaderFields": configs.endPointExtraHeaderFields ?: [NSNull null],
+        @"endPointExtraBody": configs.endPointExtraBody ?: [NSNull null],
+        @"showCloseButton": [NSNumber numberWithBool:configs.showCloseButton],
+        @"showLogos": [NSNumber numberWithBool:configs.showCloseButton],
+        @"showAddAccountButton": [NSNumber numberWithBool:configs.showAddAccountButton],
+    };
+}
 
 - (NSDictionary<DPCEndPoint, NSString *> *)parseEndpoints:(NSDictionary *)endpoints {
     NSMutableDictionary<DPCEndPoint, NSString *> *result = [NSMutableDictionary dictionary];

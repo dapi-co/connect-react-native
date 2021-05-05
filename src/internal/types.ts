@@ -2,26 +2,58 @@ export interface IDapiConfigurations {
   endpoints?: Map<DapiEndpoint, string>;
   endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]>;
   endPointExtraHeaderFields?: Map<DapiEndpoint, Map<string, string>>;
+
+  /**
+  * Let's you append extra json object to the root of the body.
+  * The appended dictionary will be under the key "UserExtraBody" at the root JSON body.
+  */
   endPointExtraBody?: Map<DapiEndpoint, Map<string, any>>;
+
+  /**
+   * Environment of the banks (either production or sandbox).
+   */
   environment?: DapiEnvironment;
+
   /**
    * Country codes of supported countries. (ISO 3166-2 format)
    */
   countries?: string[];
+
+  /**
+   * Controls whether bank account connect UI shows the bank logos.
+   * The value is true by default.
+   */
+  showLogos: boolean;
+
+  /**
+   * Controls whether bank account connect UI shows a close button.
+   * The value is true by default.
+   */
+   showCloseButton: boolean;
+
+  /**
+   * Controls whether account selection UI shows a add account button.
+   * The value is true by default.
+   */
+   showAddAccountButton: boolean;
 }
 
 export enum DapiEnvironment {
-  sandbox,
-  production,
+  sandbox = "sandbox",
+  production = "production",
 }
 
 export enum DapiEndpoint {
-  getIdentity,
-  getAccounts,
-  getAccountMetadata,
-  getTransactions,
-  createTransfer,
-  delete,
+  exchangeToken = "auth/ExchangeToken",
+  getIdentity = "data/identity/get",
+  getAccounts = "data/accounts/get",
+  getAccountMetadata = "metadata/accounts/get",
+  getTransactions = "data/transactions/get",
+  getBeneficiaries = "payment/beneficiaries/get",
+  createBeneficiary = "payment/beneficiaries/create",
+  createTransfer = "payment/transfer/create",
+  createTransferToExistingBeneficiary = "payment/transfer/autoflow",
+  delete = "users/DelinkUser",
 }
 
 export interface IDapiQueryParameter {

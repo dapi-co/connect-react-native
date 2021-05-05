@@ -18,29 +18,57 @@ import {
   NativeModules,
 } from 'react-native';
 
-import Dapi from 'connect-react-native';
+import Dapi, { DapiConfigurations, DapiEndpoint, DapiEnvironment } from 'connect-react-native';
 
 import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 
 const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
-const configurations = {
-  environment: 'production',
-  countries: ['AE'],
-  showLogos: false,
-};
-
 async function startDapi() {
-  const configurations = {
-    environment: 'sandbox',
-    countries: ['AE'],
-  };
+  // const configurations = {
+  //   environment: 'production',
+  //   endPointExtraHeaderFields: {
+  //     getIdentity: { Authorization: 'token' },
+  //     getAccounts: { Authorization: 'token' },
+  //     getAccountMetadata: { Authorization: 'token' },
+  //     getTransactions: { Authorization: 'token' },
+  //     createTransfer: { Authorization: 'token' },
+  //     delete: { Authorization: 'token' },
+  //   },
+  // };
+
+  let configs = generateConfigs('ABC');
+
   await Dapi.instance.start(
     '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
     'JohnDoe',
-    configurations,
+    configs,
   );
+}
+
+function generateConfigs(authKey) {
+  let configs = new DapiConfigurations(["AE"], DapiEnvironment.production);
+  let authHeader = new Map()
+  authHeader.set('Authorization', authKey);
+
+  let extraHeaders = new Map()
+  extraHeaders.set(DapiEndpoint.getIdentity, authHeader);
+  extraHeaders.set(DapiEndpoint.getAccounts, authHeader);
+  configs.endPointExtraHeaderFields = extraHeaders;
+  configs.showAddAccountButton = false;
+  
+  console.log(configs);
+
+  return configs;
+}
+
+function resetConfigs() {
+  var d = new Date();
+  var n = d.toLocaleTimeString();
+
+  let configs = generateConfigs(n);
+  Dapi.instance.setConfigurations(configs);
 }
 
 function presentConnect() {
@@ -85,8 +113,7 @@ async function getMetadata() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
     var metadata = await connections[0].getAccountsMetadata();
-
-    console.log(metadata.accountsMetadata.swiftCode);
+    console.log(metadata.accountsMetadata.beneficiaryCoolDownPeriod);
   }
 }
 
@@ -97,22 +124,22 @@ async function transfer() {
       line2: 'dubai',
       line3: 'united arab emirates',
     },
-    accountNumber: '11352348001',
-    bankName: 'Sharjah Islamic Bank',
-    swiftCode: 'NBSHAEAS',
-    iban: 'AE270410000011352348001',
+    accountNumber: '18243421401',
+    bankName: 'STANDARD CHARTERED BANK',
+    swiftCode: 'SCBLAEAD',
+    iban: 'AE220440000010243421401',
     country: 'AE',
-    branchAddress: 'Sheikh Zayed Road',
-    branchName: 'Sheikh Zayed Road Branch',
-    phoneNumber: '+971501977498',
-    name: 'Kamil Abid Kamili',
+    branchAddress: 'Dubai Mall',
+    branchName: 'Dubai Mall',
+    phoneNumber: '+971585859206',
+    name: 'Mohammed Ennabah SC',
   };
 
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
     var accountsResponse = await connections[0].getAccounts();
     await connections[0]
-      .createTransfer(accountsResponse.accounts[0], beneficiary, 1, 'test')
+      .createTransfer(null, beneficiary, 10.53, 'test')
       .then(accountsResponse => console.log(accountsResponse))
       .catch(error => {
         console.log(error);
@@ -131,7 +158,7 @@ async function transferToExistingBeneficiary() {
     await connections[0]
       .createTransferToExistingBeneficiary(
         accountsResponse.accounts[0],
-        beneficiariesResponse.beneficiaries[0].id,
+        beneficiariesResponse.beneficiaries[7].id,
         1,
       )
       .then(transfer => console.log(transfer))
@@ -262,6 +289,15 @@ const App: () => React$Node = () => {
               onPress={() => createBeneficiary()}
             />
           </View>
+
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button
+              title="Reset Configs"
+              onPress={() => resetConfigs()}
+            />
+          </View>
+
         </View>
       </ScrollView>
     </>

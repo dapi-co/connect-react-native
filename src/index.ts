@@ -12,15 +12,28 @@ import {
   DapiEnvironment,
   IBankBeneficiaryResponse,
   IDapiResult,
+  DapiEndpoint,
+  IDapiQueryParameter,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
   environment?: DapiEnvironment
   countries?: string[];
+  endpoints?: Map<DapiEndpoint, string> | undefined;
+  endPointExtraQueryItems?: Map<DapiEndpoint, IDapiQueryParameter[]> | undefined;
+  endPointExtraHeaderFields?: Map<DapiEndpoint, Map<string, string>> | undefined;
+  endPointExtraBody?: Map<DapiEndpoint, Map<string, any>> | undefined;
+  
+  showLogos: boolean;
+  showCloseButton: boolean;
+  showAddAccountButton: boolean;
 
   constructor(countries: string[], environment: DapiEnvironment = DapiEnvironment.production) {
     this.environment = environment;
     this.countries = countries;
+    this.showLogos = true;
+    this.showCloseButton = true;
+    this.showAddAccountButton = true;
   }
 }
 
@@ -212,6 +225,14 @@ export default class Dapi {
 
   clientUserID(): Promise<string> {
     return NativeInterface.clientUserID();
+  }
+
+  setConfigurations(configurations: IDapiConfigurations): void {
+    NativeInterface.setConfigurations(configurations);
+  }
+
+  configurations(): Promise<IDapiConfigurations> {
+    return NativeInterface.configurations();
   }
 
   dismissConnect(): void {

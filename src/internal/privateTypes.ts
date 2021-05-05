@@ -20,6 +20,8 @@ export interface DapiConnectNativeModule {
   presentConnect(): void;
   setClientUserID(clientUserID: string): void;
   clientUserID(): Promise<string>;
+  setConfigurations(configurations: IDapiConfigurations): void;
+  configurations(): Promise<IDapiConfigurations>;
   dismissConnect(): void;
   getConnections(): Promise<IDapiConnection[]>;
   getIdentity(userID: string): Promise<IIdentityResponse>;
