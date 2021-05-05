@@ -56,6 +56,14 @@ RCT_EXPORT_METHOD(start:(NSString *)appKey clientUserID:(NSString *)clientUserID
     
     DPCConfigurations *configurations = [[DPCConfigurations alloc] initWithCountries:countries environment:environment];
     
+    NSDictionary<NSString *, NSDictionary<NSString *, NSString *> *> *endPointExtraHeaderFields = [configs objectForKey:@"endPointExtraHeaderFields"];
+    NSDictionary<NSString *, NSDictionary<NSString *, id> *> *endPointExtraBody = [configs objectForKey:@"endPointExtraBody"];
+    NSDictionary<NSString *, NSString *> *endpoints = [configs objectForKey:@"endpoints"];
+
+    configurations.endPointExtraHeaderFields = endPointExtraHeaderFields;
+    configurations.endPointExtraBody = endPointExtraBody;
+    configurations.endpoints = endpoints;
+
     [Dapi startWithAppKey:appKey clientUserID:clientUserID configuration:configurations completion:^(Dapi * _Nullable dapi, NSError * _Nullable error) {
         if (dapi) {
             self.isStarted = YES;
@@ -164,6 +172,35 @@ RCT_EXPORT_METHOD(getAccountsMetadata:(NSString *)userID resolver:(RCTPromiseRes
     [bankConnection getAccountMetadata:^(DPCBankMetadata * _Nullable accounts, NSError * _Nullable error, NSString * _Nullable operationID) {
         [self respondForDictionaryRepresentableObject:accounts error:error resolver:resolve rejecter:reject];
     }];
+}
+
+RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID accountID:(NSString *)accountID receiverID:(NSString *)receiverID amount:(NSUInteger)amount remark:(NSString *)remark resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
+        __block DPCAccount *account;
+        [bankConnection.accounts enumerateObjectsUsingBlock:^(DPCAccount * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj.accountID isEqualToString:accountID]) {
+                *stop = YES;
+                account = obj;
+            }
+        }];
+        
+        [bankConnection createTransferToExistingBeneficiaryFromAccount:account beneficiaryID:receiverID amount:amount remark:remark completion:^(DPCAccount * _Nullable account, NSUInteger amount, NSError * _Nullable error, NSString * _Nullable operationID) {
+            if (error) {
+                reject(@"1012", error.localizedDescription, error);
+            } else {
+                NSDictionary *accountDictionary;
+                if ([account respondsToSelector:@selector(dictionaryRepresentation)]) {
+                    accountDictionary = [accountDictionary valueForKey:@"dictionaryRepresentation"];
+                }
+                resolve(@{
+                    @"account": accountDictionary ?: [NSNull null],
+                    @"amount": [NSNumber numberWithUnsignedInteger:amount]
+                        });
+            }
+
+        }];
+    });
 }
 
 RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accountID beneficiary:(NSDictionary<NSString *, id> *)beneficiary amount:(NSUInteger)amount remark:(NSString *)remark resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {

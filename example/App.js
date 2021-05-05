@@ -32,6 +32,10 @@ const configurations = {
 };
 
 async function startDapi() {
+  const configurations = {
+    environment: 'sandbox',
+    countries: ['AE'],
+  };
   await Dapi.instance.start(
     '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
     'JohnDoe',
@@ -218,6 +222,11 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
+            <Button
+              title="Create Beneficiary"
+              onPress={() => createBeneficiary()}
+            />
+            <Button title="Beneficiaries" onPress={() => getBeneficiaries()} />
           </View>
 
           <View style={styles.sectionContainer}>
