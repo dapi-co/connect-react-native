@@ -8,9 +8,9 @@ export interface IDapiConfigurations {
    * Country codes of supported countries. (ISO 3166-2 format)
    */
   countries?: string[];
-  showExperimentalBanks?: boolean
-  showCloseButton?: boolean
-  showAddButton?: boolean
+  showExperimentalBanks?: boolean;
+  showCloseButton?: boolean;
+  showAddButton?: boolean;
 }
 
 export enum DapiEnvironment {
