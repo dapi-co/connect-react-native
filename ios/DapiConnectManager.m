@@ -199,7 +199,7 @@ RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID account
             } else {
                 resolve(@{
                     @"account": account.accountID ?: [NSNull null],
-                    @"amount": [NSNumber numberWithUnsignedInteger:amount]
+                    @"amount": [NSNumber numberWithDouble:amount]
                         });
             }
 
@@ -229,7 +229,7 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
             } else {
                 resolve(@{
                     @"account": account.accountID ?: [NSNull null],
-                    @"amount": [NSNumber numberWithUnsignedInteger:amount]
+                    @"amount": [NSNumber numberWithDouble:amount]
                         });
             }
         }];
@@ -326,9 +326,21 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
     configurations.endPointExtraHeaderFields = endPointExtraHeaderFields;
     configurations.endPointExtraBody = endPointExtraBody;
     configurations.endpoints = endpoints;
-    configurations.showCloseButton = [[configs objectForKey:@"showCloseButton"] boolValue];
-    configurations.showLogos = [[configs objectForKey:@"showLogos"] boolValue];
-    configurations.showAddAccountButton = [[configs objectForKey:@"showAddButton"] boolValue];
+    NSNumber *showCloseButton = [configs objectForKey:@"showCloseButton"];
+    NSNumber *showLogos = [configs objectForKey:@"showLogos"];
+    NSNumber *showAddButton = [configs objectForKey:@"showAddButton"];
+    
+    if (showCloseButton != nil) {
+        configurations.showCloseButton = showCloseButton.boolValue;
+    }
+    
+    if (showLogos != nil) {
+        configurations.showLogos = showLogos.boolValue;
+    }
+    
+    if (showAddButton != nil) {
+        configurations.showAddAccountButton = showAddButton.boolValue;
+    }
 
     return configurations;
 }

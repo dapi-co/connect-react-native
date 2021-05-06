@@ -35,43 +35,23 @@ async function startDapi() {
     'JohnDoe',
     configs,
   );
-
-  const newConfigurations = {
-    environment: 'sandbox',
-    countries: ['AE'],
-    showLogos: true,
-  };
-
-  Dapi.instance.setConfigurations(newConfigurations);
-  var retrievedConfigurations = await Dapi.instance.configurations()
-  console.log(retrievedConfigurations);
-
 }
 
 function generateConfigs(authKey) {
-  // let configs = new DapiConfigurations(["AE"], DapiEnvironment.production);
-  // let authHeader = new Map()
-  // authHeader.set('Authorization', authKey);
-
-  // let extraHeaders = new Map()
-  // extraHeaders.set(DapiEndpoint.getIdentity, authHeader);
-  // extraHeaders.set(DapiEndpoint.getAccounts, authHeader);
-  // configs.endPointExtraHeaderFields = extraHeaders;
-  // configs.showAddButton = false;
-
-  // console.log(configs);
 
   const configurations = {
     environment: 'production',
     showAddButton: false,
     endPointExtraHeaderFields: {
-      'data/identity/get': { 'Authorization': authKey },
-      'data/accounts/get': { 'Authorization': authKey },
-      'metadata/accounts/get': { 'Authorization': authKey },
-      'data/transactions/get': { 'Authorization': authKey },
-      'payment/transfer/autoflow': { 'Authorization': authKey },
+      'data/identity/get': { 'authKey': authKey },
+      'data/accounts/get': { 'authKey': authKey },
+      'metadata/accounts/get': { 'authKey': authKey },
+      'data/transactions/get': { 'authKey': authKey },
+      'payment/transfer/autoflow': { 'authKey': authKey },
     },
   };
+
+  console.log(configurations);
 
   return configurations;
 }
@@ -82,6 +62,11 @@ function resetConfigs() {
 
   let configs = generateConfigs(n);
   Dapi.instance.setConfigurations(configs);
+}
+
+async function getConfigurations() {
+  var retrievedConfigurations = await Dapi.instance.configurations()
+  console.log(retrievedConfigurations);
 }
 
 function presentConnect() {
@@ -165,10 +150,12 @@ async function transfer() {
 
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var accountsResponse = await connections[0].getAccounts();
     await connections[0]
-      .createTransfer(null, beneficiary, 10.53, 'test')
-      .then(accountsResponse => console.log(accountsResponse))
+      .createTransfer(null, beneficiary, 10.42, 'test')
+      .then(accountsResponse => {
+        console.log(accountsResponse.account.currency)
+        console.log(accountsResponse.amount)
+      })
       .catch(error => {
         console.log(error);
         if (error.message.includes('Beneficiary will be activated')) {
@@ -181,11 +168,10 @@ async function transfer() {
 async function transferToExistingBeneficiary() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var accountsResponse = await connections[0].getAccounts();
     var beneficiariesResponse = await connections[0].getBeneficiaries();
     await connections[0]
       .createTransferToExistingBeneficiary(
-        accountsResponse.accounts[0],
+        connections[0].accounts[0],
         beneficiariesResponse.beneficiaries[7].id,
         1,
       )
@@ -266,6 +252,15 @@ const App: () => React$Node = () => {
             <Button title="Start Dapi" onPress={() => startDapi()} />
             <Button title="Is started" onPress={() => isStarted()} />
             <Button title="Client User ID" onPress={() => clientUserID()} />
+            <Button
+              title="Get Configs"
+              onPress={() => getConfigurations()}
+            />
+            <Button
+              title="Reset Configs"
+              onPress={() => resetConfigs()}
+            />
+
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Connect</Text>
@@ -291,38 +286,18 @@ const App: () => React$Node = () => {
 
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Payment</Text>
-            <Button title="Create Transfer" onPress={() => transfer()} />
-          </View>
-
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Payment</Text>
-            <Button
-              title="Create Transfer To Existing Beneficiary"
-              onPress={() => transferToExistingBeneficiary()}
-            />
-          </View>
-
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Payment</Text>
             <Button
               title="Get Beneficiaries"
               onPress={() => getBeneficiaries()}
             />
-          </View>
-
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Payment</Text>
+            <Button title="Create Transfer" onPress={() => transfer()} />
+            <Button
+              title="Create Transfer To Existing Beneficiary"
+              onPress={() => transferToExistingBeneficiary()}
+            />
             <Button
               title="Create Beneficiary"
               onPress={() => createBeneficiary()}
-            />
-          </View>
-
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Payment</Text>
-            <Button
-              title="Reset Configs"
-              onPress={() => resetConfigs()}
             />
           </View>
 
