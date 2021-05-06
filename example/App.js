@@ -41,6 +41,7 @@ function generateConfigs(authKey) {
 
   const configurations = {
     environment: 'production',
+    countries: ['AE'],
     showAddButton: false,
     endPointExtraHeaderFields: {
       'data/identity/get': { 'authKey': authKey },
