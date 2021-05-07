@@ -18,16 +18,18 @@ import {
   NativeModules,
 } from 'react-native';
 
-import Dapi, { DapiConfigurations, DapiEndpoint, DapiEnvironment } from 'connect-react-native';
+import Dapi, {
+  DapiConfigurations,
+  DapiEndpoint,
+  DapiEnvironment,
+} from 'connect-react-native';
 
-import { Header, Colors } from 'react-native/Libraries/NewAppScreen';
+import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 
-const { DapiConnectManager } = NativeModules;
+const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
 
 async function startDapi() {
-
-
   let configs = generateConfigs('ABC');
 
   await Dapi.instance.start(
@@ -38,17 +40,16 @@ async function startDapi() {
 }
 
 function generateConfigs(authKey) {
-
   const configurations = {
     environment: 'production',
     countries: ['AE'],
     showAddButton: false,
     endPointExtraHeaderFields: {
-      'data/identity/get': { 'authKey': authKey },
-      'data/accounts/get': { 'authKey': authKey },
-      'metadata/accounts/get': { 'authKey': authKey },
-      'data/transactions/get': { 'authKey': authKey },
-      'payment/transfer/autoflow': { 'authKey': authKey },
+      'data/identity/get': {authKey: authKey},
+      'data/accounts/get': {authKey: authKey},
+      'metadata/accounts/get': {authKey: authKey},
+      'data/transactions/get': {authKey: authKey},
+      'payment/transfer/autoflow': {authKey: authKey},
     },
   };
 
@@ -66,7 +67,7 @@ function resetConfigs() {
 }
 
 async function getConfigurations() {
-  var retrievedConfigurations = await Dapi.instance.configurations()
+  var retrievedConfigurations = await Dapi.instance.configurations();
   console.log(retrievedConfigurations);
 }
 
@@ -122,7 +123,6 @@ async function getMetadata() {
 }
 
 async function transfer() {
-
   dapiConnectManagerEmitter.addListener('EventDapiTransferUIDismissed', _ => {
     console.log('Transfer UI is dismissed');
   });
@@ -154,8 +154,8 @@ async function transfer() {
     await connections[0]
       .createTransfer(null, beneficiary, 10.42, 'test')
       .then(accountsResponse => {
-        console.log(accountsResponse.account.currency)
-        console.log(accountsResponse.amount)
+        console.log(accountsResponse.account.currency);
+        console.log(accountsResponse.amount);
       })
       .catch(error => {
         console.log(error);
@@ -174,7 +174,7 @@ async function transferToExistingBeneficiary() {
       .createTransferToExistingBeneficiary(
         connections[0].accounts[0],
         beneficiariesResponse.beneficiaries[7].id,
-        1,
+        10.43,
       )
       .then(transfer => console.log(transfer))
       .catch(error => {
@@ -253,15 +253,8 @@ const App: () => React$Node = () => {
             <Button title="Start Dapi" onPress={() => startDapi()} />
             <Button title="Is started" onPress={() => isStarted()} />
             <Button title="Client User ID" onPress={() => clientUserID()} />
-            <Button
-              title="Get Configs"
-              onPress={() => getConfigurations()}
-            />
-            <Button
-              title="Reset Configs"
-              onPress={() => resetConfigs()}
-            />
-
+            <Button title="Get Configs" onPress={() => getConfigurations()} />
+            <Button title="Reset Configs" onPress={() => resetConfigs()} />
           </View>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Connect</Text>
@@ -301,7 +294,6 @@ const App: () => React$Node = () => {
               onPress={() => createBeneficiary()}
             />
           </View>
-
         </View>
       </ScrollView>
     </>

@@ -366,7 +366,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     private <T> void resolve(T data, Promise promise) {
         try {
-            if (data instanceof WritableArray || data instanceof WritableMap || data instanceof Boolean) {
+            if (data instanceof WritableArray || data instanceof WritableMap || data instanceof Boolean || data instanceof String) {
                 promise.resolve(data);
             } else {
                 promise.resolve(JsonConvert.jsonToReact(convertToJSONObject(data)));
@@ -410,7 +410,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 .emit(eventName, params);
     }
 
-    @SuppressWarnings({"ConstantConditions", "unchecked", "rawtypes"})
+    @SuppressWarnings({"ConstantConditions"})
     private DapiConfigurations getConfigurations(ReadableMap configurations) {
         if (configurations == null) {
             return null;
@@ -446,22 +446,22 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             showAddButton = configurations.getBoolean("showAddButton");
         }
 
-        if (!configurations.hasKey("endpointExtraQueryItems")) {
-            extraQueryParameters = new HashMap<String, Object>();
+        if (!configurations.hasKey("endPointExtraQueryItems")) {
+            extraQueryParameters = new HashMap<>();
         } else {
-            extraQueryParameters = configurations.getMap("endpointExtraQueryItems").toHashMap();
+            extraQueryParameters = configurations.getMap("endPointExtraQueryItems").toHashMap();
         }
 
-        if (!configurations.hasKey("endpointExtraHeaderFields")) {
-            extraHeaderFields = new HashMap<String, Object>();
+        if (!configurations.hasKey("endPointExtraHeaderFields")) {
+            extraHeaderFields = new HashMap<>();
         } else {
-            extraHeaderFields = configurations.getMap("endpointExtraHeaderFields").toHashMap();
+            extraHeaderFields = configurations.getMap("endPointExtraHeaderFields").toHashMap();
         }
 
-        if (!configurations.hasKey("endpointExtraBody")) {
-            extraBody = new HashMap<String, Object>();
+        if (!configurations.hasKey("endPointExtraBody")) {
+            extraBody = new HashMap<>();
         } else {
-            extraBody = configurations.getMap("endpointExtraBody").toHashMap();
+            extraBody = configurations.getMap("endPointExtraBody").toHashMap();
         }
 
         if (!configurations.hasKey("environment")) {
@@ -478,87 +478,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         if (!configurations.hasKey("endpoints")) {
             endpoints = new DapiEndpoints();
         } else {
-            Map<String, Object> endpointsMap = configurations.getMap("endpoints").toHashMap();
-            String getIdentity;
-            String getAccounts;
-            String getTransactions;
-            String accountMetaData;
-            String delete;
-
-            if (endpointsMap.get("getIdentity") == null) {
-                getIdentity = DapiEndpoints.GET_IDENTITY_ENDPOINT;
-            } else {
-                getIdentity = (String) endpointsMap.get("getIdentity");
-            }
-
-            if (endpointsMap.get("getAccounts") == null) {
-                getAccounts = DapiEndpoints.GET_ACCOUNTS_ENDPOINT;
-            } else {
-                getAccounts = (String) endpointsMap.get("getAccounts");
-            }
-
-
-            if (endpointsMap.get("getTransactions") == null) {
-                getTransactions = DapiEndpoints.GET_TRANSACTIONS_ENDPOINT;
-            } else {
-                getTransactions = (String) endpointsMap.get("getTransactions");
-            }
-
-            if (endpointsMap.get("getAccountMetadata") == null) {
-                accountMetaData = DapiEndpoints.ACCOUNTS_META_DATA_ENDPOINT;
-            } else {
-                accountMetaData = (String) endpointsMap.get("getAccountMetadata");
-            }
-
-            if (endpointsMap.get("delete") == null) {
-                delete = DapiEndpoints.DELETE_CONNECTION_ENDPOINT;
-            } else {
-                delete = (String) endpointsMap.get("delete");
-            }
-
-            endpoints = new DapiEndpoints(
-                    getIdentity,
-                    getAccounts,
-                    getTransactions,
-                    accountMetaData,
-                    delete
-            );
-        }
-
-        HashMap<String, Object> extraBodyMapOfObjects =
-                (extraBody instanceof HashMap)
-                        ? (HashMap) extraBody
-                        : new HashMap<String, Object>(extraBody);
-
-        HashMap<String, Object> extraHeadersMapOfObjects =
-                (extraHeaderFields instanceof HashMap)
-                        ? (HashMap) extraHeaderFields
-                        : new HashMap<String, Object>(extraHeaderFields);
-
-        HashMap<String, Object> extraParamsMapOfObjects =
-                (extraQueryParameters instanceof HashMap)
-                        ? (HashMap) extraQueryParameters
-                        : new HashMap<String, Object>(extraQueryParameters);
-
-        HashMap<String, String> extraBodyMapOfStrings = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraBodyMapOfObjects.entrySet()) {
-            if (entry.getValue() instanceof String) {
-                extraBodyMapOfStrings.put(entry.getKey(), (String) entry.getValue());
-            }
-        }
-
-        HashMap<String, String> extraHeadersMapOfStrings = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraHeadersMapOfObjects.entrySet()) {
-            if (entry.getValue() instanceof String) {
-                extraHeadersMapOfStrings.put(entry.getKey(), (String) entry.getValue());
-            }
-        }
-
-        HashMap<String, String> extraParamsMapOfStrings = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraParamsMapOfObjects.entrySet()) {
-            if (entry.getValue() instanceof String) {
-                extraParamsMapOfStrings.put(entry.getKey(), (String) entry.getValue());
-            }
+            endpoints = getDapiEndpoints(configurations);
         }
 
         String[] countriesArray;
@@ -570,9 +490,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
         return new DapiConfigurations(
                 endpoints,
-                extraHeadersMapOfStrings,
-                extraParamsMapOfStrings,
-                extraBodyMapOfStrings,
+                getExtraBody(extraBody),
+                getExtraParams(extraQueryParameters),
+                getExtraHeaders(extraHeaderFields),
                 environment,
                 countriesArray,
                 showLogos,
@@ -580,6 +500,137 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 showCloseButton,
                 showAddButton
         );
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private DapiEndpoints getDapiEndpoints(ReadableMap configurations) {
+        Map<String, Object> endpointsMap = configurations.getMap("endpoints").toHashMap();
+        String getIdentity;
+        String getAccounts;
+        String getTransactions;
+        String accountMetaData;
+        String createTransfer;
+        String createTransferToExistingBeneficiary;
+        String createBeneficiary;
+        String getBeneficiaries;
+        String delete;
+
+        if (endpointsMap.get("getIdentity") == null) {
+            getIdentity = DapiEndpoints.GET_IDENTITY_ENDPOINT;
+        } else {
+            getIdentity = (String) endpointsMap.get("getIdentity");
+        }
+
+        if (endpointsMap.get("getAccounts") == null) {
+            getAccounts = DapiEndpoints.GET_ACCOUNTS_ENDPOINT;
+        } else {
+            getAccounts = (String) endpointsMap.get("getAccounts");
+        }
+
+
+        if (endpointsMap.get("getTransactions") == null) {
+            getTransactions = DapiEndpoints.GET_TRANSACTIONS_ENDPOINT;
+        } else {
+            getTransactions = (String) endpointsMap.get("getTransactions");
+        }
+
+        if (endpointsMap.get("getAccountMetadata") == null) {
+            accountMetaData = DapiEndpoints.ACCOUNTS_META_DATA_ENDPOINT;
+        } else {
+            accountMetaData = (String) endpointsMap.get("getAccountMetadata");
+        }
+
+        if (endpointsMap.get("createTransfer") == null) {
+            createTransfer = DapiEndpoints.CREATE_TRANSFER_AUTOFLOW_ENDPOINT;
+        } else {
+            createTransfer = (String) endpointsMap.get("createTransfer");
+        }
+
+        if (endpointsMap.get("createTransferToExistingBeneficiary") == null) {
+            createTransferToExistingBeneficiary = DapiEndpoints.CREATE_TRANSFER_TO_EXISTING_BENEFICIARY_ENDPOINT;
+        } else {
+            createTransferToExistingBeneficiary = (String) endpointsMap.get("createTransferToExistingBeneficiary");
+        }
+
+        if (endpointsMap.get("createBeneficiary") == null) {
+            createBeneficiary = DapiEndpoints.CREATE_BENEFICIARY_ENDPOINT;
+        } else {
+            createBeneficiary = (String) endpointsMap.get("createBeneficiary");
+        }
+
+        if (endpointsMap.get("getBeneficiaries") == null) {
+            getBeneficiaries = DapiEndpoints.GET_BENEFICIARIES_ENDPOINT;
+        } else {
+            getBeneficiaries = (String) endpointsMap.get("getBeneficiaries");
+        }
+
+        if (endpointsMap.get("delete") == null) {
+            delete = DapiEndpoints.DELETE_CONNECTION_ENDPOINT;
+        } else {
+            delete = (String) endpointsMap.get("delete");
+        }
+
+        return new DapiEndpoints(
+                getIdentity,
+                getAccounts,
+                getTransactions,
+                accountMetaData,
+                createTransfer,
+                createTransferToExistingBeneficiary,
+                createBeneficiary,
+                getBeneficiaries,
+                delete
+        );
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "MismatchedQueryAndUpdateOfCollection"})
+    private HashMap<String, HashMap<String, String>> getExtraBody(Map<String, Object> extraBody) {
+        HashMap<String, Object> extraBodyMapOfObjects =
+                (extraBody instanceof HashMap)
+                        ? (HashMap) extraBody
+                        : new HashMap<>(extraBody);
+
+        HashMap<String, HashMap<String, String>> extraBodyMapOfMaps = new HashMap<>();
+        for (Map.Entry<String, Object> entry : extraBodyMapOfObjects.entrySet()) {
+            if (entry.getValue() instanceof HashMap) {
+                extraBodyMapOfMaps.put(entry.getKey(), (HashMap<String, String>) entry.getValue());
+            }
+        }
+
+        return extraBodyMapOfMaps;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "MismatchedQueryAndUpdateOfCollection"})
+    private HashMap<String, HashMap<String, String>> getExtraHeaders(Map<String, Object> extraHeaderFields) {
+        HashMap<String, Object> extraHeadersMapOfObjects =
+                (extraHeaderFields instanceof HashMap)
+                        ? (HashMap) extraHeaderFields
+                        : new HashMap<>(extraHeaderFields);
+
+        HashMap<String, HashMap<String, String>> extraHeadersMapOfMaps = new HashMap<>();
+        for (Map.Entry<String, Object> entry : extraHeadersMapOfObjects.entrySet()) {
+            if (entry.getValue() instanceof HashMap) {
+                extraHeadersMapOfMaps.put(entry.getKey(), (HashMap<String, String>) entry.getValue());
+            }
+        }
+        return extraHeadersMapOfMaps;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes", "MismatchedQueryAndUpdateOfCollection"})
+    private HashMap<String, HashMap<String, String>> getExtraParams(Map<String, Object> extraQueryParameters) {
+        HashMap<String, Object> extraParamsMapOfObjects =
+                (extraQueryParameters instanceof HashMap)
+                        ? (HashMap) extraQueryParameters
+                        : new HashMap<>(extraQueryParameters);
+
+        HashMap<String, HashMap<String, String>> extraParamsMapOfMaps = new HashMap<>();
+        for (Map.Entry<String, Object> entry : extraParamsMapOfObjects.entrySet()) {
+            if (entry.getValue() instanceof HashMap) {
+                extraParamsMapOfMaps.put(entry.getKey(), (HashMap<String, String>) entry.getValue());
+            }
+        }
+
+        return extraParamsMapOfMaps;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked", "SameParameterValue"})
