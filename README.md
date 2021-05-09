@@ -90,7 +90,7 @@ end
       };
 
         await Dapi.instance.start(
-        'ae473ebe572718081692256b62589c29d83ad6d1167dadaa7822482da965723d',
+        'appKey',
         'JohnDoe',
         configurations, //optional
       );
