@@ -8,20 +8,6 @@
 
 Financial APIs to connect users' bank accounts
 
-## Download Sample App
-
-We love it when you can immediately see Dapi in action in your own environment. That's why we recommend you download our Demo App project.
-
-Go to: 
-
-[dapi-co/connect-react-native](https://github.com/dapi-co/connect-react-native/tree/v2)
-
-Or clone the demo app using the command: 
-
-```kotlin
-git clone https://github.com/dapi-co/connect-react-native.git
-```
-
 ## Setup your own App
 
 1. Install the SDK
@@ -249,6 +235,19 @@ Also, you may send money to an existing beneficiary using `createTransferToExist
         10.43,
       )
 ```
+
+You may add these listeners to know when the transfer UI is dismissed `EventDapiTransferUIDismissed`, or when the user is about to make a transfer using Dapi UI `EventDapiUIWillTransfer`.
+
+```tsx
+dapiConnectManagerEmitter.addListener('EventDapiTransferUIDismissed', _ => {
+    console.log('Transfer UI is dismissed');
+  });
+
+  dapiConnectManagerEmitter.addListener('EventDapiUIWillTransfer',
+    uiWillTransferResult => console.log(uiWillTransferResult),
+  );
+```
+
 ### Get Accounts
 
 Each bank `connection` will have a list of `accounts`.
