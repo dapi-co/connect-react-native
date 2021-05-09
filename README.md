@@ -233,7 +233,7 @@ Also, you may send money to an existing beneficiary using `createTransferToExist
         connection.accounts[0],
         beneficiariesResponse.beneficiaries[7].id,
         10.43,
-      )
+    )
 ```
 
 You may add these listeners to know when the transfer UI is dismissed `EventDapiTransferUIDismissed`, or when the user is about to make a transfer using Dapi UI `EventDapiUIWillTransfer`.
@@ -241,11 +241,11 @@ You may add these listeners to know when the transfer UI is dismissed `EventDapi
 ```tsx
 dapiConnectManagerEmitter.addListener('EventDapiTransferUIDismissed', _ => {
     console.log('Transfer UI is dismissed');
-  });
+});
 
-  dapiConnectManagerEmitter.addListener('EventDapiUIWillTransfer',
+dapiConnectManagerEmitter.addListener('EventDapiUIWillTransfer',
     uiWillTransferResult => console.log(uiWillTransferResult),
-  );
+);
 ```
 
 ### Get Accounts
@@ -298,7 +298,7 @@ Adds a new beneficiary
 
 ```tsx
 var beneficiary = {
-      address: {
+    address: {
       line1: 'baniyas road',
       line2: 'baniyas road',
       line3: 'baniyas road',
