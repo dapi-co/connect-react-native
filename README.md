@@ -85,7 +85,7 @@ end
         },
         endPointExtraBody : { 
         'metadata/accounts/get': {key: value},
-         'data/transactions/get': {key: value},
+        'data/transactions/get': {key: value},
         },
       };
 
