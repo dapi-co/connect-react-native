@@ -1,3 +1,11 @@
+## v2.7.0
+### Added 
+- `DapiBankConnection` has 3 new properties for bank logos: `fullLogo`, `halfLogo` and `miniLogo`.
+- createTransfer rejected promise returns error and sender account.
+### Fixed
+ - [iOS] A crash occuring when opening transfer UI with bank connection has no accounts.
+ - [iOS] `createTransfer` callback is fired with error when user taps on back button of transfer UI.
+
 ## v2.6.0
 ### Added 
 - Mutable configuration on Dapi object.
