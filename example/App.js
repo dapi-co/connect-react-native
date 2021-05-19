@@ -44,12 +44,23 @@ function generateConfigs(authKey) {
     environment: 'production',
     countries: ['AE'],
     showAddButton: false,
+    showLogos: true,
+    showExperimentalBanks: false,
+    showCloseButton: true,
     endPointExtraHeaderFields: {
       'data/identity/get': {authKey: authKey},
       'data/accounts/get': {authKey: authKey},
       'metadata/accounts/get': {authKey: authKey},
       'data/transactions/get': {authKey: authKey},
       'payment/transfer/autoflow': {authKey: authKey},
+    },
+    endPointExtraQueryItems: {
+      'data/identity/get': {authKey: authKey},
+      'data/accounts/get': {authKey: authKey},
+    },
+    endPointExtraBody: {
+      'metadata/accounts/get': {authKey: authKey},
+      'data/transactions/get': {authKey: authKey},
     },
   };
 
@@ -152,14 +163,17 @@ async function transfer() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
     await connections[0]
-      .createTransfer(null, beneficiary, 10.42, 'test')
+      .createTransfer(null, beneficiary, 1.42, 'test')
       .then(accountsResponse => {
+        console.log('accountsResponse');
         console.log(accountsResponse.account.currency);
         console.log(accountsResponse.amount);
       })
       .catch(error => {
-        console.log(error);
-        if (error.message.includes('Beneficiary will be activated')) {
+        let json = JSON.parse(error.message);
+        let errorMessage = json.error;
+        let account = json.account;
+        if (errorMessage.includes('Beneficiary will be activated')) {
           console.log('This is a coolDownPeriod error');
         }
       });

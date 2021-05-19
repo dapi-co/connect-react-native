@@ -53,6 +53,7 @@ import kotlin.jvm.functions.Function1;
 public class DapiConnectModule extends ReactContextBaseJavaModule {
 
     public static final String NAME = "DapiConnectManager";
+    public static final String ERROR_CODE = "1015";
 
     public DapiConnectModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -104,6 +105,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setClientUserID(String clientUserID) {
         Dapi.setClientUserID(clientUserID);
+        Log.i("DapiSDK", "ClientUserID is set");
     }
 
     @ReactMethod
@@ -119,6 +121,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setConfigurations(ReadableMap configurationMap) {
         Dapi.setConfigurations(getConfigurations(configurationMap));
+        Log.i("DapiSDK", "New configurations set");
     }
 
     @ReactMethod
@@ -158,6 +161,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     connectionMap.putString("bankShortName", connection.getBankShortName());
                     connectionMap.putString("bankFullName", connection.getBankFullName());
                     connectionMap.putString("country", connection.getCountry());
+                    connectionMap.putString("fullLogo", connection.getFullLogo());
+                    connectionMap.putString("halfLogo", connection.getHalfLogo());
+                    connectionMap.putString("miniLogo", connection.getMiniLogo());
                     connectionMap.putArray("accounts", resultAccountMapArray);
                     connectionsArray.pushMap(connectionMap);
                 } catch (Exception e) {
@@ -382,14 +388,13 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         try {
             if (error instanceof DapiError) {
                 Throwable throwable = new Throwable(((DapiError) error).getMsg());
-                JSONObject jsonObject = convertToJSONObject(error);
-                promise.reject("1015", throwable, JsonConvert.jsonToReact(jsonObject));
+                promise.reject(ERROR_CODE, throwable);
             } else {
-                promise.reject("1015", error.toString());
+                promise.reject(ERROR_CODE, error.toString());
             }
 
         } catch (Exception e) {
-            promise.reject("1015", e);
+            promise.reject(ERROR_CODE, e);
             e.printStackTrace();
         }
     }
@@ -760,8 +765,15 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onTransferFailure(@org.jetbrains.annotations.Nullable Accounts.DapiAccount dapiAccount, @NotNull DapiError error) {
-                reject(error, promise);
+            public void onTransferFailure(@org.jetbrains.annotations.Nullable Accounts.DapiAccount account, @NotNull DapiError error) {
+                JSONObject errorObject = new JSONObject();
+                try {
+                    errorObject.put("error", error.getMsg());
+                    errorObject.put("account", account);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                reject(errorObject, promise);
             }
 
             @Override

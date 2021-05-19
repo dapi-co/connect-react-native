@@ -54,6 +54,9 @@ export class DapiConnection implements IDapiConnection {
   private _bankShortName: string;
   private _bankFullName: string;
   private _accounts: IAccount[];
+  private _fullLogo: string;
+  private _halfLogo: string;
+  private _miniLogo: string;
 
   public get clientUserID(): string {
     return this._clientUserID;
@@ -79,6 +82,16 @@ export class DapiConnection implements IDapiConnection {
   public get accounts(): IAccount[] {
     return this._accounts;
   }
+  public get fullLogo(): string {
+    return this._fullLogo;
+  }
+  public get halfLogo(): string {
+    return this._halfLogo;
+  }
+  public get miniLogo(): string {
+    return this._miniLogo;
+  }
+
   constructor(
     clientUserID: string,
     userID: string,
@@ -88,6 +101,10 @@ export class DapiConnection implements IDapiConnection {
     bankShortName: string,
     bankFullName: string,
     accounts: IAccount[],
+    fullLogo: string,
+    halfLogo: string,
+    miniLogo: string,
+
   ) {
     this._clientUserID = clientUserID;
     this._userID = userID;
@@ -97,6 +114,10 @@ export class DapiConnection implements IDapiConnection {
     this._bankShortName = bankShortName;
     this._bankFullName = bankFullName;
     this._accounts = accounts;
+    this._fullLogo = fullLogo;
+    this._halfLogo = halfLogo;
+    this._miniLogo = miniLogo;
+
   }
   createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult> {
     return NativeInterface.createBeneficiary(this.userID, beneficiary);
@@ -141,7 +162,6 @@ export class DapiConnection implements IDapiConnection {
     amount: number,
     remark: string | null,
   ): Promise<ITransferResponse> {
-
     let transferResponse = await NativeInterface.createTransfer(
       this.userID,
       fromAccount ? fromAccount.id : null,
@@ -149,19 +169,10 @@ export class DapiConnection implements IDapiConnection {
       amount,
       remark,
     );
-
-    let accountID = transferResponse['account'];
-    let amnt = transferResponse['amount'];
-
-    let sendingAccount: IAccount = fromAccount ?? this._accounts[0];
-    this._accounts.find((acc, i, accs) => {
-      if (acc.id == accountID) {
-        sendingAccount = acc
-      }
-    })
-
+    let accountID = transferResponse.account;
+    let amnt = transferResponse.amount;
+    let sendingAccount = this.getAccount(accountID);
     return new TransferResponse(amnt, sendingAccount);
-
   }
 
   async createTransferToExistingBeneficiary(
@@ -170,9 +181,6 @@ export class DapiConnection implements IDapiConnection {
     amount: number,
     remark: string | null,
   ): Promise<ITransferResponse> {
-
-    
-
     let transferResponse = await NativeInterface.createTransferToExistingBeneficiary(
       this.userID,
       fromAccount.id,
@@ -180,18 +188,20 @@ export class DapiConnection implements IDapiConnection {
       amount,
       remark,
     );
+    let accountID = transferResponse.account;
+    let amnt = transferResponse.amount;
+    let sendingAccount = this.getAccount(accountID);
+    return new TransferResponse(amnt, sendingAccount);
+  }
 
-    let accountID = transferResponse['account'];
-    let amnt = transferResponse['amount'];
-
-    let sendingAccount: IAccount = fromAccount;
+  private getAccount(accountID: string): IAccount | undefined {
+    var account : IAccount | undefined = undefined;
     this._accounts.find((acc, i, accs) => {
       if (acc.id == accountID) {
-        sendingAccount = acc
+        account = acc;
       }
-    })
-
-    return new TransferResponse(amnt, sendingAccount);
+    });
+    return account;
   }
 }
 
@@ -238,7 +248,7 @@ export default class Dapi {
   public static get instance(): Dapi {
     return this._instance;
   }
-  private constructor() {}
+  private constructor() { }
 
   start(
     appKey: string,
@@ -248,7 +258,7 @@ export default class Dapi {
     return NativeInterface.start(appKey, clientUserID, configurations);
   }
 
-  isStarted() : Promise<boolean> {
+  isStarted(): Promise<boolean> {
     return NativeInterface.isStarted();
   }
 
@@ -307,6 +317,9 @@ export default class Dapi {
         currentConnection.bankShortName,
         currentConnection.bankFullName,
         accounts,
+        currentConnection.fullLogo,
+        currentConnection.halfLogo,
+        currentConnection.miniLogo
       );
       connections.push(connection);
     }

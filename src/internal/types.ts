@@ -41,21 +41,21 @@ export interface IDapiConfigurations {
 }
 
 export enum DapiEnvironment {
-  sandbox = "sandbox",
-  production = "production",
+  sandbox = 'sandbox',
+  production = 'production',
 }
 
 export enum DapiEndpoint {
-  exchangeToken = "auth/ExchangeToken",
-  getIdentity = "data/identity/get",
-  getAccounts = "data/accounts/get",
-  getAccountMetadata = "metadata/accounts/get",
-  getTransactions = "data/transactions/get",
-  getBeneficiaries = "payment/beneficiaries/get",
-  createBeneficiary = "payment/beneficiaries/create",
-  createTransfer = "payment/transfer/create",
-  createTransferToExistingBeneficiary = "payment/transfer/autoflow",
-  delete = "users/DelinkUser",
+  exchangeToken = 'auth/ExchangeToken',
+  getIdentity = 'data/identity/get',
+  getAccounts = 'data/accounts/get',
+  getAccountMetadata = 'metadata/accounts/get',
+  getTransactions = 'data/transactions/get',
+  getBeneficiaries = 'payment/beneficiaries/get',
+  createBeneficiary = 'payment/beneficiaries/create',
+  createTransfer = 'payment/transfer/create',
+  createTransferToExistingBeneficiary = 'payment/transfer/autoflow',
+  delete = 'users/DelinkUser',
 }
 
 export interface IDapiQueryParameter {
@@ -245,6 +245,10 @@ export interface IDapiConnection {
   readonly bankShortName: string;
   readonly bankFullName: string;
   readonly accounts: IAccount[];
+  readonly fullLogo: string;
+  readonly halfLogo: string;
+  readonly miniLogo: string;
+
 
   getIdentity(): Promise<IIdentityResponse>;
   getAccounts(): Promise<IAccountResponse>;
