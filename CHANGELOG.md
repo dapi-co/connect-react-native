@@ -1,3 +1,8 @@
+## v2.7.1
+### Fixed
+ - [iOS] Handle multiple MFA inputs.
+
+
 ## v2.7.0
 ### Added 
 - `DapiBankConnection` has 3 new properties for bank logos: `fullLogo`, `halfLogo` and `miniLogo`.
