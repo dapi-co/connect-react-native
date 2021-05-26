@@ -1,7 +1,11 @@
+## v2.7.2
+### Fixed
+- [iOS] Caching accounts from the same bank account for different `clientUserID`.
+- [iOS] Crash caused by calling `getBeneficiaries` with an MFA. 
+
 ## v2.7.1
 ### Fixed
  - [iOS] Handle multiple MFA inputs.
-
 
 ## v2.7.0
 ### Added 
