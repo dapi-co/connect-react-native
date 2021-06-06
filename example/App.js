@@ -172,6 +172,7 @@ async function transfer() {
       })
       .catch(error => {
         let json = JSON.parse(error.message);
+        console.log(json);
         let errorMessage = json.error;
         let account = json.account;
         console.log(json);
@@ -192,17 +193,17 @@ async function transferToExistingBeneficiary() {
       .createTransferToExistingBeneficiary(
         connections[0].accounts[0],
         beneficiariesResponse.beneficiaries[7].id,
-        10.43,
+        1.43,
       )
       .then(transfer => console.log(transfer))
       .catch(error => {
         let json = JSON.parse(error.message);
+        console.log(json);
         let errorMessage = json.error;
         let account = json.account;
-        console.log(json);
-        console.log(errorMessage);
-        console.log(account);
-        console.log(error);
+        if (errorMessage.includes('Beneficiary will be activated')) {
+          console.log('This is a coolDownPeriod error');
+        }
       });
   }
 }

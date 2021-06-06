@@ -195,7 +195,8 @@ RCT_EXPORT_METHOD(createTransferToExistingBeneficiary:(NSString *)userID account
                         [self emitAccountSelectionCanceledEvent];
                     }
                 }
-                reject(@"1012", error.localizedDescription, error);
+                NSString *jsonError = [self jsonRepresentationOfError:error account:account];
+                reject(@"1012", jsonError, error);
             } else {
                 resolve(@{
                     @"account": account.accountID ?: [NSNull null],
@@ -225,7 +226,9 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
                         [self emitAccountSelectionCanceledEvent];
                     }
                 }
-                reject(@"1012", error.localizedDescription, error);
+
+                NSString *jsonError = [self jsonRepresentationOfError:error account:account];
+                reject(@"1012", jsonError, error);
             } else {
                 resolve(@{
                     @"account": account.accountID ?: [NSNull null],
@@ -414,6 +417,30 @@ RCT_EXPORT_METHOD(createTransfer:(NSString *)userID accountID:(NSString *)accoun
     beneficiary.branchAddress = [beneficiaryInfoDictionary objectForKey:@"branchAddress"];
     beneficiary.branchName = [beneficiaryInfoDictionary objectForKey:@"branchName"];
     return beneficiary;
+}
+
+- (NSString *)jsonRepresentationOfError:(NSError *)error account:(DPCAccount *)account {
+    
+    NSDictionary *accountDictionaryRepresentation;
+    if ([account respondsToSelector:@selector(dictionaryRepresentation)]) {
+        accountDictionaryRepresentation = [account valueForKey:@"dictionaryRepresentation"];
+    }
+    
+    NSDictionary *jsonError = @{
+        @"error": error.localizedDescription ?: [NSNull null],
+        @"account": accountDictionaryRepresentation ?: [NSNull null],
+    };
+    
+    NSError *convertingError;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonError
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&convertingError];
+    if (convertingError) {
+        return [NSString stringWithFormat:@"{\"error\": %@, \"account\": null}", error.localizedDescription];
+    } else {
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        return jsonString;
+    }
 }
 
 @end
