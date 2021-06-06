@@ -29,6 +29,7 @@ import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 
 const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
+let params = null;
 
 async function startDapi() {
   let configs = generateConfigs('ABC');
@@ -262,8 +263,10 @@ async function clientUserID() {
 async function getParameters() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var params = await connections[0].getParameters();
-    console.log('connection params: ', params);
+    params = await connections[0].getParameters();
+    const jsonParams = JSON.parse(params);
+    var prettyParams = JSON.stringify(jsonParams, null, 2);
+    console.log('connection params:\n', prettyParams);
   }
 }
 
@@ -305,6 +308,11 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Connect</Text>
             <Button title="Present Connect" onPress={() => presentConnect()} />
             <Button title="Get Connections" onPress={() => getConnections()} />
+            <Button
+              title="Connection Parameters"
+              onPress={() => getParameters()}
+            />
+            <Button title="Create Connection" onPress={() => create()} />
           </View>
 
           <View style={styles.sectionContainer}>

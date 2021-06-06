@@ -114,6 +114,21 @@ RCT_EXPORT_METHOD(getConnections:(RCTPromiseResolveBlock)resolve rejecter:(RCTPr
     resolve(arrayObjects);
 }
 
+RCT_EXPORT_METHOD(getConnectionParameters:(NSString *)userID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
+    NSDictionary<NSString *, id> *connectionParams = bankConnection.getConnectionParameters;
+    
+    
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:connectionParams options:NSJSONWritingPrettyPrinted error:&error];
+    
+    if (!jsonData) {
+        reject(@"1012", error.localizedDescription, error);
+    } else {
+        NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        resolve(json);
+    }
+}
 RCT_EXPORT_METHOD(getIdentity:(NSString *)userID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
     [bankConnection getIdentity:^(DPCIdentity * _Nullable identity, NSError * _Nullable error, NSString * _Nullable jobID) {
