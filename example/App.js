@@ -271,9 +271,11 @@ async function getParameters() {
 }
 
 async function create() {
-  var jsonConnection =
-    '{"accessCode":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBLZXkiOiIxZDQ1OTJjNGE4ZGQ2ZmY3NTI2MWU1N2ViM2Y4MGM1MThkNzg1N2Q2NjE3NzY5YWYzZjhmMDRiMDU5MGJhY2ViIiwiZXhwIjoxNjIyOTY1NzgwLCJpYXQiOjE2MjI5NjU0ODAsImp0aSI6Ijc0YjQzOWIyLWM4YzYtNDlmNS1hYTY3LTM3NDM0YTY3MGU0MSIsIm90cCI6IkUxMWdEWWRJRTB0TlpMd29ITmk5OHdHMG81TUl6ZCtiMzdTRkJ0emJ5WXM9IiwidXVpZCI6IjhhYzZmZTJlLTEwMmMtNDlkMi04NmFiLTViM2MyNjc1YmJkMiJ9.frybeE66acfhXdGH0EU8fIWSvpFURcJ3djuJ4gX4Xts","bankID":"CITIAEAD","clientUserID":"JohnDoe","color":{"primaryColor":"#092769","secondaryColor":"#FE000C"},"connectionID":"154f5c9d-9613-456e-8f5c-0e734273e050","fullLogoPng":"https://cdn-dapi.azureedge.net/banks-full-logo/Citibank.png","fullName":"CitiBank","halfLogoPng":"https://cdn-dapi.azureedge.net/banks-horizontal-logo/Citibank.png","miniLogoPng":"https://cdn-dapi.azureedge.net/banks-mini-logo/Citibank.png","name":"Citi","tokenID":"74b439b2-c8c6-49f5-aa67-37434a670e41","userID":"b45ASC4/WZZmE8LFrOUzp4KWUy6H94C/x2AV4KGfd3w+78ntR5js8CHICQIKXZCCGKlDR27Z+apWb8P+SigkDw==","userSecret":"m+VSB+bCJr8BBGbFSPGaOq1YUzydX1jiSrU7LH5DTgTiJy0Btur3G22sA47EPZ+g4nFBEKDjTBRzHsvcQa1IPOn1OY6aN7G6APhjn/RohHzG8aDWKiAlVA2uyAYqSmWVfjqctzeFMYjBPos9qQLedW0N469KJCD6aNKCsGMnknEOdjWnNztTSVZPCkyp/SRW8ny88LpRx52/zs6v7BA65X6TPGVPhU7ThdukJ3kZVdBx9ozT2HQcBnP+QT5kbjqc2ZPZDUlb2FRy3RLb7djidKPzziwYFhLWrRL4dMEs/fWSqI184nWe4m31zNX6WVz2gFyAl+xaNApf3wHhbRGAdj8IMPQAAnvLpQTM1xk5UlNWFOqG4+gWPWB2wiRld+4Z8WXFUxMjU1iWHNFUUkYNjSkrMjuzO6czPwndgVEcULy/9Jd6l7N97znJYfH3hHgqRA9CplhmFdqTPg34OdmDix/vCo4DjJQyeesKveu4d5456y3w0ZemY2A7qoOpQXzkJdXcRaPoBrw11rMSgrXfGBQEnSiqAeJX3p3kir/n2XkDLrIOY+S2ykgTz/2/ew5y17OGA56kU6Isqi2vl0EGwD1yteFUsw29FSgkgYaQ6Gr71CeZnNpqQqV8WxgF1NduPVrHEZufLO1FM6zqmuMQj1WEvzkpgRnFFnB+FoEazsY="}';
-  var connection = await DapiConnection.create(JSON.parse(jsonConnection));
+  if (params == null) {
+    console.log('params field is null');
+    return;
+  }
+  var connection = await DapiConnection.create(params);
   console.log(connection);
 }
 
