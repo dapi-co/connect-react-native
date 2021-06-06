@@ -274,6 +274,8 @@ export interface IDapiConnection {
     amount: number,
     remark: string | null,
   ): Promise<ITransferResponse>;
+
+  getParameters() : Promise<string>
 }
 
 export type IAddress = IAddressGeneral;

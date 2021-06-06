@@ -92,6 +92,10 @@ export class DapiConnection implements IDapiConnection {
     return this._miniLogo;
   }
 
+  static create(jsonConnectionDetails: string): Promise<DapiConnection> {
+    return NativeInterface.createConnection(jsonConnectionDetails);
+  }
+
   constructor(
     clientUserID: string,
     userID: string,
@@ -119,13 +123,20 @@ export class DapiConnection implements IDapiConnection {
     this._miniLogo = miniLogo;
 
   }
+
+  getParameters(): Promise<string> {
+    return NativeInterface.getConnectionParameters(this.userID);
+  }
+
   createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult> {
     return NativeInterface.createBeneficiary(this.userID, beneficiary);
   }
 
+
   getIdentity(): Promise<IIdentityResponse> {
     return NativeInterface.getIdentity(this.userID);
   }
+
 
   getAccounts(): Promise<IAccountResponse> {
     return NativeInterface.getAccounts(this.userID);

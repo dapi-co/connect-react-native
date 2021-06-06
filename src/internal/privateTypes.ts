@@ -1,3 +1,4 @@
+import { DapiConnection } from '..';
 import {
   IDapiConfigurations,
   IAccount,
@@ -54,5 +55,8 @@ export interface DapiConnectNativeModule {
   getBeneficiaries(userID: string): Promise<IBankBeneficiaryResponse>;
   createBeneficiary(userID: string, beneficiary: IBeneficiary): Promise<IDapiResult>;
 
-  isStarted() : Promise<boolean>
+  isStarted() : Promise<boolean>;
+
+  createConnection(jsonConnectionDetails : string) : Promise<DapiConnection>;
+  getConnectionParameters(userID : string) : Promise<string>
 }
