@@ -4,17 +4,17 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.dapi.connect.core.base.Dapi;
-import com.dapi.connect.core.callbacks.OnDapiConnectListener;
-import com.dapi.connect.core.callbacks.OnDapiTransferListener;
-import com.dapi.connect.data.endpoint_models.Accounts;
-import com.dapi.connect.data.models.DapiBeneficiary;
-import com.dapi.connect.data.models.DapiConfigurations;
-import com.dapi.connect.data.models.DapiConnection;
-import com.dapi.connect.data.models.DapiEndpoints;
-import com.dapi.connect.data.models.DapiEnvironment;
-import com.dapi.connect.data.models.DapiError;
-import com.dapi.connect.data.models.LinesAddress;
+import co.dapi.connect.core.base.Dapi;
+import co.dapi.connect.core.callbacks.OnDapiConnectListener;
+import co.dapi.connect.core.callbacks.OnDapiTransferListener;
+import co.dapi.connect.data.endpoint_models.Accounts;
+import co.dapi.connect.data.models.DapiBeneficiary;
+import co.dapi.connect.data.models.DapiConfigurations;
+import co.dapi.connect.data.models.DapiConnection;
+import co.dapi.connect.data.models.DapiEndpoints;
+import co.dapi.connect.data.models.DapiEnvironment;
+import co.dapi.connect.data.models.DapiError;
+import co.dapi.connect.data.models.LinesAddress;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Dynamic;
@@ -156,14 +156,14 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     WritableMap connectionMap = new WritableNativeMap();
                     connectionMap.putString("userID", connection.getUserID());
                     connectionMap.putString("clientUserID", connection.getClientUserID());
-                    connectionMap.putString("bankID", connection.getBankID());
+                    connectionMap.putString("bankID", connection.getBankId());
                     connectionMap.putString("swiftCode", connection.getSwiftCode());
-                    connectionMap.putString("bankShortName", connection.getBankShortName());
-                    connectionMap.putString("bankFullName", connection.getBankFullName());
+                    connectionMap.putString("bankShortName", connection.getName());
+                    connectionMap.putString("bankFullName", connection.getFullName());
                     connectionMap.putString("country", connection.getCountry());
-                    connectionMap.putString("fullLogo", connection.getFullLogo());
-                    connectionMap.putString("halfLogo", connection.getHalfLogo());
-                    connectionMap.putString("miniLogo", connection.getMiniLogo());
+                    connectionMap.putString("fullLogo", connection.getFullLogoPng());
+                    connectionMap.putString("halfLogo", connection.getHalfLogoPng());
+                    connectionMap.putString("miniLogo", connection.getMiniLogoPng());
                     connectionMap.putArray("accounts", resultAccountMapArray);
                     connectionsArray.pushMap(connectionMap);
                 } catch (Exception e) {
@@ -365,6 +365,39 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         });
     }
 
+    @ReactMethod
+    public void createConnection(String jsonConnectionParameters, Promise promise) {
+        DapiConnection.Companion.create(jsonConnectionParameters, connection -> {
+            WritableMap connectionMap = new WritableNativeMap();
+            connectionMap.putString("userID", connection.getUserID());
+            connectionMap.putString("clientUserID", connection.getClientUserID());
+            connectionMap.putString("bankID", connection.getBankId());
+            connectionMap.putString("swiftCode", connection.getSwiftCode());
+            connectionMap.putString("bankShortName", connection.getName());
+            connectionMap.putString("bankFullName", connection.getFullName());
+            connectionMap.putString("country", connection.getCountry());
+            connectionMap.putString("fullLogo", connection.getFullLogoPng());
+            connectionMap.putString("halfLogo", connection.getHalfLogoPng());
+            connectionMap.putString("miniLogo", connection.getMiniLogoPng());
+            resolve(connectionMap, promise);
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
+    @ReactMethod
+    public void getConnectionParameters(String userID, Promise promise) {
+        getOperatingConnection(userID, connection -> {
+            resolve(connection.getParameters(), promise);
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
 
     /**
      * ************ HELPER FUNCTIONS ************
@@ -387,7 +420,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Log.e("DapiSDK", error.toString());
         try {
             if (error instanceof DapiError) {
-                Throwable throwable = new Throwable(((DapiError) error).getMsg());
+                Throwable throwable = new Throwable(((DapiError) error).getMessage());
                 promise.reject(ERROR_CODE, throwable);
             } else {
                 promise.reject(ERROR_CODE, error.toString());
@@ -420,9 +453,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         if (configurations == null) {
             return null;
         }
-        Map<String, Object> extraQueryParameters;
-        Map<String, Object> extraHeaderFields;
-        Map<String, Object> extraBody;
+        HashMap<String, Object> extraQueryParameters;
+        HashMap<String, Object> extraHeaderFields;
+        HashMap<String, Object> extraBody;
         DapiEndpoints endpoints;
         DapiEnvironment environment;
         ReadableArray countries = null;
@@ -495,9 +528,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
 
         return new DapiConfigurations(
                 endpoints,
-                getExtraBody(extraBody),
-                getExtraParams(extraQueryParameters),
-                getExtraHeaders(extraHeaderFields),
+                extraBody,
+                extraQueryParameters,
+                extraHeaderFields,
                 environment,
                 countriesArray,
                 showLogos,
@@ -586,56 +619,6 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                 getBeneficiaries,
                 delete
         );
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes", "MismatchedQueryAndUpdateOfCollection"})
-    private HashMap<String, HashMap<String, String>> getExtraBody(Map<String, Object> extraBody) {
-        HashMap<String, Object> extraBodyMapOfObjects =
-                (extraBody instanceof HashMap)
-                        ? (HashMap) extraBody
-                        : new HashMap<>(extraBody);
-
-        HashMap<String, HashMap<String, String>> extraBodyMapOfMaps = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraBodyMapOfObjects.entrySet()) {
-            if (entry.getValue() instanceof HashMap) {
-                extraBodyMapOfMaps.put(entry.getKey(), (HashMap<String, String>) entry.getValue());
-            }
-        }
-
-        return extraBodyMapOfMaps;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes", "MismatchedQueryAndUpdateOfCollection"})
-    private HashMap<String, HashMap<String, String>> getExtraHeaders(Map<String, Object> extraHeaderFields) {
-        HashMap<String, Object> extraHeadersMapOfObjects =
-                (extraHeaderFields instanceof HashMap)
-                        ? (HashMap) extraHeaderFields
-                        : new HashMap<>(extraHeaderFields);
-
-        HashMap<String, HashMap<String, String>> extraHeadersMapOfMaps = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraHeadersMapOfObjects.entrySet()) {
-            if (entry.getValue() instanceof HashMap) {
-                extraHeadersMapOfMaps.put(entry.getKey(), (HashMap<String, String>) entry.getValue());
-            }
-        }
-        return extraHeadersMapOfMaps;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes", "MismatchedQueryAndUpdateOfCollection"})
-    private HashMap<String, HashMap<String, String>> getExtraParams(Map<String, Object> extraQueryParameters) {
-        HashMap<String, Object> extraParamsMapOfObjects =
-                (extraQueryParameters instanceof HashMap)
-                        ? (HashMap) extraQueryParameters
-                        : new HashMap<>(extraQueryParameters);
-
-        HashMap<String, HashMap<String, String>> extraParamsMapOfMaps = new HashMap<>();
-        for (Map.Entry<String, Object> entry : extraParamsMapOfObjects.entrySet()) {
-            if (entry.getValue() instanceof HashMap) {
-                extraParamsMapOfMaps.put(entry.getKey(), (HashMap<String, String>) entry.getValue());
-            }
-        }
-
-        return extraParamsMapOfMaps;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked", "SameParameterValue"})
@@ -734,7 +717,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             public void onConnectionFailure(@NotNull DapiError error, @NotNull String bankID) {
                 WritableMap params = Arguments.createMap();
                 params.putString("bankID", bankID);
-                params.putString("error", error.getMsg());
+                params.putString("error", error.getMessage());
                 sendEvent(getReactApplicationContext(), "EventConnectFailure", params);
             }
         });
@@ -768,7 +751,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             public void onTransferFailure(@org.jetbrains.annotations.Nullable Accounts.DapiAccount account, @NotNull DapiError error) {
                 JSONObject errorObject = new JSONObject();
                 try {
-                    errorObject.put("error", error.getMsg());
+                    errorObject.put("error", error.getMessage());
                     errorObject.put("account", account);
                 } catch (JSONException e) {
                     e.printStackTrace();
