@@ -1,3 +1,10 @@
+## v2.8.0
+### Added
+- `DapiConnection` now implements an instance method `getParameters()` that returns a JSON representation of the connection.
+- `DapiConnection` now implements a static method `create(jsonConnectionDetails: string)` to support creating a connection with JSON object from the connection.
+
+Note: Avoid creating a connection that already exists for a `clientUserID`.
+
 ## v2.7.2
 ### Fixed
 - [iOS] Caching accounts from the same bank account for different `clientUserID`.
