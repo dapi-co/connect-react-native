@@ -2,6 +2,8 @@
 ### Added
 - `DapiConnection` now implements an instance method `getParameters()` that returns a JSON representation of the connection.
 - `DapiConnection` now implements a static method `create(jsonConnectionDetails: string)` to support creating a connection with JSON object from the connection.
+### Fixed
+- Accounts UI is now filtered for the passed connection.
 
 Note: Avoid creating a connection that already exists for a `clientUserID`.
 
