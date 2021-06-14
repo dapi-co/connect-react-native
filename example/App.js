@@ -43,7 +43,7 @@ async function startDapi() {
 
 function generateConfigs(authKey) {
   const configurations = {
-    environment: 'production',
+    environment: 'sandbox',
     countries: ['AE'],
     showAddButton: false,
     showLogos: true,
@@ -151,10 +151,10 @@ async function transfer() {
       line2: 'dubai',
       line3: 'united arab emirates',
     },
-    accountNumber: '18243421401',
+    accountNumber: '1623404370879825504324',
     bankName: 'STANDARD CHARTERED BANK',
     swiftCode: 'SCBLAEAD',
-    iban: 'AE220440000010243421401',
+    iban: 'DAPIBANKAEENBD1623404370879825504324',
     country: 'AE',
     branchAddress: 'Dubai Mall',
     branchName: 'Dubai Mall',
