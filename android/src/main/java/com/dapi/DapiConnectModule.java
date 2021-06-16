@@ -7,7 +7,8 @@ import androidx.annotation.Nullable;
 import co.dapi.connect.core.base.Dapi;
 import co.dapi.connect.core.callbacks.OnDapiConnectListener;
 import co.dapi.connect.core.callbacks.OnDapiTransferListener;
-import co.dapi.connect.data.endpoint_models.Accounts;
+import co.dapi.connect.data.endpoint_models.DapiAccountsResponse;
+import co.dapi.connect.data.endpoint_models.DapiCardsResponse;
 import co.dapi.connect.data.models.DapiBeneficiary;
 import co.dapi.connect.data.models.DapiConfigurations;
 import co.dapi.connect.data.models.DapiConnection;
@@ -15,6 +16,7 @@ import co.dapi.connect.data.models.DapiEndpoints;
 import co.dapi.connect.data.models.DapiEnvironment;
 import co.dapi.connect.data.models.DapiError;
 import co.dapi.connect.data.models.LinesAddress;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Dynamic;
@@ -137,7 +139,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             for (DapiConnection connection : connections) {
                 try {
                     WritableArray resultAccountMapArray = new WritableNativeArray();
-                    for (Accounts.DapiAccount account : connection.getAccounts()) {
+                    for (DapiAccountsResponse.DapiAccount account : connection.getAccounts()) {
                         WritableMap currencyMap = new WritableNativeMap();
                         currencyMap.putString("code", account.getCurrency().getCode());
                         currencyMap.putString("name", account.getCurrency().getName());
@@ -203,9 +205,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getAccounts(String userID, Promise promise) {
         getOperatingConnection(userID, connection -> {
-            connection.getAccounts(identity -> {
+            connection.getAccounts(accounts -> {
                 Log.i("DapiSDK", "getAccounts call success");
-                resolve(identity, promise);
+                resolve(accounts, promise);
                 return null;
             }, error -> {
                 reject(error, promise);
@@ -219,13 +221,31 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getTransactions(
+    public void getCards(String userID, Promise promise) {
+        getOperatingConnection(userID, connection -> {
+            connection.getCards(cards -> {
+                Log.i("DapiSDK", "getCards call success");
+                resolve(cards, promise);
+                return null;
+            }, error -> {
+                reject(error, promise);
+                return null;
+            });
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
+    @ReactMethod
+    public void getTransactionsForAccount(
             String userID,
             String accountID,
             Dynamic startDate,
             Dynamic endDate,
-            Promise promise) {
-
+            Promise promise
+    ) {
         long startDateAsLong = (long) startDate.asDouble();
         long endDateAsLong = (long) endDate.asDouble();
 
@@ -233,9 +253,9 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         Date endDateObject = new Date(endDateAsLong);
 
         getOperatingConnection(userID, connection -> {
-            Accounts.DapiAccount account = getDapiAccount(accountID, connection);
+            DapiAccountsResponse.DapiAccount account = getDapiAccount(accountID, connection);
             connection.getTransactions(account, startDateObject, endDateObject, transactions -> {
-                Log.i("DapiSDK", "getTransactions call success");
+                Log.i("DapiSDK", "getTransactionsForAccount call success");
                 resolve(transactions, promise);
                 return null;
             }, error -> {
@@ -248,6 +268,38 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             return null;
         });
     }
+
+    @ReactMethod
+    public void getTransactionsForCard(
+            String userID,
+            String cardID,
+            Dynamic startDate,
+            Dynamic endDate,
+            Promise promise
+    ) {
+        long startDateAsLong = (long) startDate.asDouble();
+        long endDateAsLong = (long) endDate.asDouble();
+
+        Date startDateObject = new Date(startDateAsLong);
+        Date endDateObject = new Date(endDateAsLong);
+
+        getOperatingConnection(userID, connection -> {
+            DapiCardsResponse.DapiCard card = getDapiCard(cardID, connection);
+            connection.getTransactions(card, startDateObject, endDateObject, transactions -> {
+                Log.i("DapiSDK", "getTransactionsForCard call success");
+                resolve(transactions, promise);
+                return null;
+            }, error -> {
+                reject(error, promise);
+                return null;
+            });
+            return null;
+        }, error -> {
+            reject(error, promise);
+            return null;
+        });
+    }
+
 
     @ReactMethod
     public void getAccountsMetadata(String userID, Promise promise) {
@@ -299,7 +351,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     ) {
         setTransferListener(promise);
         getOperatingConnection(userID, connection -> {
-            Accounts.DapiAccount account = getDapiAccount(accountID, connection);
+            DapiAccountsResponse.DapiAccount account = getDapiAccount(accountID, connection);
             DapiBeneficiary beneficiary = getBeneficiary(beneficiaryMap);
             connection.createTransfer(account, beneficiary, amount, remark);
             return null;
@@ -320,7 +372,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     ) {
         setTransferListener(promise);
         getOperatingConnection(userID, connection -> {
-            Accounts.DapiAccount account = getDapiAccount(accountID, connection);
+            DapiAccountsResponse.DapiAccount account = getDapiAccount(accountID, connection);
             connection.createTransferToExistingBeneficiary(account, receiverID, amount, remark);
             return null;
         }, error -> {
@@ -663,10 +715,19 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
         return beneficiary;
     }
 
-    private Accounts.DapiAccount getDapiAccount(String accountID, DapiConnection connection) {
-        for (Accounts.DapiAccount account : connection.getAccounts()) {
+    private DapiAccountsResponse.DapiAccount getDapiAccount(String accountID, DapiConnection connection) {
+        for (DapiAccountsResponse.DapiAccount account : connection.getAccounts()) {
             if (account.getId().equals(accountID)) {
                 return account;
+            }
+        }
+        return null;
+    }
+
+    private DapiCardsResponse.DapiCard getDapiCard(String cardID, DapiConnection connection) {
+        for (DapiCardsResponse.DapiCard card : connection.getCards()) {
+            if (card.getId().equals(cardID)) {
+                return card;
             }
         }
         return null;
@@ -727,7 +788,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
     private void setTransferListener(Promise promise) {
         Dapi.setTransferListener(new OnDapiTransferListener() {
             @Override
-            public void willTransferAmount(double sentAmount, @NotNull Accounts.DapiAccount senderAccount) {
+            public void willTransferAmount(double sentAmount, @NotNull DapiAccountsResponse.DapiAccount senderAccount) {
                 WritableMap params = Arguments.createMap();
                 params.putDouble("amount", sentAmount);
                 try {
@@ -739,7 +800,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onTransferSuccess(@NotNull Accounts.DapiAccount senderAccount, double sentAmount, @org.jetbrains.annotations.Nullable String reference) {
+            public void onTransferSuccess(@NotNull DapiAccountsResponse.DapiAccount senderAccount, double sentAmount, @org.jetbrains.annotations.Nullable String reference) {
                 HashMap<String, Object> successfulTransferMap = new HashMap<>();
                 successfulTransferMap.put("account", senderAccount.getId());
                 successfulTransferMap.put("amount", sentAmount);
@@ -748,7 +809,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             }
 
             @Override
-            public void onTransferFailure(@org.jetbrains.annotations.Nullable Accounts.DapiAccount account, @NotNull DapiError error) {
+            public void onTransferFailure(@org.jetbrains.annotations.Nullable DapiAccountsResponse.DapiAccount account, @NotNull DapiError error) {
                 JSONObject errorObject = new JSONObject();
                 try {
                     errorObject.put("error", error.getMessage());
