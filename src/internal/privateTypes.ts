@@ -1,7 +1,7 @@
 import { DapiConnection } from '..';
 import {
   IDapiConfigurations,
-  IAccount,
+  ICardResponse,
   IBeneficiary,
   IDapiConnection,
   IAccountResponse,
@@ -10,7 +10,6 @@ import {
   ITransactionResponse,
   IBankBeneficiaryResponse,
   IDapiResult,
-  ITransferResponse,
 } from './types';
 
 export interface DapiConnectNativeModule {
@@ -28,9 +27,15 @@ export interface DapiConnectNativeModule {
   getConnections(): Promise<IDapiConnection[]>;
   getIdentity(userID: string): Promise<IIdentityResponse>;
   getAccounts(userID: string): Promise<IAccountResponse>;
-  getTransactions(
+  getTransactionsForAccount(
     userID: string,
     accountID: string,
+    startDateMilliseconds: number,
+    endDateMilliseconds: number,
+  ): Promise<ITransactionResponse>;
+  getTransactionsForCard(
+    userID: string,
+    cardID: string,
     startDateMilliseconds: number,
     endDateMilliseconds: number,
   ): Promise<ITransactionResponse>;
@@ -59,4 +64,7 @@ export interface DapiConnectNativeModule {
 
   createConnection(jsonConnectionDetails : string) : Promise<DapiConnection>;
   getConnectionParameters(userID : string) : Promise<string>
+
+  getCards(userID: string): Promise<ICardResponse>;
+
 }

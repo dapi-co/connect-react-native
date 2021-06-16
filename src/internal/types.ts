@@ -93,6 +93,12 @@ export interface IAccountResponse {
   readonly accounts: IAccount[];
 }
 
+export interface ICardResponse {
+  readonly operationID: string;
+  readonly success: boolean;
+  readonly cards: ICard[];
+}
+
 export interface ITransferResponse {
   readonly account?: IAccount;
   readonly amount: number;
@@ -121,6 +127,18 @@ export interface IAccount {
   readonly type: string;
   readonly id: string;
   readonly name: string;
+}
+
+export interface ICard {
+  readonly balance: number;
+  readonly cardNumber: string;
+  readonly creditLimit : string;
+  readonly currency: IPair;
+  readonly expiryDate : string;
+  readonly id: string;
+  readonly name: string;
+  readonly status : string;
+  readonly type: string;
 }
 
 interface IIdentification {
@@ -252,8 +270,13 @@ export interface IDapiConnection {
 
   getIdentity(): Promise<IIdentityResponse>;
   getAccounts(): Promise<IAccountResponse>;
-  getTransactions(
+  getTransactionsForAccount(
     account: IAccount,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ITransactionResponse>;
+  getTransactionsForCard(
+    card: ICard,
     startDate: Date,
     endDate: Date,
   ): Promise<ITransactionResponse>;
@@ -276,6 +299,8 @@ export interface IDapiConnection {
   ): Promise<ITransferResponse>;
 
   getParameters() : Promise<string>
+
+  getCards(): Promise<ICardResponse>;
 }
 
 export type IAddress = IAddressGeneral;

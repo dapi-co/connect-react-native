@@ -127,6 +127,14 @@ async function getAccounts() {
   }
 }
 
+async function getCards() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var cardsResponse = await connections[0].getCards();
+    console.log(cardsResponse);
+  }
+}
+
 async function getMetadata() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
@@ -279,6 +287,19 @@ async function create() {
   console.log(connection);
 }
 
+async function getTransactionsForAccount() {
+  var connections = await Dapi.instance.getConnections();
+  var transactions = await connections[0].getTransactionsForAccount(connections[0].accounts[0],new Date(1621235963109), new Date(1623865763109));
+  console.log(transactions);
+}
+
+async function getTransactionsForCard() {
+  var connections = await Dapi.instance.getConnections();
+  var cardsResponse = await connections[0].getCards();
+  var transactions = await connections[0].getTransactionsForCard(cardsResponse.cards[0],new Date(1621235963109), new Date(1623865763109));
+  console.log(transactions[0].amount);
+}
+
 const App: () => React$Node = () => {
   return (
     <>
@@ -321,6 +342,18 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
+             <Button
+              title="Get Cards"
+              onPress={() => getCards()}
+            />
+            <Button
+              title="Get Transactions For Account"
+              onPress={() => getTransactionsForAccount()}
+            />
+            <Button
+              title="Get Transactions For Card"
+              onPress={() => getTransactionsForCard()}
+            />
             <Button
               title="Create Beneficiary"
               onPress={() => createBeneficiary()}

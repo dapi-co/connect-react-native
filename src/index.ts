@@ -2,6 +2,7 @@ import NativeInterface from './internal/nativeInterface';
 import {
   IDapiConfigurations,
   IAccount,
+  ICard,
   IBeneficiary,
   IDapiConnection,
   IPair,
@@ -15,6 +16,7 @@ import {
   DapiEndpoint,
   IDapiQueryParameter,
   ITransferResponse,
+  ICardResponse,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -142,14 +144,27 @@ export class DapiConnection implements IDapiConnection {
     return NativeInterface.getAccounts(this.userID);
   }
 
-  getTransactions(
+  getTransactionsForAccount(
     account: IAccount,
     startDate: Date,
     endDate: Date,
   ): Promise<ITransactionResponse> {
-    return NativeInterface.getTransactions(
+    return NativeInterface.getTransactionsForAccount(
       this.userID,
       account.id,
+      startDate.getTime(),
+      endDate.getTime(),
+    );
+  }
+
+  getTransactionsForCard(
+    card: ICard,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ITransactionResponse> {
+    return NativeInterface.getTransactionsForCard(
+      this.userID,
+      card.id,
       startDate.getTime(),
       endDate.getTime(),
     );
@@ -165,6 +180,10 @@ export class DapiConnection implements IDapiConnection {
 
   getBeneficiaries(): Promise<IBankBeneficiaryResponse> {
     return NativeInterface.getBeneficiaries(this.userID);
+  }
+
+  getCards(): Promise<ICardResponse> {
+    return NativeInterface.getCards(this.userID);
   }
 
   async createTransfer(
