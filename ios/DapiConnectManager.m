@@ -163,7 +163,14 @@ RCT_EXPORT_METHOD(getAccounts:(NSString *)userID resolver:(RCTPromiseResolveBloc
     }];
 }
 
-RCT_EXPORT_METHOD(getTransactions:(NSString *)userID accountID:(NSString *)accountID startDate:(NSDate *)startDate endDate:(NSDate *)endDate resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getCards:(NSString *)userID resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
+    [bankConnection getCards:^(NSArray<DPCCard *> * _Nullable result, NSError * _Nullable error, NSString * _Nullable operationID) {
+        [self respondForDictionaryRepresentableObject:result error:error resolver:resolve rejecter:reject];
+    }];
+}
+
+RCT_EXPORT_METHOD(getTransactionsForAccount:(NSString *)userID accountID:(NSString *)accountID startDate:(NSDate *)startDate endDate:(NSDate *)endDate resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
     __block DPCAccount *account;
     [bankConnection.accounts enumerateObjectsUsingBlock:^(DPCAccount * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -173,6 +180,22 @@ RCT_EXPORT_METHOD(getTransactions:(NSString *)userID accountID:(NSString *)accou
         }
     }];
     [bankConnection getTransactionsForAccount:account fromDate:startDate toDate:endDate completion:^(NSArray<DPCTransaction *> * _Nullable transactions, NSError * _Nullable error, NSString * _Nullable operationID) {
+        [self respondForDictionaryRepresentableObject:transactions error:error resolver:resolve rejecter:reject];
+    }];
+}
+
+RCT_EXPORT_METHOD(getTransactionsForCard:(NSString *)userID cardID:(NSString *)cardID startDate:(NSDate *)startDate endDate:(NSDate *)endDate resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DPCBankConnection *bankConnection = [self bankConnectionForUserID:userID];
+    
+    __block DPCCard *card;
+    [bankConnection.cards enumerateObjectsUsingBlock:^(DPCCard * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj.cardID isEqualToString:cardID]) {
+            *stop = YES;
+            card = obj;
+        }
+    }];
+    
+    [bankConnection getTransactionsForCard:card fromDate:startDate toDate:endDate completion:^(NSArray<DPCTransaction *> * _Nullable transactions, NSError * _Nullable error, NSString * _Nullable operationID) {
         [self respondForDictionaryRepresentableObject:transactions error:error resolver:resolve rejecter:reject];
     }];
 }
