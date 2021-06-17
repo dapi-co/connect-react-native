@@ -138,8 +138,8 @@ async function getCards() {
 async function getCachedCards() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
-    var cardsResponse = await connections[0].cards;
-    console.log(cardsResponse);
+    var cards = await connections[0].cards;
+    console.log(cards);
   }
 }
 

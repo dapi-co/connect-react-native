@@ -43,6 +43,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -139,6 +140,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
             for (DapiConnection connection : connections) {
                 try {
                     WritableArray resultAccountMapArray = new WritableNativeArray();
+                    WritableArray resultCardMapArray = new WritableNativeArray();
                     for (DapiAccountsResponse.DapiAccount account : connection.getAccounts()) {
                         WritableMap currencyMap = new WritableNativeMap();
                         currencyMap.putString("code", account.getCurrency().getCode());
@@ -155,6 +157,31 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                         resultAccountMapArray.pushMap(accountMap);
                     }
 
+                    for (DapiCardsResponse.DapiCard card : connection.getCards()) {
+                        WritableMap currencyMap = new WritableNativeMap();
+                        currencyMap.putString("code", card.getCurrency().getCode());
+                        currencyMap.putString("name", card.getCurrency().getName());
+
+                        WritableMap balanceMap = new WritableNativeMap();
+                        balanceMap.putString("amountDue", String.valueOf(card.getBalance().getAmountDue()));
+                        balanceMap.putString("availableBalance", String.valueOf(card.getBalance().getAvailableBalance()));
+                        balanceMap.putString("dueDate", card.getBalance().getDueDate());
+                        balanceMap.putString("outstandingBalance", String.valueOf(card.getBalance().getOutstandingBalance()));
+
+
+                        WritableMap cardMap = new WritableNativeMap();
+                        cardMap.putString("cardNumber", card.getCardNumber());
+                        cardMap.putString("creditLimit", String.valueOf(card.getCreditLimit()));
+                        cardMap.putMap("currency", currencyMap);
+                        cardMap.putString("type", card.getType());
+                        cardMap.putString("name", card.getName());
+                        cardMap.putString("id", card.getId());
+                        cardMap.putString("expiryDate", card.getExpiryDate());
+                        cardMap.putString("status", card.getStatus());
+                        cardMap.putMap("balance", balanceMap);
+                        resultCardMapArray.pushMap(cardMap);
+                    }
+
                     WritableMap connectionMap = new WritableNativeMap();
                     connectionMap.putString("userID", connection.getUserID());
                     connectionMap.putString("clientUserID", connection.getClientUserID());
@@ -167,6 +194,7 @@ public class DapiConnectModule extends ReactContextBaseJavaModule {
                     connectionMap.putString("halfLogo", connection.getHalfLogoPng());
                     connectionMap.putString("miniLogo", connection.getMiniLogoPng());
                     connectionMap.putArray("accounts", resultAccountMapArray);
+                    connectionMap.putArray("cards", resultCardMapArray);
                     connectionsArray.pushMap(connectionMap);
                 } catch (Exception e) {
                     Log.e("DapiSDK", e.toString());
