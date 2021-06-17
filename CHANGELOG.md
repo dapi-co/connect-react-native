@@ -1,3 +1,9 @@
+## 2.9.0
+### Added
+- Get Cards API `connection.getCards()`.
+- Get Card Transactions API `connection.getTransactionsForCard(card: ICard, startDate: Date, endDate: Date))`.
+- Get Cards API from cache `connection.cards`.
+
 ## v2.8.0
 ### Added
 - `DapiConnection` now implements an instance method `getParameters()` that returns a JSON representation of the connection.
