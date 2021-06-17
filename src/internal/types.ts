@@ -129,8 +129,15 @@ export interface IAccount {
   readonly name: string;
 }
 
+export interface ICardBalance {
+  readonly amountDue: number;
+  readonly availableBalance: number;
+  readonly outstandingBalance: number;
+  readonly dueDate: string;
+}
+
 export interface ICard {
-  readonly balance: number;
+  readonly balance: ICardBalance;
   readonly cardNumber: string;
   readonly creditLimit : string;
   readonly currency: IPair;
@@ -263,6 +270,7 @@ export interface IDapiConnection {
   readonly bankShortName: string;
   readonly bankFullName: string;
   readonly accounts: IAccount[];
+  readonly cards: ICard[];
   readonly fullLogo: string;
   readonly halfLogo: string;
   readonly miniLogo: string;

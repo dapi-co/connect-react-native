@@ -17,6 +17,7 @@ import {
   IDapiQueryParameter,
   ITransferResponse,
   ICardResponse,
+  ICardBalance,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -56,6 +57,7 @@ export class DapiConnection implements IDapiConnection {
   private _bankShortName: string;
   private _bankFullName: string;
   private _accounts: IAccount[];
+  private _cards: ICard[];
   private _fullLogo: string;
   private _halfLogo: string;
   private _miniLogo: string;
@@ -84,6 +86,9 @@ export class DapiConnection implements IDapiConnection {
   public get accounts(): IAccount[] {
     return this._accounts;
   }
+  public get cards(): ICard[] {
+    return this._cards;
+  }
   public get fullLogo(): string {
     return this._fullLogo;
   }
@@ -107,6 +112,7 @@ export class DapiConnection implements IDapiConnection {
     bankShortName: string,
     bankFullName: string,
     accounts: IAccount[],
+    cards: ICard[],
     fullLogo: string,
     halfLogo: string,
     miniLogo: string,
@@ -120,6 +126,7 @@ export class DapiConnection implements IDapiConnection {
     this._bankShortName = bankShortName;
     this._bankFullName = bankFullName;
     this._accounts = accounts;
+    this._cards = cards;
     this._fullLogo = fullLogo;
     this._halfLogo = halfLogo;
     this._miniLogo = miniLogo;
@@ -273,6 +280,45 @@ export class DapiAccount implements IAccount {
   }
 }
 
+export class DapiCardBalance implements ICardBalance {
+  readonly amountDue: number;
+  readonly availableBalance: number;
+  readonly outstandingBalance: number;
+  readonly dueDate: string;
+
+  constructor(amountDue: number, availableBalance: number, outstandingBalance: number, dueDate: string) {
+    this.amountDue = amountDue;
+    this.availableBalance = availableBalance;
+    this.outstandingBalance = outstandingBalance;
+    this.dueDate = dueDate;
+  }
+
+}
+
+export class DapiCard implements ICard {
+  balance: DapiCardBalance;
+  cardNumber: string;
+  creditLimit: string;
+  currency: IPair;
+  expiryDate: string;
+  id: string;
+  name: string;
+  status: string;
+  type: string;
+
+  constructor(balance: DapiCardBalance, cardNumber: string, creditLimit: string, currency: IPair, expiryDate: string, id: string, name: string, status: string, type: string) {
+    this.balance = balance;
+    this.cardNumber = cardNumber;
+    this.creditLimit = creditLimit;
+    this.currency = currency;
+    this.expiryDate = expiryDate;
+    this.id = id;
+    this.name = name;
+    this.status = status;
+    this.type = type;
+  }
+}
+
 export default class Dapi {
   private static _instance = new Dapi();
   public static get instance(): Dapi {
@@ -321,6 +367,8 @@ export default class Dapi {
     let connections: IDapiConnection[] = [];
     for (let i = 0; i < jsonConnections.length; i++) {
       let currentConnection = jsonConnections[i];
+
+      // convert json accounts array to IAccount array.
       let accounts: IAccount[] = [];
       for (let j = 0; j < currentConnection.accounts.length; j++) {
         let currentAccount = currentConnection.accounts[j];
@@ -338,6 +386,33 @@ export default class Dapi {
         );
         accounts.push(account);
       }
+
+      // convert json cards array to DapiCard array.
+      let cards: ICard[] = [];
+      for (let j = 0; j < currentConnection.cards.length; j++) {
+        let currentCard = currentConnection.cards[j];
+        let card = new DapiCard(
+          new DapiCardBalance(
+            currentCard.balance.amountDue,
+            currentCard.balance.availableBalance,
+            currentCard.balance.outstandingBalance,
+            currentCard.balance.dueDate,
+          ),
+          currentCard.cardNumber,
+          currentCard.creditLimit,
+          new DapiPair(
+            currentCard.currency.code,
+            currentCard.currency.name
+          ),
+          currentCard.expiryDate,
+          currentCard.id,
+          currentCard.name,
+          currentCard.status,
+          currentCard.type
+        );
+        cards.push(card);
+      }
+
       let connection = new DapiConnection(
         currentConnection.clientUserID,
         currentConnection.userID,
@@ -347,6 +422,7 @@ export default class Dapi {
         currentConnection.bankShortName,
         currentConnection.bankFullName,
         accounts,
+        cards,
         currentConnection.fullLogo,
         currentConnection.halfLogo,
         currentConnection.miniLogo

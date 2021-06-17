@@ -135,6 +135,14 @@ async function getCards() {
   }
 }
 
+async function getCachedCards() {
+  var connections = await Dapi.instance.getConnections();
+  if (connections.length > 0) {
+    var cardsResponse = await connections[0].cards;
+    console.log(cardsResponse);
+  }
+}
+
 async function getMetadata() {
   var connections = await Dapi.instance.getConnections();
   if (connections.length > 0) {
@@ -289,14 +297,22 @@ async function create() {
 
 async function getTransactionsForAccount() {
   var connections = await Dapi.instance.getConnections();
-  var transactions = await connections[0].getTransactionsForAccount(connections[0].accounts[0],new Date(1621235963109), new Date(1623865763109));
+  var transactions = await connections[0].getTransactionsForAccount(
+    connections[0].accounts[0],
+    new Date(1621235963109),
+    new Date(1623865763109),
+  );
   console.log(transactions);
 }
 
 async function getTransactionsForCard() {
   var connections = await Dapi.instance.getConnections();
-  var cardsResponse = await connections[0].getCards();
-  var transactions = await connections[0].getTransactionsForCard(cardsResponse.cards[0],new Date(1621235963109), new Date(1623865763109));
+  var cardsResponse = await connections[0].cards;
+  var transactions = await connections[0].getTransactionsForCard(
+    cardsResponse.cards[0],
+    new Date(1621235963109),
+    new Date(1623865763109),
+  );
   console.log(transactions[0].amount);
 }
 
@@ -342,10 +358,8 @@ const App: () => React$Node = () => {
             <Text style={styles.sectionTitle}>Data</Text>
             <Button title="Identity" onPress={() => getIdentity()} />
             <Button title="Accounts" onPress={() => getAccounts()} />
-             <Button
-              title="Get Cards"
-              onPress={() => getCards()}
-            />
+            <Button title="Get Cards" onPress={() => getCards()} />
+            <Button title="Get Cached Cards" onPress={() => getCachedCards()} />
             <Button
               title="Get Transactions For Account"
               onPress={() => getTransactionsForAccount()}
