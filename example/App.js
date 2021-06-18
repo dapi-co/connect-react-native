@@ -43,7 +43,7 @@ async function startDapi() {
 
 function generateConfigs(authKey) {
   const configurations = {
-    environment: 'production',
+    environment: 'sandbox',
     countries: ['AE'],
     showAddButton: false,
     showLogos: true,
