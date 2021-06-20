@@ -1,6 +1,6 @@
 {
   "name": "connect-react-native",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "Financial APIs to connect users' bank accounts",
   "react-native": "src/index.ts",
   "private": false,

@@ -1,8 +1,14 @@
+## 2.10.0
+### Fix
+- `DapiConnection.create()` returns `IDapiConnection` instead of JSON object.
+
 ## 2.9.0
 ### Added
 - Get Cards API `connection.getCards()`.
 - Get Card Transactions API `connection.getTransactionsForCard(card: ICard, startDate: Date, endDate: Date))`.
 - Get Cards API from cache `connection.cards`.
+### Changed
+- `getTransactions()` is now renamed to `getTransactionsForAccount()`. Reason: This change is to accomodate for a `getTransactionsForCard()`.
 
 ## v2.8.0
 ### Added

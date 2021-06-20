@@ -99,8 +99,43 @@ export class DapiConnection implements IDapiConnection {
     return this._miniLogo;
   }
 
-  static create(jsonConnectionDetails: string): Promise<DapiConnection> {
-    return NativeInterface.createConnection(jsonConnectionDetails);
+  static async create(jsonConnectionDetails: string): Promise<IDapiConnection> {
+
+    var promise = new Promise<IDapiConnection>(async (resolve, reject) => {
+
+      const isStarted = await Dapi.instance.isStarted();
+
+      if (!isStarted) {
+        reject("Dapi SDK is not started yet. It's not permitted to call create() (or any other method) on Dapi SDK unless started.");
+        return;
+      }
+
+      NativeInterface.createConnection(jsonConnectionDetails).then(newJSONConnection => {
+        Dapi.instance.getConnections().then(connections => {
+
+          let isResolved = false;
+
+          for (let index = 0; index < connections.length; index++) {
+            const element = connections[index];
+            if (element.userID === newJSONConnection.userID) {
+              isResolved = true;
+              resolve(element);
+              break;
+            }
+          }
+
+          if (!isResolved) {
+            reject('matchingConnection is undefined');
+          }
+        }).catch(getConnectionsError => {
+          reject(getConnectionsError);
+        });
+      }).catch(error => {
+        reject(error);
+      });
+    });
+
+    return promise;
   }
 
   constructor(

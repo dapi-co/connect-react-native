@@ -29,13 +29,30 @@ import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
 
 const {DapiConnectManager} = NativeModules;
 const dapiConnectManagerEmitter = new NativeEventEmitter(DapiConnectManager);
-let params = null;
+let params = `{
+  "halfLogoPng": "https://cdn-dapi.azureedge.net/banks-horizontal-logo/Emirates%20NBD.png",
+  "userID": "4wE5O2iwOygS+nQAiFPp9bbWVk2XpaYAebU8JfAFjQrgsuPx9Dr1vsBY6g2Hxrx9ZkLI5APD1TB1KZKZzSa64A==",
+  "accessCode": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBLZXkiOiI3OTQ5MjMzZGQ5ZmU3YWJhNTU4YWYwZWJhZDdlNjc4MjlhNjY0NGM4N2E1NjkzNjg4YzFlZmZjNTVkYjNjMWUzIiwiZXhwIjoxNjI0MTc5NjYxLCJpYXQiOjE2MjQxNzkzNjEsImp0aSI6IjEzNDVlNTM4LTIzYzEtNGUxOS1hMjhkLWJlYzk2MzhkM2M1NyIsIm90cCI6Ii9WZUZsOFdCRzRCdmM5S0VyL0twZEF6RUsvZVd3Q2xyK2hIUEVmQWR4MUE9IiwidXVpZCI6ImVjOTQ0ODg1LTY0MDUtNGMyZi1iMWYzLTQ2ZGEzNTMxMDUxZiJ9.6k3-1BWap9nU8MMI2uJU05k4UXjMu-Lm5CBnJ2AH5kg",
+  "tokenID": "1345e538-23c1-4e19-a28d-bec9638d3c57",
+  "connectionID": "7d7f9892-6fef-4d70-9464-f2abe88f723c",
+  "clientUserID": "JohnDoe",
+  "fullLogoPng": "https://cdn-dapi.azureedge.net/banks-full-logo/Emirates%20NBD.png",
+  "miniLogoPng": "https://cdn-dapi.azureedge.net/banks-mini-logo/Emirates%20NBD.png",
+  "color": {
+    "primaryColor": "#0A0F4E",
+    "secondaryColor": "#FFC227"
+  },
+  "fullName": "ENBD",
+  "userSecret": "iXiU+PnGGG/QyE/YnTW9TGFErluH89FZWeJXQy5jXTyt7anloq7OhcvbIy7IyT0mmDM4Q9sVoyLz2iDWbZmtVBZZA4tD8b1Oet44dsbX9kd1Y4f9QOtndPgT4LvIpYZVi4DXHUaxl5Z+3k1DZprxJVlWnrBgDblk1QKRIrryTwGWKkMsRBzjS9TTMT78Nj3t1S2163K0VbGN8OknoSIsJOjCvIt/IXgjchtZVAYyb54D7bZKzIU37o8/8ytdsqlJIIVerWeFT0atTusqTrZTKw4NfyEfn+ughfGRYnhZCZ15UwPkFFc9lBsMgmONxm0OHIgZFhUDseNmv1FBafERdXzLnD5nDSnVozVK6d24ovcb5aNHVQMgjbeaO+yUpAK8q3krs8HJhBvhMvTifGGvHZVDSOx1UVqgkmW4RqWHarNbTQH7tBpxa+KZE0C3+/2ke6qqaCUYO/T3Y3HPSmMzOvZS1HIBTkqk+Z0lkAeGhI3Uizvu1tItdnHmxvrCe7o6mHX+vPbHZpVQQJbP32vIyv0yMuzd9PmP5K3c4FCbqaeP2O+r2C3IT4y9J/0UD2ByMyDcKYfZxaUnDqebeHkp1v+pH9ALFpkliHmoLmepTP0fIHB18J20PrDUoJZ1r6oPdZ+IWegsBE5bfsFtV6BKvmApC4Zz6U6RLc9h9RAeKz8=",
+  "bankId": "DAPIBANK_AE_ENBD",
+  "name": "ENBD"
+}`;
 
 async function startDapi() {
   let configs = generateConfigs('ABC');
 
   await Dapi.instance.start(
-    '1d4592c4a8dd6ff75261e57eb3f80c518d7857d6617769af3f8f04b0590baceb',
+    '7949233dd9fe7aba558af0ebad7e67829a6644c87a5693688c1effc55db3c1e3',
     'JohnDoe',
     configs,
   );
@@ -43,7 +60,7 @@ async function startDapi() {
 
 function generateConfigs(authKey) {
   const configurations = {
-    environment: 'production',
+    environment: 'sandbox',
     countries: ['AE'],
     showAddButton: false,
     showLogos: true,
@@ -291,8 +308,25 @@ async function create() {
     console.log('params field is null');
     return;
   }
-  var connection = await DapiConnection.create(params);
-  console.log(connection);
+  DapiConnection.create(params)
+    .then(async newConnection => {
+      var accounts = await newConnection.getAccounts();
+      console.log('=====\nCreated:');
+      console.log(newConnection);
+      console.log('=====');
+    })
+    .catch(err => {
+      console.log('=====\nError:');
+      console.log(err);
+      console.log('=====');
+    });
+}
+
+async function deleteConnections() {
+  var connections = await Dapi.instance.getConnections();
+  connections.forEach(c => {
+    c.delete();
+  });
 }
 
 async function getTransactionsForAccount() {
@@ -352,6 +386,10 @@ const App: () => React$Node = () => {
               onPress={() => getParameters()}
             />
             <Button title="Create Connection" onPress={() => create()} />
+            <Button
+              title="Delete Connections"
+              onPress={() => deleteConnections()}
+            />
           </View>
 
           <View style={styles.sectionContainer}>
