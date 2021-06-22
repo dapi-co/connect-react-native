@@ -16,5 +16,5 @@ Pod::Spec.new do |s|
   s.source_files  = "ios/*.{h,m}"
 
   s.dependency 'React'
-  s.dependency 'DapiSDK', '2.11.0'
+  s.dependency 'DapiSDK', '2.12.0'
 end

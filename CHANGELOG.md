@@ -1,3 +1,7 @@
+## 2.10.1
+### Fix
+- [iOS] Crash caused by running CoreData on a background thread.
+
 ## 2.10.0
 ### Fix
 - `DapiConnection.create()` returns `IDapiConnection` instead of JSON object.
