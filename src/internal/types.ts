@@ -63,7 +63,7 @@ export interface IDapiQueryParameter {
   value: string;
 }
 
-interface ILineAddress {
+export interface ILineAddress {
   line1: string;
   line2: string;
   line3: string;

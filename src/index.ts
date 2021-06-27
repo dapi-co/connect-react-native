@@ -18,6 +18,7 @@ import {
   ITransferResponse,
   ICardResponse,
   ICardBalance,
+  ILineAddress,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -286,6 +287,62 @@ export class DapiPair implements IPair {
     this.name = name;
   }
 }
+
+export class DapiLineAddress implements ILineAddress {
+  line1: string;
+  line2: string;
+  line3: string;
+
+  constructor(
+    line1: string,
+    line2: string,
+    line3: string
+  ) {
+    this.line1 = line1;
+    this.line2 = line2;
+    this.line3 = line3;
+  }
+}
+
+
+export class DapiBeneficiary implements IBeneficiary {
+  linesAddress: ILineAddress;
+  accountNumber: string;
+  name: string;
+  bankName: string;
+  swiftCode: string;
+  iban: string;
+  phoneNumber: string;
+  country: string;
+  branchAddress: string;
+  branchName: string;
+
+  constructor(
+  linesAddress: ILineAddress,
+  accountNumber: string,
+  name: string,
+  bankName: string,
+  swiftCode: string,
+  iban: string,
+  phoneNumber: string,
+  country: string,
+  branchAddress: string,
+  branchName: string
+  ) {
+    this.linesAddress = linesAddress;
+    this.accountNumber = accountNumber;
+    this.name = name;
+    this.bankName = bankName;
+    this.swiftCode = swiftCode;
+    this.iban = iban;
+    this.phoneNumber = phoneNumber;
+    this.country = country;
+    this.branchAddress = branchAddress;
+    this.branchName = branchName;
+  }
+
+}
+
 
 export class DapiAccount implements IAccount {
   balance: number;
