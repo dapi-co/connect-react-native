@@ -120,13 +120,17 @@ export interface IBankBeneficiaryResponse {
 }
 
 export interface IAccount {
-  readonly balance: number;
+  readonly balance: IAccountBalance;
   readonly iban: string | null;
   readonly number: string | null;
   readonly currency: IPair;
   readonly type: string;
   readonly id: string;
   readonly name: string;
+}
+
+export interface IAccountBalance {
+  readonly amount: number
 }
 
 export interface ICardBalance {

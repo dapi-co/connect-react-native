@@ -18,6 +18,7 @@ import {
   ITransferResponse,
   ICardResponse,
   ICardBalance,
+  IAccountBalance,
 } from './internal/types';
 
 export class DapiConfigurations implements IDapiConfigurations {
@@ -288,7 +289,7 @@ export class DapiPair implements IPair {
 }
 
 export class DapiAccount implements IAccount {
-  balance: number;
+  balance: IAccountBalance;
   iban: string | null;
   number: string | null;
   currency: IPair;
@@ -297,7 +298,7 @@ export class DapiAccount implements IAccount {
   name: string;
 
   constructor(
-    balance: number,
+    balance: IAccountBalance,
     iban: string | null,
     number: string | null,
     currency: IPair,
