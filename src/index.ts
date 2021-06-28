@@ -230,12 +230,7 @@ export class DapiConnection implements IDapiConnection {
     return NativeInterface.getCards(this.userID);
   }
 
-  async createTransfer(
-    fromAccount: IAccount | null,
-    toBeneficiary: IBeneficiary | null,
-    amount: number,
-    remark: string | null,
-  ): Promise<ITransferResponse> {
+  async createTransfer(fromAccount: IAccount | null, toBeneficiary: IBeneficiary | null, amount: number, remark: string | null): Promise<ITransferResponse> {
     let transferResponse = await NativeInterface.createTransfer(
       this.userID,
       fromAccount ? fromAccount.id : null,
@@ -248,7 +243,7 @@ export class DapiConnection implements IDapiConnection {
     let sendingAccount = this.getAccount(accountID);
     return new TransferResponse(amnt, sendingAccount);
   }
-
+  
   async createTransferToExistingBeneficiary(
     fromAccount: IAccount,
     toBeneficiaryID: string,

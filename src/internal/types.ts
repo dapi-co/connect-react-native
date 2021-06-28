@@ -297,10 +297,10 @@ export interface IDapiConnection {
   getBeneficiaries(): Promise<IBankBeneficiaryResponse>;
   createBeneficiary(beneficiary: IBeneficiary): Promise<IDapiResult>;
   createTransfer(
-    fromAccount: IAccount,
-    toBeneficiary: IBeneficiary,
+    fromAccount: IAccount | null,
+    toBeneficiary: IBeneficiary | null,
     amount: number,
-    remark: string,
+    remark: string | null,
   ): Promise<ITransferResponse>;
 
   createTransferToExistingBeneficiary(
