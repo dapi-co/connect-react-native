@@ -1,6 +1,7 @@
 {
   "include": ["src/**/*.ts"],
   "compilerOptions": {
+    "types": ["react", "jest"],
     "target": "es5",
     "module": "commonjs",
     "strict": true,
