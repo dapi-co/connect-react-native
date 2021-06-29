@@ -1,3 +1,11 @@
+## 2.11.0
+### Changed
+- Create connection method now returns `IDapiConnection` instead of `DapiConnection`
+- `IAccount` balance property is now an object of type `IAccountBalance`.
+- `createTransfer` now accepts a nullable account, beneficiary, and remark in the interface.
+### Fix
+- [iOS] Crash caused by running CoreData on a background thread.
+
 ## 2.10.1
 ### Fix
 - [iOS] Crash caused by running CoreData on a background thread.
