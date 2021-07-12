@@ -1,3 +1,8 @@
+## 2.12.0
+### Added
+- [iOS] An API call is serially queued, and considered completed once the MFA is resolved.
+- [Android] An API call is serially queued, and considered completed once the MFA is resolved.
+
 ## 2.11.0
 ### Changed
 - Create connection method now returns `IDapiConnection` instead of `DapiConnection`
