@@ -1,3 +1,7 @@
+## 2.12.1
+### Fix
+- [iOS] Updating the configuration at runtime.
+
 ## 2.12.0
 ### Added
 - [iOS] An API call is serially queued, and considered completed once the MFA is resolved.
